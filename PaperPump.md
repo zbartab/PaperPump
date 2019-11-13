@@ -1,6 +1,6 @@
-% Why correcting for coauthorships fail?
+% Why correcting for coauthorships fails?
 % Z Barta
-% 2019-10-11
+% 2019-10-13
 
 ---
 standalone: true
@@ -21,9 +21,11 @@ geometry:
 - margin=1in
 ---
 
+<!--
 # TODOs
 
 - write introduction
+-->
 
 # Introduction
 
