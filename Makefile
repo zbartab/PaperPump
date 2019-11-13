@@ -12,8 +12,9 @@ html: $(HTML)
 pdf: $(PDFS)
 docx: $(DOCX)
 
-$(DOCX): $(SRC)
-	pandoc -o $@ $<
+$(DOCX): $(SRC) groups.png weighted_production.png
+	pandoc -c ~/lib/markdown/pandoc.css --mathml -N --standalone \
+		--self-contained --filter pandoc-citeproc -o $@ $<
 
 $(PDFS): $(SRC)
 	pandoc -o $@ $<
