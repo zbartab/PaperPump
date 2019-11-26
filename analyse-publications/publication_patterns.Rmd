@@ -1,0 +1,394 @@
+% Publication patterns in Evolution and Ecology
+% Zoltán Barta; Tibor Magura
+% `r date()`
+
+---
+bibliography: /home/apa/notes/articles.bib
+natbib: true
+biblio-files: /home/apa/notes/articles.bib
+biblio-style: /home/apa/lib/texinputs/AmNat
+biblio-title: References
+fontsize: 12pt
+papersize: a4paper
+include-before:
+- \linenumbers
+header-includes:
+- \usepackage{lineno}
+- \usepackage{double_spaced}
+geometry:
+- margin=1in
+---
+
+# TODOs
+
+- collect first/last authorship
+
+```{r set-up, include=FALSE}
+## set the working directory
+## load the libraries
+library(openxlsx)
+library(igraph)
+## load local code
+source("~/lib/markdown/produce_output.R")
+source("process_MTMT-json-functions.R")
+```
+
+# Create the publication database
+
+We collect publication data from the Hungarian publication database, [MTMT](www.mtmt.hu). As we do not have the MTMT ID of all, or a large number of evolutionary biologists and ecologists, we use a recursive technique to collect the publication data. In this recursive algorithm we download the publication records of some researchers and then use their record to obtain further IDs. We repeat this procedure for the newly downloaded records too, for a couple of times.
+
+First, we create a database of the seed IDs. The file `mtmt_azonositok.xlsx` was collected by TM, while the file `BOI.staff.txt` contains the IDs of the researchers at the Institute of Biology and Ecology, University of Debrecen, collected by ZB.
+
+```{r create-seeds}
+m.ids <- read.xlsx("mtmt_azonositok.xlsx")
+BOI.ids <- read.table(file="~/Hivatal/intezet/publikaciok/BOI_staff.txt",
+											sep="\t", header=TRUE, stringsAsFactors=FALSE)
+seed.ids <- unique(c(m.ids$MTMT.azonosító, BOI.ids$mtmt.id))
+```
+
+Next, we download the MTMT records for the seed IDs. First, the function.
+
+```{r download-seeds-fun}
+download.MTMT.batch <- function(seed.ids, data.dir="MTMT-downloads") {
+	json.files <- list.files(path=data.dir, pattern=".*\\.json$")
+	#json.files <- jl[1:20]
+	ids.done <- sub(".*/(.*)_.*", "\\1", json.files)
+	seed.ids <- seed.ids[!(seed.ids %in% ids.done)]
+	for(i in seed.ids) {
+		ofile <- paste(data.dir, "/", i, "_", Sys.Date(), ".json", sep="")
+		download.MTMTrecords(i, ofile)
+	}
+}
+records.to.download <- function(seed.ids, data.dir="MTMT-downloads") {
+	json.files <- list.files(path=data.dir, pattern=".*\\.json$")
+	#json.files <- jl[1:20]
+	ids.done <- sub(".*/(.*)_.*", "\\1", json.files)
+	seed.ids <- seed.ids[!(seed.ids %in% ids.done)]
+	length(seed.ids)
+}
+```
+
+Then the actual download of the first round.
+
+```{r download-first}
+download.MTMT.batch(seed.ids)
+```
+
+Next, we process the downloaded `json` files and get the MTMT IDs of the coauthors. For this we write a function, which takes the list of publication records and returns the vector of coauthors' IDs. In a second function we wrap the `get.coauthors` function to process all the files in the data directory.
+
+```{r get-coauthors-fun}
+get.coauthors <- function(cikkek) {
+	coauthors <- c()
+	for(cikk in cikkek) {
+		coau <- unlist(sapply(cikk$authorships, function(l) {
+													if(length(l$author) > 1) l$author$mtid }))
+		coauthors <- c(coauthors, coau)
+	}
+	unique(coauthors)
+}
+get.all.coauthors <- function(data.dir="MTMT-downloads") {
+	json.files <- list.files(path=data.dir, pattern=".*\\.json$",
+													 full.names=TRUE)
+	coauthors <- list()
+	for(f in json.files) {
+		r <- read.MTMT(f)
+		coauthors[[f]] <- get.coauthors(r)
+	}
+	unique(unlist(coauthors))
+}
+```
+
+And now, the actual computations to get the list of coauthors for each downloaded author.
+
+```{r get-coauthors-1}
+seed.ids2 <- get.all.coauthors()
+```
+
+Now, we start the second round of getting author records.
+
+```{r download-second}
+download.MTMT.batch(seed.ids2)
+```
+
+The third round.
+
+```{r download-third}
+seed.ids3 <- get.all.coauthors()
+#download.MTMT.batch(seed.ids3)
+```
+
+# Load publication data
+
+We load the publication records from the local repository. At the same time we also process them and calculate some basic measures for each article. We only consider those articles which has valid ranking (D1, Q1, ...).
+
+```{r load-records}
+json.files <- list.files(path="MTMT-downloads", pattern=".*\\.json$",
+												 full.names=TRUE)
+papers.ls <- list()
+au.info <- list()
+au.ids <- list()
+for(f in json.files) {
+	id <- sub(".*/(.*)_.*", "\\1", f)
+	id.hash <- hash.id(as.numeric(id))
+	cikkek <- read.MTMT(f)
+	au.ids[[id.hash]] <- id
+	au.info[[id.hash]] <- p.author.label(cikkek[[1]], id)
+	papers.ls[[id.hash]] <- pub.measures(cikkek, id)
+}
+au.info <- unlist(au.info)
+au.ids <- unlist(au.ids)
+```
+
+We create an author database, to contain the authors, MTMT ID, name, affiliation and subject field.
+
+```{r author-info}
+author.info <- data.frame(mtmt.id=au.ids, info=au.info)
+n <- sub(".*\\[(.*)\\].*", "\\1", author.info$info)
+n <- sub(", szerző", "", n)
+n <- sub("\\(.*", "", n)
+n <- sub(" *$", "", n)
+n <- gsub(",", "", n)
+author.info$name <- n
+aff <- sub(".*\\] *", "", author.info$info)
+author.info$affiliation <- aff
+ff <- sub(".*\\[(.*)\\].*", "\\1", author.info$info)
+ff <- sub(".*\\((.*)\\).*", "\\1", ff)
+author.info$field <- ff
+author.info <- author.info[,c(1,3:5,2)]
+```
+
+Because we only consider papers with ranks, several author remained without publications. We discard those people.
+
+```{r discard-zero.pubs}
+l <- sapply(papers.ls, nrow)
+papers.ls <- papers.ls[l != 0]
+```
+
+
+# Analyses of the whole dataset
+
+## Build collaboration network
+
+We build a collaboration network based on the proportion of shared publications, $p_{A,B}$: the weight of an edge is the number of shared papers divided by the sum of the shared papers and the papers unique to each author connected by the edge.
+
+$$
+p_{A,B} = \frac{A \cap B}{A \cup B}
+$$
+
+First, we create an association matrix from the bibliography data and convert it to a graph:
+
+```{r create-assoc-mat}
+assoc.mat <- create.assoc.mat(papers.ls)
+g <- graph.adjacency(assoc.mat, mode="undirected", weighted=TRUE, diag=FALSE)
+```
+
+Then we plot the graph. Here the width of the edges is proportional to $p_{A,B}$, i.e. the proportion of shared articles. The size of the nodes is proportional the number of D1 articles published by the given person (node). Node colour represents the department of the person (Botany: orange, Ecology: brown, Evolutionary Zoology: green, Hydrobiology: blue). The coloured shapes behind the nodes identify the communities of the network, determined by a the fast greedy algorithm.
+
+```{r plot-assoc-mat}
+#set.seed(11)
+cols <- rep("lightblue", length(V(g)))
+cols[grepl("5yc4a", names(V(g)))] <- "salmon3"
+#cols[grepl("10000433", names(V(g)))] <- "orange"
+#cols[grepl("10001510", names(V(g)))] <- "lightgreen"
+#cols[grepl("-Ev$", names(V(g)))] <- "lightgreen"
+#cols[grepl("-Bo$", names(V(g)))] <- "orange"
+V(g)$color <- cols
+V(g)$size = 0.1
+V(g)$size[names(V(g)) == "10000090"] <- 1
+#V(g)$size[names(V(g)) == "10000433"] <- 1
+#V(g)$size[names(V(g)) == "10001510"] <- 1
+#V(g)$size = 4*sqrt(sum.pubs$n.D1)
+#V(g)$size = 10*sqrt(sum.pubs$n.D1.corr)
+pub.comm <- cluster_fast_greedy(g)
+m <- membership(pub.comm)
+#sort(m)
+m.l <- tapply(names(m), m, unique)
+#pdf(file="proba.pdf", width=200, height=200)
+plot(g, vertex.label.cex=0.1, edge.width=10*E(g)$weight, mark.groups=m.l)
+#dev.off()
+sg <- induced_subgraph(g, m.l[[5]])
+pdf(file="proba-sg.pdf", width=20, height=20)
+plot(sg, vertex.label.cex=0.75, edge.width=10*E(sg)$weight)
+dev.off()
+```
+
+## Calculate publication measures
+
+We calculate a couple of derived bibliographic measures for each author:
+
+- total number of independent citations
+- total number of coauthors
+- average number of citations per papers
+- number of citations corrected for the number of coauthors
+- number of papers
+- number of papers corrected for the number of coauthors
+- number of ranked papers (i.e. papers with label of D1, Q1, etc.)
+- number of ranked papers corrected for the number of coauthors
+- number of D1 papers
+- number of D1 papers corrected for the number of coauthors
+- proportion of D1 papers
+
+```{r calc-pup-measures}
+sum.pubs <- NULL
+for(s in staff.measures) {
+	r <- calc.bib.measures(s)
+	if(is.null(sum.pubs)) {
+		sum.pubs <- data.frame(t(r))
+	} else {
+		sum.pubs <- rbind(sum.pubs, r)
+	}
+}
+rownames(sum.pubs) <- names(staff.measures)
+sum.pubs <- cbind(BOI.staff, sum.pubs)
+```
+
+# Analyses of the last ten years
+
+## Calculate publication measures
+
+We calculate a couple of derived bibliographic measures for each author for the last ten years i.e. we take only into account those articles which were published after 2009.
+
+```{r last-ten-years}
+staff.measures10 <- lapply(staff.measures, function(s) s[s$year > 2009,])
+```
+
+```{r calc-pup-measures10}
+sum.pubs10 <- NULL
+for(s in staff.measures10) {
+	r <- calc.bib.measures(s)
+	if(is.null(sum.pubs10)) {
+		sum.pubs10 <- data.frame(t(r))
+	} else {
+		sum.pubs10 <- rbind(sum.pubs10, r)
+	}
+}
+rownames(sum.pubs10) <- names(staff.measures10)
+sum.pubs10 <- cbind(BOI.staff, sum.pubs10)
+```
+
+## Build collaboration network
+
+We build a collaboration network based on the proportion of shared publications, $p_{A,B}$: the weight of an edge is the number of shared papers divided by the sum of the shared papers and the papers unique to each author connected by the edge.
+
+$$
+p_{A,B} = \frac{A \cap B}{A \cup B}
+$$
+
+First, we create an association matrix from the bibliography data and convert it to a graph:
+
+```{r create-assoc-mat10}
+assoc.mat <- create.assoc.mat(staff.measures10)
+g10 <- graph.adjacency(assoc.mat, mode="undirected", weighted=TRUE, diag=FALSE)
+```
+
+Then we plot the graph. Here the width of the edges is proportional to $p_{A,B}$, i.e. the proportion of shared articles. The size of the nodes is proportional the number of D1 articles published by the given person (node). Node colour represents the department of the person (Botany: orange, Ecology: brown, Evolutionary Zoology: green, Hydrobiology: blue). The coloured shapes behind the nodes identify the communities of the network, determined by a the fast greedy algorithm.
+
+```{r plot-assoc-mat10}
+set.seed(11)
+cols <- rep("lightblue", length(V(g10)))
+cols[grepl("-Ec$", names(V(g10)))] <- "salmon3"
+cols[grepl("-Ev$", names(V(g10)))] <- "lightgreen"
+cols[grepl("-Bo$", names(V(g10)))] <- "orange"
+V(g10)$color <- cols
+#V(g10)$size = 5*sqrt(sum.pubs10$n.WoS.corr)
+V(g10)$size = 4*sqrt(sum.pubs10$n.D1)
+#V(g10)$size = 10*sqrt(sum.pubs10$n.D1.corr)
+pub.comm <- cluster_fast_greedy(g10)
+m <- membership(pub.comm)
+sort(m)
+m.l <- tapply(names(m), m, unique)
+plot(g10, edge.width=100*E(g10)$weight, mark.groups=m.l)
+dev.copy2pdf(file="BOI-publication-network-n_D1-last_10y.pdf", width=10, height=10)
+```
+
+The pattern of relationships as a dendrogram.
+
+```{r last-ten-year-as-dendrogram}
+plot(as.dendrogram(pub.comm))
+```
+
+# Analyses of departmental publication activity
+
+Now we are wandering, how the productivity of the departments compare to each other. For this we have to control for the fact that several people belonging to the same department publish the same article. In this case this very same article will be included several times into the productivity of the department. Therefore, first we have to create data bases of articles for each department and then remove the duplicates from these databases.
+
+First, creating the data bases for the departments.
+
+```{r create-departmental-databases}
+departments <- unique(BOI.staff$department)
+#departments <- gsub(" ", "", departments)
+dept.pubs <- list()
+for(d in departments) {
+	dept.pubs[[d]] <- data.frame()
+}
+for(id in names(staff.measures10)) {
+	i <- as.character(BOI.staff$mtmt.id) == id
+	d <- BOI.staff$department[i]
+	dept.pubs[[d]] <- rbind(dept.pubs[[d]], staff.measures10[[id]])
+}
+```
+
+Then we remove the duplicated papers.
+
+```{r rm-duplicates}
+dept.pubs <- lapply(dept.pubs, unique)
+```
+
+Finally, we calculate several bibliographic measures and create a data frame.
+
+```{r dept-bibliography}
+sum.depts <- data.frame()
+for(s in dept.pubs) {
+	r <- calc.bib.measures(s)
+	sum.depts <- rbind(sum.depts, t(r))
+}
+rownames(sum.depts) <- departments
+```
+
+Now, we visualise the results.
+
+```{r plot-departments}
+sum.depts <- sum.depts[order(rownames(sum.depts)),]
+n.vars <- names(sum.depts)
+opar <- par()
+par(mar=c(5,10,1,1)+0.1)
+for(v in n.vars) {
+	barplot(sum.depts[,v], names.arg=rownames(sum.depts), horiz=TRUE, las=1,
+					xlab=v)
+}
+par(opar)
+```
+
+# Analyses of individual authors
+
+```{r authors-VO}
+r <- read.MTMT("MTMT_records/VO-Ecology-10033110.json")
+au.l <- lapply(r, p.authors)
+aus <- tolower(unlist(au.l))
+aus <- gsub("\\s+", " ", aus)
+aus <- gsub("[^[:alnum:] ]", "", aus)
+aus <- unique(aus)
+l.aus <- length(aus)
+au.matches <- list()
+for(i in 1:l.aus) {
+	a1 <- aus[i]
+	r <- c()
+	for(j in 1:l.aus) {
+		a2 <- aus[j]
+		#if(agrepl(a1, a2)) {
+		if(comp.authors(a1, a2)) {
+			r <- c(r, a2)
+		}
+	}
+	au.matches[[a1]] <- r
+}
+
+#aus <- gsub("\\<.\\>", "", aus)
+```
+
+# End matters
+
+```{r session-info, include=TRUE, echo=TRUE, results="markup"}
+sessionInfo()
+```
+
+<!-- vim: set foldmethod=syntax: -->
