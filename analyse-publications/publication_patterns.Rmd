@@ -46,59 +46,13 @@ BOI.ids <- read.table(file="~/Hivatal/intezet/publikaciok/BOI_staff.txt",
 seed.ids <- unique(c(m.ids$MTMT.azonosító, BOI.ids$mtmt.id))
 ```
 
-Next, we download the MTMT records for the seed IDs. First, the function.
-
-```{r download-seeds-fun}
-download.MTMT.batch <- function(seed.ids, data.dir="MTMT-downloads") {
-	json.files <- list.files(path=data.dir, pattern=".*\\.json$")
-	#json.files <- jl[1:20]
-	ids.done <- sub(".*/(.*)_.*", "\\1", json.files)
-	seed.ids <- seed.ids[!(seed.ids %in% ids.done)]
-	for(i in seed.ids) {
-		ofile <- paste(data.dir, "/", i, "_", Sys.Date(), ".json", sep="")
-		download.MTMTrecords(i, ofile)
-	}
-}
-records.to.download <- function(seed.ids, data.dir="MTMT-downloads") {
-	json.files <- list.files(path=data.dir, pattern=".*\\.json$")
-	#json.files <- jl[1:20]
-	ids.done <- sub(".*/(.*)_.*", "\\1", json.files)
-	seed.ids <- seed.ids[!(seed.ids %in% ids.done)]
-	length(seed.ids)
-}
-```
-
-Then the actual download of the first round.
+Next, we download the MTMT records for the seed IDs.
 
 ```{r download-first}
 download.MTMT.batch(seed.ids)
 ```
 
-Next, we process the downloaded `json` files and get the MTMT IDs of the coauthors. For this we write a function, which takes the list of publication records and returns the vector of coauthors' IDs. In a second function we wrap the `get.coauthors` function to process all the files in the data directory.
-
-```{r get-coauthors-fun}
-get.coauthors <- function(cikkek) {
-	coauthors <- c()
-	for(cikk in cikkek) {
-		coau <- unlist(sapply(cikk$authorships, function(l) {
-													if(length(l$author) > 1) l$author$mtid }))
-		coauthors <- c(coauthors, coau)
-	}
-	unique(coauthors)
-}
-get.all.coauthors <- function(data.dir="MTMT-downloads") {
-	json.files <- list.files(path=data.dir, pattern=".*\\.json$",
-													 full.names=TRUE)
-	coauthors <- list()
-	for(f in json.files) {
-		r <- read.MTMT(f)
-		coauthors[[f]] <- get.coauthors(r)
-	}
-	unique(unlist(coauthors))
-}
-```
-
-And now, the actual computations to get the list of coauthors for each downloaded author.
+Next, we process the downloaded `json` files and get the MTMT IDs of the coauthors. For this we write a function, which takes the list of publication records and returns the vector of coauthors' IDs. In a second function we wrap the `get.coauthors` function to process all the files in the data directory. And now, the actual computations to get the list of coauthors for each downloaded author.
 
 ```{r get-coauthors-1}
 seed.ids2 <- get.all.coauthors()
@@ -113,7 +67,7 @@ download.MTMT.batch(seed.ids2)
 The third round.
 
 ```{r download-third}
-seed.ids3 <- get.all.coauthors()
+seed.ids3 <- get.all.coauthors(pattern=".*2019-11-24\\.json$")
 #download.MTMT.batch(seed.ids3)
 ```
 
@@ -167,6 +121,35 @@ papers.ls <- papers.ls[l != 0]
 
 # Analyses of the whole dataset
 
+## Calculate publication measures
+
+We calculate a couple of derived bibliographic measures for each author:
+
+- total number of independent citations
+- total number of coauthors
+- average number of citations per papers
+- number of citations corrected for the number of coauthors
+- number of papers
+- number of papers corrected for the number of coauthors
+- number of ranked papers (i.e. papers with label of D1, Q1, etc.)
+- number of ranked papers corrected for the number of coauthors
+- number of D1 papers
+- number of D1 papers corrected for the number of coauthors
+- proportion of D1 papers
+
+```{r calc-pup-measures}
+sum.pubs <- NULL
+for(s in papers.ls) {
+	r <- calc.bib.measures(s)
+	if(is.null(sum.pubs)) {
+		sum.pubs <- data.frame(t(r))
+	} else {
+		sum.pubs <- rbind(sum.pubs, r)
+	}
+}
+rownames(sum.pubs) <- names(papers.ls)
+```
+
 ## Build collaboration network
 
 We build a collaboration network based on the proportion of shared publications, $p_{A,B}$: the weight of an edge is the number of shared papers divided by the sum of the shared papers and the papers unique to each author connected by the edge.
@@ -210,36 +193,6 @@ sg <- induced_subgraph(g, m.l[[5]])
 pdf(file="proba-sg.pdf", width=20, height=20)
 plot(sg, vertex.label.cex=0.75, edge.width=10*E(sg)$weight)
 dev.off()
-```
-
-## Calculate publication measures
-
-We calculate a couple of derived bibliographic measures for each author:
-
-- total number of independent citations
-- total number of coauthors
-- average number of citations per papers
-- number of citations corrected for the number of coauthors
-- number of papers
-- number of papers corrected for the number of coauthors
-- number of ranked papers (i.e. papers with label of D1, Q1, etc.)
-- number of ranked papers corrected for the number of coauthors
-- number of D1 papers
-- number of D1 papers corrected for the number of coauthors
-- proportion of D1 papers
-
-```{r calc-pup-measures}
-sum.pubs <- NULL
-for(s in staff.measures) {
-	r <- calc.bib.measures(s)
-	if(is.null(sum.pubs)) {
-		sum.pubs <- data.frame(t(r))
-	} else {
-		sum.pubs <- rbind(sum.pubs, r)
-	}
-}
-rownames(sum.pubs) <- names(staff.measures)
-sum.pubs <- cbind(BOI.staff, sum.pubs)
 ```
 
 # Analyses of the last ten years
