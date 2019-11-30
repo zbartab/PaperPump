@@ -1,10 +1,17 @@
 
 # functions to process MTMT publication records json
 
-library("rjson")
+library("jsonlite")
 
 read.MTMT <- function(file) {
-	mtmt.json <- fromJSON(file=file)
+	mtmt.json <- fromJSON(file)
+	mtmt.json$content
+}
+
+wrong.read.MTMT <- function(file) {
+	json.txt <- scan(file, what=character())
+	json.txt <- paste(json.txt, collapse=" ")
+	mtmt.json <- fromJSON(json.txt)
 	mtmt.json$content
 }
 
@@ -90,7 +97,7 @@ download.MTMTrecords <- function(mtmt.id, outfile) {
 	download.file(mtmt.url, outfile, method="libcurl")
 }
 
-calc.bib.measures <- function(cikkek) {
+calc.bib.measures.old <- function(cikkek) {
 	# total number of independent citations:
 	cit <- sum(cikkek$citations)
 	# total number of coauthors:
@@ -199,4 +206,110 @@ hash.id <- function(x, base=36, n.digits=5) {
 		x <- x %% base^i
 	}
 	paste(paste(rep(0, n.digits-nchar(res)), collapse=""), res, sep="")
+}
+
+name2hash <- function(name, au.info=author.info) {
+	rownames(au.info)[grepl(name, au.info$name)]
+}
+
+hash2name <- function(hash, au.info=author.info) {
+	au.info[hash, "name"]
+}
+
+calc.bib.measures <- function(cikkek, b=0.2) {
+	m <- c(n.papers = nrow(cikkek),
+				 n.citations = sum(cikkek$citations),
+				 n.coauthors = sum(cikkek$n.authors),
+				 n.D1 = sum(cikkek$ranks == "D1", na.rm=TRUE))
+	m["avg.citations"] <- m["n.citations"] / m["n.papers"]
+	m["p.D1"] <- m["n.D1"] / m["n.papers"]
+	m["w.ec.papers"] <- sum(w.ec(cikkek))
+	m["w.sdc.papers"] <- sum(w.sdc(cikkek))
+	m["w.flae.papers"] <- sum(w.flae(cikkek))
+	m["w.bf.papers"] <- sum(w.bf(cikkek, b))
+	m["w.bfl.papers"] <- sum(w.bfl(cikkek, b))
+	m["w.ec.citations"] <- sum(w.ec(cikkek)*cikkek$citations)
+	m["w.sdc.citations"] <- sum(w.sdc(cikkek)*cikkek$citations)
+	m["w.flae.citations"] <- sum(w.flae(cikkek)*cikkek$citations)
+	m["w.bf.citations"] <- sum(w.bf(cikkek, b)*cikkek$citations)
+	m["w.bfl.citations"] <- sum(w.bfl(cikkek, b)*cikkek$citations)
+	m["w.ec.D1"] <- sum(w.ec(cikkek)*(cikkek$ranks == "D1"))
+	m["w.sdc.D1"] <- sum(w.sdc(cikkek)*(cikkek$ranks == "D1"))
+	m["w.flae.D1"] <- sum(w.flae(cikkek)*(cikkek$ranks == "D1"))
+	m["w.bf.D1"] <- sum(w.bf(cikkek, b)*(cikkek$ranks == "D1"))
+	m["w.bfl.D1"] <- sum(w.bfl(cikkek, b)*(cikkek$ranks == "D1"))
+	m
+}
+
+download.MTMT.batch <- function(seed.ids, data.dir="MTMT-downloads") {
+	json.files <- list.files(path=data.dir, pattern=".*\\.json$")
+	#json.files <- jl[1:20]
+	#ids.done <- sub(".*/(.*)_.*", "\\1", json.files)
+	ids.done <- sub("(.*)_.*", "\\1", json.files)
+	seed.ids <- seed.ids[!(seed.ids %in% ids.done)]
+	for(i in seed.ids) {
+		ofile <- paste(data.dir, "/", i, "_", Sys.Date(), ".json", sep="")
+		download.MTMTrecords(i, ofile)
+	}
+}
+
+records.to.download <- function(seed.ids, data.dir="MTMT-downloads") {
+	json.files <- list.files(path=data.dir, pattern=".*\\.json$")
+	#json.files <- jl[1:20]
+	ids.done <- sub(".*/(.*)_.*", "\\1", json.files)
+	seed.ids <- seed.ids[!(seed.ids %in% ids.done)]
+	length(seed.ids)
+}
+
+
+get.coauthors <- function(cikkek) {
+	coauthors <- c()
+	for(cikk in cikkek) {
+		coau <- unlist(sapply(cikk$authorships, function(l) {
+													if(length(l$author) > 1) l$author$mtid }))
+		coauthors <- c(coauthors, coau)
+	}
+	unique(coauthors)
+}
+
+get.all.coauthors <- function(data.dir="MTMT-downloads",
+															pattern=".*\\.json$") {
+	json.files <- list.files(path=data.dir, pattern=pattern,
+													 full.names=TRUE)
+	coauthors <- list()
+	for(f in json.files) {
+		r <- read.MTMT(f)
+		coauthors[[f]] <- get.coauthors(r)
+	}
+	unique(unlist(coauthors))
+}
+
+
+# weigths
+
+w.ec <- function(cikkek) {
+	1/cikkek$n.authors
+}
+
+w.sdc <- function(cikkek) {
+	norm.fac <- sapply(cikkek$n.authors, function(y) sum(1/(1:y)))
+	sdc <- 1/cikkek$r.author
+	sdc / norm.fac
+}
+
+w.flae <- function(cikkek) {
+	norm.fac <- ifelse(cikkek$n.authors == 1, 1, {
+				 1.5 + (cikkek$n.authors-2)/cikkek$n.authors
+		})
+	flae <- ifelse(cikkek$first.au, 1, ifelse(cikkek$last.au, 0.5,
+																						1/cikkek$n.authors))
+	flae/norm.fac
+}
+
+w.bf <- function(cikkek, b=0.2) {
+	(1-b)/cikkek$n.authors + b*cikkek$first.au
+}
+
+w.bfl <- function(cikkek, b=0.2) {
+	(1-2*b)/cikkek$n.authors + b*(cikkek$first.au + cikkek$last.au)
 }
