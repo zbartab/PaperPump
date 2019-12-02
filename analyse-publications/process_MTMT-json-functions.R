@@ -1,17 +1,31 @@
 
 # functions to process MTMT publication records json
 
-library("jsonlite")
+library("rjson")
+#library("jsonlite")
 
 read.MTMT <- function(file) {
-	mtmt.json <- fromJSON(file)
-	mtmt.json$content
+	mtmt.json <- try(fromJSON(file=file), silent=TRUE)
+	if ("try-error" %in% class(mtmt.json)) {
+		return(NA)
+	} else {
+		return(mtmt.json$content)
+	}
+}
+
+read.MTMT.jsonlite <- function(file) {
+	mtmt.json <- try(fromJSON(file, simplifyVector=FALSE), silent=TRUE)
+	if ("try-error" %in% class(mtmt.json)) {
+		return(NA)
+	} else {
+		return(mtmt.json$content)
+	}
 }
 
 wrong.read.MTMT <- function(file) {
 	json.txt <- scan(file, what=character())
 	json.txt <- paste(json.txt, collapse=" ")
-	mtmt.json <- fromJSON(json.txt)
+	mtmt.json <- fromJSON(json.txt, unexpected.escape="keep")
 	mtmt.json$content
 }
 
@@ -54,11 +68,19 @@ p.n.citations <- function(cikk) {
 	cikk$independentCitationCount
 }
 
+field.exists <- function(x) {
+	if(is.null(x)) {
+		return(NA)
+	} else {
+		return(x)
+	}
+}
+
 pub.measures <- function(cikkek, au.id) {
 	#cikkek <- read.MTMT(file)
-	id <- sapply(cikkek, function(p) p$mtid)
-	types <- sapply(cikkek, function(p) p$type$label)
-	year <- sapply(cikkek, function(p) p$publishedYear)
+	id <- sapply(cikkek, function(p) field.exists(p$mtid))
+	types <- sapply(cikkek, function(p) field.exists(p$type$label))
+	year <- sapply(cikkek, function(p) field.exists(p$publishedYear))
 	ranks <- sapply(cikkek, p.rank)
 	citations <- sapply(cikkek, p.n.citations)
 	n.authors <- sapply(cikkek, p.n.authors)
