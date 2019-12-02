@@ -31,6 +31,8 @@ library(igraph)
 ## load local code
 source("~/lib/markdown/produce_output.R")
 source("process_MTMT-json-functions.R")
+## set options
+par(xpd=FALSE)
 ```
 
 # Create the publication database
@@ -76,24 +78,50 @@ seed.ids3 <- get.all.coauthors(pattern=".*2019-11-24\\.json$")
 We load the publication records from the local repository. At the same time we also process them and calculate some basic measures for each article. We only consider those articles which has valid ranking (D1, Q1, ...).
 
 ```{r load-records}
-json.files <- list.files(path="MTMT-downloads", pattern=".*\\.json$",
-												 full.names=TRUE)
-papers.ls <- list()
-au.info <- list()
-au.ids <- list()
-for(f in json.files) {
-	id <- sub(".*/(.*)_.*", "\\1", f)
-	id.hash <- hash.id(as.numeric(id))
-	cikkek <- read.MTMT(f)
-	au.ids[[id.hash]] <- id
-	au.info[[id.hash]] <- p.author.label(cikkek[[1]], id)
-	papers.ls[[id.hash]] <- pub.measures(cikkek, id)
+records.file <- "load-records_20191130.Rdata"
+if(file.exists(records.file)) {
+	load(records.file)
+} else {
+	json.files <- list.files(path="MTMT-downloads", pattern=".*\\.json",
+													 full.names=TRUE)
+	papers.ls <- list()
+	au.info <- list()
+	au.ids <- list()
+	i <- 1
+	saved.records <- "load-records.Rdata"
+	for(f in json.files) {
+		#if(i %% 100 == 0) print(i)
+		print(i)
+		id <- sub(".*/(.*)_.*", "\\1", f)
+		id.hash <- hash.id(as.numeric(id))
+		cikkek <- read.MTMT(f)
+		if(length(cikkek) == 0 | is.na(cikkek)[1]) {
+			next
+		} else {
+			au.ids[[id.hash]] <- id
+			au.info[[id.hash]] <- p.author.label(cikkek[[1]], id)
+			papers.ls[[id.hash]] <- pub.measures(cikkek, id)
+		}
+		if(i %% 1000 == 0) {
+			save(au.ids, au.info, papers.ls, file=saved.records)
+			gc()
+		}
+		i <- i+1
+	}
+	save(au.ids, au.info, papers.ls, file=saved.records)
 }
 au.info <- unlist(au.info)
 au.ids <- unlist(au.ids)
 ```
 
-We create an author database, to contain the authors, MTMT ID, name, affiliation and subject field.
+We create an author database, to contain the authors, MTMT ID, name, affiliation and subject field. For some unknown reason `au.info` contain one less records than `au.ids`, so first we remove this record from `au.ids`.
+
+```{r rm-au-id}
+i <- names(au.ids) %in% names(au.info)
+au.ids <- au.ids[i]
+```
+
+Now the creation of the database.
 
 ```{r author-info}
 author.info <- data.frame(mtmt.id=au.ids, info=au.info)
@@ -111,11 +139,20 @@ author.info$field <- ff
 author.info <- author.info[,c(1,3:5,2)]
 ```
 
-Because we only consider papers with ranks, several author remained without publications. We discard those people.
+Because we only consider papers with ranks, several author remained without publications. We discard the records of those people.
 
 ```{r discard-zero.pubs}
 l <- sapply(papers.ls, nrow)
+n.p <- as.numeric(names(table(l)))
+f.p <- as.numeric(table(l))
+plot((n.p+1), f.p, log="xy")
 papers.ls <- papers.ls[l != 0]
+```
+
+We also update the author database.
+
+```{r update-authors}
+author.info <- author.info[names(papers.ls),]
 ```
 
 
@@ -161,38 +198,287 @@ $$
 First, we create an association matrix from the bibliography data and convert it to a graph:
 
 ```{r create-assoc-mat}
-assoc.mat <- create.assoc.mat(papers.ls)
-g <- graph.adjacency(assoc.mat, mode="undirected", weighted=TRUE, diag=FALSE)
+graph.file <- "assoc_mat.Rdata"
+if(file.exists(graph.file)) {
+	load(graph.file)
+} else {
+	assoc.mat <- create.assoc.mat(papers.ls)
+}
+assoc.mat <- assoc.mat[names(papers.ls), names(papers.ls)]
+g.pubs <- graph.adjacency(assoc.mat, mode="undirected", weighted=TRUE, diag=FALSE)
 ```
 
-Then we plot the graph. Here the width of the edges is proportional to $p_{A,B}$, i.e. the proportion of shared articles. The size of the nodes is proportional the number of D1 articles published by the given person (node). Node colour represents the department of the person (Botany: orange, Ecology: brown, Evolutionary Zoology: green, Hydrobiology: blue). The coloured shapes behind the nodes identify the communities of the network, determined by a the fast greedy algorithm.
+Then we plot the graph. Here the width of the edges is proportional to $p_{A,B}$, i.e. the proportion of shared articles. The size of the nodes is proportional the number of D1 articles published by the given person (node). Node colour represents the department of the person (Botany: orange, Ecology: brown, Evolutionary Zoology: green, Hydrobiology: blue). The coloured shapes behind the nodes identify the communities of the network, determined by the fast greedy algorithm.
 
 ```{r plot-assoc-mat}
 #set.seed(11)
-cols <- rep("lightblue", length(V(g)))
-cols[grepl("5yc4a", names(V(g)))] <- "salmon3"
-#cols[grepl("10000433", names(V(g)))] <- "orange"
-#cols[grepl("10001510", names(V(g)))] <- "lightgreen"
-#cols[grepl("-Ev$", names(V(g)))] <- "lightgreen"
-#cols[grepl("-Bo$", names(V(g)))] <- "orange"
-V(g)$color <- cols
-V(g)$size = 0.1
-V(g)$size[names(V(g)) == "10000090"] <- 1
-#V(g)$size[names(V(g)) == "10000433"] <- 1
-#V(g)$size[names(V(g)) == "10001510"] <- 1
-#V(g)$size = 4*sqrt(sum.pubs$n.D1)
-#V(g)$size = 10*sqrt(sum.pubs$n.D1.corr)
-pub.comm <- cluster_fast_greedy(g)
+cols <- rep("lightblue", length(V(g.pubs)))
+V(g.pubs)$color <- cols
+V(g.pubs)$size = 0.1
+#V(g.pubs)$size = 4*sqrt(sum.pubs$n.D1)
+#V(g.pubs)$size = 10*sqrt(sum.pubs$n.D1.corr)
+pub.comm <- cluster_fast_greedy(g.pubs)
 m <- membership(pub.comm)
-#sort(m)
 m.l <- tapply(names(m), m, unique)
-#pdf(file="proba.pdf", width=200, height=200)
-plot(g, vertex.label.cex=0.1, edge.width=10*E(g)$weight, mark.groups=m.l)
-#dev.off()
-sg <- induced_subgraph(g, m.l[[5]])
-pdf(file="proba-sg.pdf", width=20, height=20)
-plot(sg, vertex.label.cex=0.75, edge.width=10*E(sg)$weight)
+png(file="full-graph-map.png", width=20000, height=20000)
+plot(g.pubs, vertex.label.cex=0.1, edge.width=10*E(g.pubs)$weight)
 dev.off()
+```
+
+It seems that the field of evolution and ecology field is very fragmented, its authors belong to several components identified by the fast greedy algorithm. So we have to find a methods to get this field.
+
+```{r evolecol}
+i <- grepl("evol|ökol|zool|növé|hidrobio|etoló",
+					 as.character(author.info$info), ignore.case=TRUE, perl=TRUE)
+evoeco.au <- author.info[i,]
+nrow(evoeco.au)
+evoeco.prod <- sum.pubs[rownames(evoeco.au),]
+```
+
+We get the subraph for the field of evolution and ecology.
+
+```{r evoeco-graph}
+ee.g <- induced_subgraph(g.pubs, rownames(evoeco.au))
+ee.g <- induced_subgraph(ee.g, names(V(ee.g)[strength(ee.g) > 0]))
+comp.ee <- cluster_fast_greedy(ee.g)
+memb.ee <- membership(comp.ee)
+ml.ee <- tapply(names(memb.ee), memb.ee, unique)
+coords <- layout_components(ee.g, layout_with_graphopt)
+pdf(file="full-evoeco-map.pdf", width=20, height=20)
+plot(ee.g, vertex.label.cex=0.01, edge.width=0.1, layout=coords)
+dev.off()
+```
+
+## Strongly connected components
+
+The next step is to identify the strongly connected components. We define strongly connected components as nodes connected with edges of weight more than 0.4. Hereafter, we refer these strongly connected components as _guilds_.
+
+```{r hist-weights}
+w.cut <- 0.4
+w <- E(ee.g)$weight
+hist(w, seq(0,1,0.01), main="", xlab="edge weight")
+abline(v=w.cut, lty=2)
+(p.cut <- sum(w >= 0.4)/length(w))
+text(0.8, 800, paste(round(p.cut*100, 2), "%", sep=""))
+```
+
+As the above histogram shows only a small proportion of edges have weights more than 0.4.
+
+The following obtains these guilds.
+
+```{r strong-comps}
+ee.g.st.red <- subgraph.edges(ee.g, E(ee.g)[E(ee.g)$weight >= w.cut])
+comp.red <- cluster_fast_greedy(ee.g.st.red)
+memb.red <- membership(comp.red)
+plot(ee.g.st.red, edge.width=2, edge.color="black")
+```
+
+Some description of these components.
+
+```{r descr-strong-comps}
+t.memb.red <- table(memb.red)
+length(t.memb.red)
+vcount(ee.g.st.red)
+vcount(ee.g.st.red)/vcount(ee.g)
+(t.size.sc <- table(t.memb.red))
+barplot(t.size.sc, xlab="size of guilds",
+				ylab="frequency")
+```
+
+The above shows that most of these guilds contain two authors, but there are several components with at least four authors. About 17% of all authors take part in these components.
+
+```{r plot-evoeco-guilds}
+ee.g.st <- subgraph.edges(ee.g, E(ee.g)[E(ee.g)$weight > w.cut],
+													delete.vertices=FALSE)
+E(ee.g.st)$weight <- 1
+pdf(file="full-evoeco-map-guilds.pdf", width=20, height=20)
+plot(ee.g, vertex.label.cex=0.01, edge.width=0.1, layout=coords)
+plot(ee.g.st, vertex.label.cex=0.01, edge.width=1, edge.color="red",
+		 layout=coords, add=TRUE)
+dev.off()
+```
+
+The guilds scattered all over the publication graph.
+
+## Productivity of members of guilds
+
+```{r prod-st-comp}
+guild.authors <- names(V(ee.g.st.red))
+non.guild.authors <- names(V(ee.g))
+non.guild.authors <- non.guild.authors[!(non.guild.authors %in%
+																					 guild.authors)]
+i <- rownames(evoeco.prod) %in% guild.authors
+j <- rownames(evoeco.prod) %in% non.guild.authors
+
+evoeco.prod$guild.member <- NA
+evoeco.prod$guild.member[i] <- "yes"
+evoeco.prod$guild.member[j] <- "no"
+evoeco.prod$guild.member <- factor(evoeco.prod$guild.member)
+
+wilcox.test(n.papers ~ guild.member, evoeco.prod)
+boxplot(n.papers ~ guild.member, evoeco.prod, log="y")
+wilcox.test(w.ec.papers ~ guild.member, evoeco.prod)
+boxplot(I(w.ec.papers+1) ~ guild.member, evoeco.prod, log="y")
+
+wilcox.test(n.citations ~ guild.member, evoeco.prod)
+boxplot(I(n.citations+1) ~ guild.member, evoeco.prod, log="y")
+wilcox.test(w.ec.citations ~ guild.member, evoeco.prod)
+boxplot(I(w.ec.citations+1) ~ guild.member, evoeco.prod, log="y")
+
+wilcox.test(n.D1 ~ guild.member, evoeco.prod)
+boxplot(I(n.D1+1) ~ guild.member, evoeco.prod, log="y")
+wilcox.test(w.ec.D1 ~ guild.member, evoeco.prod)
+boxplot(I(w.ec.D1+1) ~ guild.member, evoeco.prod, log="y")
+```
+
+```{r guild-ranks}
+r.n.papers <- rank(evoeco.prod$n.papers)
+r.flae.papers <- rank(evoeco.prod$w.flae.papers)
+d.r <- r.flae.papers - r.n.papers
+wilcox.test(d.r ~ guild.member, evoeco.prod)
+boxplot(d.r ~ guild.member, evoeco.prod)
+
+o <- order(r.n.papers)
+cm <- evoeco.prod$guild.member[o]
+dr <- d.r[o]
+i.c <- (1:nrow(evoeco.prod))[cm == "yes"]
+i.c <- i.c[!is.na(i.c)]
+i.p <- i.c - 1
+i.p <- i.p[cm[i.p] == "no"]
+i.n <- i.c + 1
+i.n <- i.n[cm[i.n] == "no"]
+wilcox.test(dr[i.p], dr[i.n])
+wilcox.test(dr[i.c], dr[i.p])
+wilcox.test(dr[i.c], dr[i.n])
+wilcox.test(dr[i.c], c(dr[i.n],dr[i.p]))
+boxplot(dr[i.c], c(dr[i.p], dr[i.n]))
+kruskal.test(list(dr[i.p], dr[i.c], dr[i.n]))
+
+r.n.citations <- rank(evoeco.prod$n.citations)
+r.flae.citations <- rank(evoeco.prod$w.flae.citations)
+d.r <- r.flae.citations - r.n.citations
+wilcox.test(d.r ~ guild.member, evoeco.prod)
+boxplot(d.r ~ guild.member, evoeco.prod)
+
+o <- order(r.n.citations)
+cm <- evoeco.prod$guild.member[o]
+dr <- d.r[o]
+i.c <- (1:nrow(evoeco.prod))[cm == "yes"]
+i.c <- i.c[!is.na(i.c)]
+i.p <- i.c - 1
+i.p <- i.p[cm[i.p] == "no"]
+i.n <- i.c + 1
+i.n <- i.n[cm[i.n] == "no"]
+wilcox.test(dr[i.p], dr[i.n])
+wilcox.test(dr[i.c], dr[i.p])
+wilcox.test(dr[i.c], dr[i.n])
+wilcox.test(dr[i.c], c(dr[i.n],dr[i.p]))
+boxplot(dr[i.c], c(dr[i.p], dr[i.n]))
+kruskal.test(list(dr[i.p], dr[i.c], dr[i.n]))
+
+r.n.D1 <- rank(evoeco.prod$n.D1)
+r.flae.D1 <- rank(evoeco.prod$w.flae.D1)
+d.r <- r.flae.D1 - r.n.D1
+wilcox.test(d.r ~ guild.member, evoeco.prod)
+boxplot(d.r ~ guild.member, evoeco.prod)
+
+o <- order(r.n.D1)
+cm <- evoeco.prod$guild.member[o]
+dr <- d.r[o]
+i.c <- (1:nrow(evoeco.prod))[cm == "yes"]
+i.c <- i.c[!is.na(i.c)]
+i.p <- i.c - 1
+i.p <- i.p[cm[i.p] == "no"]
+i.n <- i.c + 1
+i.n <- i.n[cm[i.n] == "no"]
+wilcox.test(dr[i.p], dr[i.n])
+wilcox.test(dr[i.c], dr[i.p])
+wilcox.test(dr[i.c], dr[i.n])
+wilcox.test(dr[i.c], c(dr[i.n],dr[i.p]))
+boxplot(dr[i.c], c(dr[i.p], dr[i.n]))
+kruskal.test(list(dr[i.p], dr[i.c], dr[i.n]))
+
+```
+
+### Correlates of being a strong component member
+
+```{r RF-guilds}
+library(randomForest)
+ee.prod <- evoeco.prod[!is.na(evoeco.prod$guild.member),]
+ee.RF <- randomForest(guild.member ~ ., ee.prod, importance=TRUE)
+varImpPlot(ee.RF)
+l.ee.prod <- as.data.frame(lapply(ee.prod[,-ncol(ee.prod)], function(x) log10(x+1)))
+l.ee.prod$betweenness <- betweenness(ee.g)
+l.ee.prod$strength <- strength(ee.g)
+l.ee.prod$closeness <- closeness(ee.g)
+l.ee.prod$guild.member <- ee.prod$guild.member
+l.ee.RF <- randomForest(guild.member ~ ., l.ee.prod, importance=TRUE)
+varImpPlot(l.ee.RF)
+p.cl <- predict(l.ee.RF)
+table(p.cl, l.ee.prod$guild.member)
+partialPlot(l.ee.RF, l.ee.prod, "strength")
+```
+
+## Productivity of guilds
+
+```{r prod-fun}
+guild.productivity <- function(guild, cikkek=papers.ls, szerzok=ee.prod) {
+	p <- unique(unlist(sapply(cikkek[guild], function(y) y$id)))
+	c(guild=length(p)/length(guild), members=mean(szerzok[guild, "n.papers"]),
+		members.weighted=mean(szerzok[guild, "w.ec.papers"]))
+}
+rnd.guild.productivity <- function(guild.size, n.rep=1000, cikkek=papers.ls,
+																		szerzok=ee.prod) {
+	n.c.a <- rownames(szerzok)[szerzok$guild.member == "no"]
+	res <- matrix(0, ncol=3, nrow=n.rep)
+	for(i in 1:n.rep) {
+		s <- sample(n.c.a, guild.size)
+		r <- guild.productivity(s, cikkek=cikkek, szerzok=szerzok)
+		res[i,] <- r
+	}
+	colnames(res) <- names(r)
+	res
+}
+guild.productivity.test <- function(guild, p.value=0.05, cikkek=papers.ls,
+																		szerzok=ee.prod) {
+	res.g <- guild.productivity(guild, cikkek=cikkek, szerzok=szerzok)
+	res.r <- rnd.guild.productivity(length(guild), 999, cikkek, szerzok)
+	res.r <- rbind(res.g, res.r)
+	value <- res.g
+	l.crit <- numeric(ncol(res.r))
+	u.crit <- numeric(ncol(res.r))
+	for(i in 1:ncol(res.r)) {
+		p <- quantile(res.r[,i], c(p.value/2, 1-p.value/2))
+		l.crit[i] <- p[1]
+		u.crit[i] <- p[2]
+	}
+	data.frame(value=res.g, l.crit=l.crit, u.crit=u.crit,
+						 sig.mark=ifelse(l.crit < res.g & res.g < u.crit, "", "*"),
+						 variable=names(res.g))
+}
+guild.productivity.q <- function(guild, p.value=0.05, n.rep=999,
+																 cikkek=papers.ls, szerzok=ee.prod) {
+	res.g <- guild.productivity(guild, cikkek=cikkek, szerzok=szerzok)
+	res.r <- rnd.guild.productivity(length(guild), n.rep, cikkek, szerzok)
+	res.r <- rbind(res.g, res.r)
+	d <- numeric(ncol(res.r))
+	for(i in 1:ncol(res.r)) {
+		d[i] <- sum(res.r[,i] > res.g[i])
+	}
+	data.frame(value=res.g, quant=d/nrow(res.r), variable=names(res.g),
+						 n.guild=length(guild))
+}
+```
+
+```{r guild-prod}
+l.memb.red <- tapply(names(memb.red), memb.red, unique)
+l <- sapply(l.memb.red, length)
+i <- names(l.memb.red)[order(l, decreasing=TRUE)]
+l.memb.red <- l.memb.red[i]
+cl.p <- lapply(l.memb.red, guild.productivity.q)
+cl.df <- data.frame()
+for(l in cl.p) {
+}
 ```
 
 # Analyses of the last ten years
