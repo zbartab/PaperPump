@@ -11,6 +11,7 @@ create.network <- function(gr.name, gr.size, n.coauthors, gr.connected=FALSE) {
 	edges <- data.frame(authors=rep(group, rep(n.coauthors, gr.size)),
 											coauthors=coauthors)
 	edges <- as.matrix(edges)
+	n.edges <- nrow(edges)
 	if(gr.connected) {
 		i <- length(group)
 		p <- (i*(i-1))/2
@@ -31,8 +32,10 @@ create.network <- function(gr.name, gr.size, n.coauthors, gr.connected=FALSE) {
 	V(g)$color[grepl("[^a-c]$", names(V(g)))] <- "lightgreen"
 	E(g)$color <- "black"
 	E(g)$width <- 4
+	E(g)$width[1:n.edges] <- 1
 	g
 }
+
 G.A <- G.B <- 4 # group size
 c.A <- c.B <- 3 # number of coauthors from outside
 network.A <- create.network("A", G.A, c.A)
