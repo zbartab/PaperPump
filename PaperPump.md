@@ -109,3 +109,4 @@ $$
 for _w_~B~'/_w_~A~' > 1, the condition _c_ > 0 should also be fulfilled. As numerical computation indicates (Figure 2) the bias is decreased by introducing the first authorship bonus, but it is still significant. @Vavrycuk18e0195509, for instance, recommend a bonus of _b_ = 0.2, but in this case author _B_ sill more 50% more credit for the same work than author _A_ has. The difference between author _A_ and _B_ decreases as _b_ increases (Figure 2b), but this way coauthorship is worth less and less, undermining the benefits of collaborations.
 
 # References
+
