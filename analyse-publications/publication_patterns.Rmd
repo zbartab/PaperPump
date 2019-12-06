@@ -19,17 +19,22 @@ geometry:
 - margin=1in
 ---
 
+```{r set-up-knitr, include=FALSE}
+source("~/lib/markdown/produce_output.R")
+```
+
 # TODOs
 
 - collect first/last authorship
 
-```{r set-up, include=FALSE}
+# Set up
+
+```{r set-up}
 ## set the working directory
 ## load the libraries
 library(openxlsx)
 library(igraph)
 ## load local code
-source("~/lib/markdown/produce_output.R")
 source("process_MTMT-json-functions.R")
 ## set options
 par(xpd=FALSE)
@@ -41,7 +46,7 @@ We collect publication data from the Hungarian publication database, [MTMT](www.
 
 First, we create a database of the seed IDs. The file `mtmt_azonositok.xlsx` was collected by TM, while the file `BOI.staff.txt` contains the IDs of the researchers at the Institute of Biology and Ecology, University of Debrecen, collected by ZB.
 
-```{r create-seeds}
+```{r create-seeds, eval=FALSE}
 m.ids <- read.xlsx("mtmt_azonositok.xlsx")
 BOI.ids <- read.table(file="~/Hivatal/intezet/publikaciok/BOI_staff.txt",
 											sep="\t", header=TRUE, stringsAsFactors=FALSE)
@@ -50,25 +55,25 @@ seed.ids <- unique(c(m.ids$MTMT.azonosító, BOI.ids$mtmt.id))
 
 Next, we download the MTMT records for the seed IDs.
 
-```{r download-first}
+```{r download-first, eval=FALSE}
 download.MTMT.batch(seed.ids)
 ```
 
 Next, we process the downloaded `json` files and get the MTMT IDs of the coauthors. For this we write a function, which takes the list of publication records and returns the vector of coauthors' IDs. In a second function we wrap the `get.coauthors` function to process all the files in the data directory. And now, the actual computations to get the list of coauthors for each downloaded author.
 
-```{r get-coauthors-1}
+```{r get-coauthors-1, eval=FALSE}
 seed.ids2 <- get.all.coauthors()
 ```
 
 Now, we start the second round of getting author records.
 
-```{r download-second}
+```{r download-second, eval=FALSE}
 download.MTMT.batch(seed.ids2)
 ```
 
 The third round.
 
-```{r download-third}
+```{r download-third, eval=FALSE}
 seed.ids3 <- get.all.coauthors(pattern=".*2019-11-24\\.json$")
 #download.MTMT.batch(seed.ids3)
 ```
@@ -205,7 +210,8 @@ if(file.exists(graph.file)) {
 	assoc.mat <- create.assoc.mat(papers.ls)
 }
 assoc.mat <- assoc.mat[names(papers.ls), names(papers.ls)]
-g.pubs <- graph.adjacency(assoc.mat, mode="undirected", weighted=TRUE, diag=FALSE)
+g.pubs <- graph.adjacency(assoc.mat, mode="undirected", weighted=TRUE,
+													diag=FALSE)
 ```
 
 Then we plot the graph. Here the width of the edges is proportional to $p_{A,B}$, i.e. the proportion of shared articles. The size of the nodes is proportional the number of D1 articles published by the given person (node). Node colour represents the department of the person (Botany: orange, Ecology: brown, Evolutionary Zoology: green, Hydrobiology: blue). The coloured shapes behind the nodes identify the communities of the network, determined by the fast greedy algorithm.
@@ -259,7 +265,7 @@ w <- E(ee.g)$weight
 hist(w, seq(0,1,0.01), main="", xlab="edge weight")
 abline(v=w.cut, lty=2)
 (p.cut <- sum(w >= 0.4)/length(w))
-text(0.8, 800, paste(round(p.cut*100, 2), "%", sep=""))
+text(0.8, 800, paste(round(p.cut*100, 2), "% of edges", sep=""))
 ```
 
 As the above histogram shows only a small proportion of edges have weights more than 0.4.
@@ -270,7 +276,9 @@ The following obtains these guilds.
 ee.g.st.red <- subgraph.edges(ee.g, E(ee.g)[E(ee.g)$weight >= w.cut])
 comp.red <- cluster_fast_greedy(ee.g.st.red)
 memb.red <- membership(comp.red)
-plot(ee.g.st.red, edge.width=2, edge.color="black")
+pdf(file="guids.pdf", width=10, height=10)
+plot(ee.g.st.red, vertex.label.cex=0.75, edge.width=2, edge.color="black")
+dev.off()
 ```
 
 Some description of these components.
@@ -302,7 +310,9 @@ The guilds scattered all over the publication graph.
 
 ## Productivity of members of guilds
 
-```{r prod-st-comp}
+First we identify authors part of a guild in the productivity database.
+
+```{r guild-ID}
 guild.authors <- names(V(ee.g.st.red))
 non.guild.authors <- names(V(ee.g))
 non.guild.authors <- non.guild.authors[!(non.guild.authors %in%
@@ -314,30 +324,80 @@ evoeco.prod$guild.member <- NA
 evoeco.prod$guild.member[i] <- "yes"
 evoeco.prod$guild.member[j] <- "no"
 evoeco.prod$guild.member <- factor(evoeco.prod$guild.member)
-
-wilcox.test(n.papers ~ guild.member, evoeco.prod)
-boxplot(n.papers ~ guild.member, evoeco.prod, log="y")
-wilcox.test(w.ec.papers ~ guild.member, evoeco.prod)
-boxplot(I(w.ec.papers+1) ~ guild.member, evoeco.prod, log="y")
-
-wilcox.test(n.citations ~ guild.member, evoeco.prod)
-boxplot(I(n.citations+1) ~ guild.member, evoeco.prod, log="y")
-wilcox.test(w.ec.citations ~ guild.member, evoeco.prod)
-boxplot(I(w.ec.citations+1) ~ guild.member, evoeco.prod, log="y")
-
-wilcox.test(n.D1 ~ guild.member, evoeco.prod)
-boxplot(I(n.D1+1) ~ guild.member, evoeco.prod, log="y")
-wilcox.test(w.ec.D1 ~ guild.member, evoeco.prod)
-boxplot(I(w.ec.D1+1) ~ guild.member, evoeco.prod, log="y")
 ```
 
+```{r test-guild-member-prod}
+(w.papers <- wilcox.test(n.papers ~ guild.member, evoeco.prod))
+(wi.ec.papers <- wilcox.test(w.ec.papers ~ guild.member, evoeco.prod))
+layout(matrix(1:2, ncol=2))
+boxplot(n.papers ~ guild.member, evoeco.prod, log="y", xlab="guild member",
+				ylab="number of papers",
+				main=paste("Wilcoxon p = ", round(w.papers$p.value, 3)))
+boxplot(I(w.ec.papers+1) ~ guild.member, evoeco.prod, log="y",
+				xlab="guild member", ylab="weighted number of papers",
+				main=paste("Wilcoxon p = ", round(wi.ec.papers$p.value, 3)))
+layout(1)
+
+(w.citations <- wilcox.test(n.citations ~ guild.member, evoeco.prod))
+(wi.ec.citations <- wilcox.test(w.ec.citations ~ guild.member, evoeco.prod))
+layout(matrix(1:2, ncol=2))
+boxplot(I(n.citations+1) ~ guild.member, evoeco.prod, log="y",
+				xlab="guild member", ylab="number of citations",
+				main=paste("Wilcoxon p = ", round(w.citations$p.value, 3)))
+boxplot(I(w.ec.citations+1) ~ guild.member, evoeco.prod, log="y",
+				xlab="guild member", ylab="weighted number of citations",
+				main=paste("Wilcoxon p = ", round(wi.ec.citations$p.value, 3)))
+layout(1)
+
+(w.D1 <- wilcox.test(n.D1 ~ guild.member, evoeco.prod))
+(wi.ec.D1 <- wilcox.test(w.ec.D1 ~ guild.member, evoeco.prod))
+layout(matrix(1:2, ncol=2))
+boxplot(I(n.D1+1) ~ guild.member, evoeco.prod, log="y",
+				xlab="guild member", ylab="number of D1 papers",
+				main=paste("Wilcoxon p = ", round(w.D1$p.value, 3)))
+boxplot(I(w.ec.D1+1) ~ guild.member, evoeco.prod, log="y",
+				xlab="guild member", ylab="weighted number of D1 papers",
+				main=paste("Wilcoxon p = ", round(wi.ec.D1$p.value, 3)))
+layout(1)
+```
+
+Authors in guild are more affected by weighting productivity.
+
+Next we investigate, how the authors rank changes if switch from unweighted to weighted publication measures.
+
 ```{r guild-ranks}
+par(xpd=FALSE)
 r.n.papers <- rank(evoeco.prod$n.papers)
 r.flae.papers <- rank(evoeco.prod$w.flae.papers)
 d.r <- r.flae.papers - r.n.papers
-wilcox.test(d.r ~ guild.member, evoeco.prod)
-boxplot(d.r ~ guild.member, evoeco.prod)
+(w <- wilcox.test(d.r ~ guild.member, evoeco.prod))
+boxplot(d.r ~ guild.member, evoeco.prod, xlab="guild member",
+				ylab="change in rank: number of papers",
+				main=paste("Wilcoxon p =", round(w$p.value, 3)))
+abline(h=0, lty=2)
 
+r.n.citations <- rank(evoeco.prod$n.citations)
+r.flae.citations <- rank(evoeco.prod$w.flae.citations)
+d.r <- r.flae.citations - r.n.citations
+(w <- wilcox.test(d.r ~ guild.member, evoeco.prod))
+boxplot(d.r ~ guild.member, evoeco.prod, xlab="guild member",
+				ylab="change in rank: number of citations",
+				main=paste("Wilcoxon p =", round(w$p.value, 4)))
+abline(h=0, lty=2)
+
+r.n.D1 <- rank(evoeco.prod$n.D1)
+r.flae.D1 <- rank(evoeco.prod$w.flae.D1)
+d.r <- r.flae.D1 - r.n.D1
+(w <- wilcox.test(d.r ~ guild.member, evoeco.prod))
+boxplot(d.r ~ guild.member, evoeco.prod, xlab="guild member",
+				ylab="change in rank: number of D1 papers",
+				main=paste("Wilcoxon p =", round(w$p.value, 4)))
+abline(h=0, lty=2)
+```
+
+Here below, compare how the ranks of authors change when switching from unweighted to weighted measures, but now we compare authors of similar ranks.
+
+```{r comp-similar-ranks}
 o <- order(r.n.papers)
 cm <- evoeco.prod$guild.member[o]
 dr <- d.r[o]
@@ -347,18 +407,11 @@ i.p <- i.c - 1
 i.p <- i.p[cm[i.p] == "no"]
 i.n <- i.c + 1
 i.n <- i.n[cm[i.n] == "no"]
-wilcox.test(dr[i.p], dr[i.n])
-wilcox.test(dr[i.c], dr[i.p])
-wilcox.test(dr[i.c], dr[i.n])
-wilcox.test(dr[i.c], c(dr[i.n],dr[i.p]))
-boxplot(dr[i.c], c(dr[i.p], dr[i.n]))
-kruskal.test(list(dr[i.p], dr[i.c], dr[i.n]))
-
-r.n.citations <- rank(evoeco.prod$n.citations)
-r.flae.citations <- rank(evoeco.prod$w.flae.citations)
-d.r <- r.flae.citations - r.n.citations
-wilcox.test(d.r ~ guild.member, evoeco.prod)
-boxplot(d.r ~ guild.member, evoeco.prod)
+(w <- wilcox.test(dr[i.c], c(dr[i.n],dr[i.p])))
+boxplot(list(no=c(dr[i.p], dr[i.n]), yes=dr[i.c]), xlab="guild member",
+				ylab="change in rank: number of papers",
+				main=paste("Wilcoxon p =", round(w$p.value, 4)))
+abline(h=0, lty=2)
 
 o <- order(r.n.citations)
 cm <- evoeco.prod$guild.member[o]
@@ -369,18 +422,11 @@ i.p <- i.c - 1
 i.p <- i.p[cm[i.p] == "no"]
 i.n <- i.c + 1
 i.n <- i.n[cm[i.n] == "no"]
-wilcox.test(dr[i.p], dr[i.n])
-wilcox.test(dr[i.c], dr[i.p])
-wilcox.test(dr[i.c], dr[i.n])
-wilcox.test(dr[i.c], c(dr[i.n],dr[i.p]))
-boxplot(dr[i.c], c(dr[i.p], dr[i.n]))
-kruskal.test(list(dr[i.p], dr[i.c], dr[i.n]))
-
-r.n.D1 <- rank(evoeco.prod$n.D1)
-r.flae.D1 <- rank(evoeco.prod$w.flae.D1)
-d.r <- r.flae.D1 - r.n.D1
-wilcox.test(d.r ~ guild.member, evoeco.prod)
-boxplot(d.r ~ guild.member, evoeco.prod)
+(w <- wilcox.test(dr[i.c], c(dr[i.n],dr[i.p])))
+boxplot(list(no=c(dr[i.p], dr[i.n]), yes=dr[i.c]), xlab="guild member",
+				ylab="change in rank: number of citations",
+				main=paste("Wilcoxon p =", round(w$p.value, 4)))
+abline(h=0, lty=2)
 
 o <- order(r.n.D1)
 cm <- evoeco.prod$guild.member[o]
@@ -391,18 +437,17 @@ i.p <- i.c - 1
 i.p <- i.p[cm[i.p] == "no"]
 i.n <- i.c + 1
 i.n <- i.n[cm[i.n] == "no"]
-wilcox.test(dr[i.p], dr[i.n])
-wilcox.test(dr[i.c], dr[i.p])
-wilcox.test(dr[i.c], dr[i.n])
-wilcox.test(dr[i.c], c(dr[i.n],dr[i.p]))
-boxplot(dr[i.c], c(dr[i.p], dr[i.n]))
-kruskal.test(list(dr[i.p], dr[i.c], dr[i.n]))
+(w <- wilcox.test(dr[i.c], c(dr[i.n],dr[i.p])))
+boxplot(list(no=c(dr[i.p], dr[i.n]), yes=dr[i.c]), xlab="guild member",
+				ylab="change in rank: number of D1 papers",
+				main=paste("Wilcoxon p =", round(w$p.value, 4)))
+abline(h=0, lty=2)
 
 ```
 
 ### Correlates of being a strong component member
 
-```{r RF-guilds}
+```{r RF-guilds, eval=FALSE}
 library(randomForest)
 ee.prod <- evoeco.prod[!is.na(evoeco.prod$guild.member),]
 ee.RF <- randomForest(guild.member ~ ., ee.prod, importance=TRUE)
@@ -420,6 +465,16 @@ partialPlot(l.ee.RF, l.ee.prod, "strength")
 ```
 
 ## Productivity of guilds
+
+Next, we compare the productivity of guilds to that of 'guilds' compiled from random individuals. We define the following function to do the calculations.
+
+The first measures the productivity of a guild, by counting (i) the number of unique papers produced by the guild as whole, `guild`, (ii) the sum of the number of papers authored by the guild members, `members`, and (iii) the sum of number of papers authored by the guild members, weighted by the equal contribution scheme, `members.weighted`. All three measures are divided by the number of members.
+
+The second function generates `n.rep` guilds randomly compiled from authors not being member of any guilds and then calculates the above measures for each random guild.
+
+The third function performs a randomisation test to see if the given measure for the focal guild differs from that of the random guilds.
+
+The fourth function calculates the quantile of the guild measures relative to the distribution of random guild values.
 
 ```{r prod-fun}
 guild.productivity <- function(guild, cikkek=papers.ls, szerzok=ee.prod) {
@@ -462,13 +517,17 @@ guild.productivity.q <- function(guild, p.value=0.05, n.rep=999,
 	res.r <- rnd.guild.productivity(length(guild), n.rep, cikkek, szerzok)
 	res.r <- rbind(res.g, res.r)
 	d <- numeric(ncol(res.r))
+	m <- numeric(ncol(res.r))
 	for(i in 1:ncol(res.r)) {
 		d[i] <- sum(res.r[,i] > res.g[i])
+		m[i] <- mean(res.r[,i])
 	}
-	data.frame(value=res.g, quant=d/nrow(res.r), variable=names(res.g),
-						 n.guild=length(guild))
+	data.frame(variable=names(res.g), value=res.g, rnd.mean=m,
+						 quantile=d/nrow(res.r), guild.size=length(guild))
 }
 ```
+
+In the following we calculate the statistics for the guilds identified previously.
 
 ```{r guild-prod}
 l.memb.red <- tapply(names(memb.red), memb.red, unique)
@@ -477,152 +536,48 @@ i <- names(l.memb.red)[order(l, decreasing=TRUE)]
 l.memb.red <- l.memb.red[i]
 cl.p <- lapply(l.memb.red, guild.productivity.q)
 cl.df <- data.frame()
-for(l in cl.p) {
+for(n in names(cl.p)) {
+	l <- cl.p[[n]]
+	l$guild <- n
+	rownames(l) <- NULL
+	cl.df <- rbind(cl.df, l)
 }
+cl.df$sig <- ifelse(cl.df$quantile > 0.975 | cl.df$quantile < 0.025, "*", "")
+cl.df$g2rnd <- cl.df$value/cl.df$rnd.mean
 ```
 
-# Analyses of the last ten years
+And finally, some analyses.
 
-## Calculate publication measures
-
-We calculate a couple of derived bibliographic measures for each author for the last ten years i.e. we take only into account those articles which were published after 2009.
-
-```{r last-ten-years}
-staff.measures10 <- lapply(staff.measures, function(s) s[s$year > 2009,])
+```{r analyse-guild-prod}
+library(lme4)
+library(emmeans)
+m.all <- lmer(log10(g2rnd) ~ variable + (1|guild), cl.df)
+drop1(m.all, test="Chisq")
+summary(m.all)
+(em <- emmeans(m.all, ~variable, type="response"))
+pairs(em)
+plot(em, horizontal=FALSE, xlab="measures", ylab="ratio of focal to random",
+		 comparison=TRUE)
 ```
 
-```{r calc-pup-measures10}
-sum.pubs10 <- NULL
-for(s in staff.measures10) {
-	r <- calc.bib.measures(s)
-	if(is.null(sum.pubs10)) {
-		sum.pubs10 <- data.frame(t(r))
-	} else {
-		sum.pubs10 <- rbind(sum.pubs10, r)
-	}
-}
-rownames(sum.pubs10) <- names(staff.measures10)
-sum.pubs10 <- cbind(BOI.staff, sum.pubs10)
+The result of the mixed effect model clearly shows that in guilds members achieve higher success if one considers success as the sum of the achievements documented individually than when one measures the composite productivity of the whole guild. Even using the weighted individual measures does not help this situation. This analyses were based on all guilds identified.
+
+We now analyse only those guilds which show higher than random productivity on the basis of the unweighted individual measure.
+
+```{r analyse-guild-prod-1}
+i <- cl.df$variable == "members" & cl.df$g2rnd > 1
+success.guilds <- as.character(cl.df$guild)[i]
+i <- cl.df$guild %in% success.guilds
+m.1 <- lmer(log10(g2rnd) ~ variable + (1|guild), cl.df, subset=i)
+drop1(m.1, test="Chisq")
+summary(m.1)
+(em.1 <- emmeans(m.1, ~variable, type="response"))
+pairs(em.1)
+plot(em.1, horizontal=FALSE, xlab="measures", ylab="ratio of focal to random",
+		 comparison=TRUE)
 ```
 
-## Build collaboration network
-
-We build a collaboration network based on the proportion of shared publications, $p_{A,B}$: the weight of an edge is the number of shared papers divided by the sum of the shared papers and the papers unique to each author connected by the edge.
-
-$$
-p_{A,B} = \frac{A \cap B}{A \cup B}
-$$
-
-First, we create an association matrix from the bibliography data and convert it to a graph:
-
-```{r create-assoc-mat10}
-assoc.mat <- create.assoc.mat(staff.measures10)
-g10 <- graph.adjacency(assoc.mat, mode="undirected", weighted=TRUE, diag=FALSE)
-```
-
-Then we plot the graph. Here the width of the edges is proportional to $p_{A,B}$, i.e. the proportion of shared articles. The size of the nodes is proportional the number of D1 articles published by the given person (node). Node colour represents the department of the person (Botany: orange, Ecology: brown, Evolutionary Zoology: green, Hydrobiology: blue). The coloured shapes behind the nodes identify the communities of the network, determined by a the fast greedy algorithm.
-
-```{r plot-assoc-mat10}
-set.seed(11)
-cols <- rep("lightblue", length(V(g10)))
-cols[grepl("-Ec$", names(V(g10)))] <- "salmon3"
-cols[grepl("-Ev$", names(V(g10)))] <- "lightgreen"
-cols[grepl("-Bo$", names(V(g10)))] <- "orange"
-V(g10)$color <- cols
-#V(g10)$size = 5*sqrt(sum.pubs10$n.WoS.corr)
-V(g10)$size = 4*sqrt(sum.pubs10$n.D1)
-#V(g10)$size = 10*sqrt(sum.pubs10$n.D1.corr)
-pub.comm <- cluster_fast_greedy(g10)
-m <- membership(pub.comm)
-sort(m)
-m.l <- tapply(names(m), m, unique)
-plot(g10, edge.width=100*E(g10)$weight, mark.groups=m.l)
-dev.copy2pdf(file="BOI-publication-network-n_D1-last_10y.pdf", width=10, height=10)
-```
-
-The pattern of relationships as a dendrogram.
-
-```{r last-ten-year-as-dendrogram}
-plot(as.dendrogram(pub.comm))
-```
-
-# Analyses of departmental publication activity
-
-Now we are wandering, how the productivity of the departments compare to each other. For this we have to control for the fact that several people belonging to the same department publish the same article. In this case this very same article will be included several times into the productivity of the department. Therefore, first we have to create data bases of articles for each department and then remove the duplicates from these databases.
-
-First, creating the data bases for the departments.
-
-```{r create-departmental-databases}
-departments <- unique(BOI.staff$department)
-#departments <- gsub(" ", "", departments)
-dept.pubs <- list()
-for(d in departments) {
-	dept.pubs[[d]] <- data.frame()
-}
-for(id in names(staff.measures10)) {
-	i <- as.character(BOI.staff$mtmt.id) == id
-	d <- BOI.staff$department[i]
-	dept.pubs[[d]] <- rbind(dept.pubs[[d]], staff.measures10[[id]])
-}
-```
-
-Then we remove the duplicated papers.
-
-```{r rm-duplicates}
-dept.pubs <- lapply(dept.pubs, unique)
-```
-
-Finally, we calculate several bibliographic measures and create a data frame.
-
-```{r dept-bibliography}
-sum.depts <- data.frame()
-for(s in dept.pubs) {
-	r <- calc.bib.measures(s)
-	sum.depts <- rbind(sum.depts, t(r))
-}
-rownames(sum.depts) <- departments
-```
-
-Now, we visualise the results.
-
-```{r plot-departments}
-sum.depts <- sum.depts[order(rownames(sum.depts)),]
-n.vars <- names(sum.depts)
-opar <- par()
-par(mar=c(5,10,1,1)+0.1)
-for(v in n.vars) {
-	barplot(sum.depts[,v], names.arg=rownames(sum.depts), horiz=TRUE, las=1,
-					xlab=v)
-}
-par(opar)
-```
-
-# Analyses of individual authors
-
-```{r authors-VO}
-r <- read.MTMT("MTMT_records/VO-Ecology-10033110.json")
-au.l <- lapply(r, p.authors)
-aus <- tolower(unlist(au.l))
-aus <- gsub("\\s+", " ", aus)
-aus <- gsub("[^[:alnum:] ]", "", aus)
-aus <- unique(aus)
-l.aus <- length(aus)
-au.matches <- list()
-for(i in 1:l.aus) {
-	a1 <- aus[i]
-	r <- c()
-	for(j in 1:l.aus) {
-		a2 <- aus[j]
-		#if(agrepl(a1, a2)) {
-		if(comp.authors(a1, a2)) {
-			r <- c(r, a2)
-		}
-	}
-	au.matches[[a1]] <- r
-}
-
-#aus <- gsub("\\<.\\>", "", aus)
-```
+We arrived at the same conclusions; being part of a guild is advantageous if individual measures are considered.
 
 # End matters
 
