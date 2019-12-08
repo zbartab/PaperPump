@@ -25,9 +25,10 @@ source("~/lib/markdown/produce_output.R")
 
 # TODOs
 
-- collect first/last authorship
 
 # Set up
+
+Here we load some packages and custom codes.
 
 ```{r set-up}
 ## set the working directory
@@ -42,9 +43,9 @@ par(xpd=FALSE)
 
 # Create the publication database
 
-We collect publication data from the Hungarian publication database, [MTMT](http://www.mtmt.hu). As we do not have the MTMT ID of all, or a large number of evolutionary biologists and ecologists, we use a recursive technique to collect the publication data. In this recursive algorithm we download the publication records of some researchers and then use their record to obtain further IDs. We repeat this procedure for the newly downloaded records too, for a couple of times.
+We collected publication data from the Hungarian publication database, [MTMT](http://www.mtmt.hu). As we do not have the MTMT ID of large number of authors, we use a recursive technique to collect the publication data. In this recursive algorithm we download the publication records of some researchers and then use their record to obtain further IDs. We repeat this procedure for the newly downloaded records too, for a couple of times.
 
-First, we create a database of the seed IDs. The file `mtmt_azonositok.xlsx` was collected by TM, while the file `BOI.staff.txt` contains the IDs of the researchers at the Institute of Biology and Ecology, University of Debrecen, collected by ZB.
+First, we create a database of the seed IDs. The file `mtmt_azonositok.xlsx` was collected by TM, while the file `BOI.staff.txt` contains the IDs of the researchers at the Institute of Biology and Ecology, University of Debrecen, compiled by ZB.
 
 ```{r create-seeds, eval=FALSE}
 m.ids <- read.xlsx("mtmt_azonositok.xlsx")
