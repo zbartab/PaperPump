@@ -13,6 +13,13 @@ read.MTMT <- function(file) {
 	}
 }
 
+download.MTMTrecords <- function(mtmt.id, outfile) {
+	mtmt.url <- "https://m2.mtmt.hu/api/publication?cond=published%3Beq%3Btrue&cond=core%3Beq%3Btrue&cond=authors.mtid%3Beq%3B<-mtmtid->&ty_on=1&ty_on_check=1&st_on=1&st_on_check=1&url_on=1&url_on_check=1&cite_type=2&sort=publishedYear%2Cdesc&sort=firstAuthor%2Casc&size=5000&page=1&format=json"
+	mtmt.url <- sub("<-mtmtid->", mtmt.id, mtmt.url)
+	#outfile <- paste(outfileID, "json", sep=".")
+	res <- try(download.file(mtmt.url, outfile, method="libcurl"), silent=TRUE)
+}
+
 read.MTMT.jsonlite <- function(file) {
 	mtmt.json <- try(fromJSON(file, simplifyVector=FALSE), silent=TRUE)
 	if ("try-error" %in% class(mtmt.json)) {
@@ -110,13 +117,6 @@ create.nameID <- function(staff.record) {
 	d <- sub("^(..).*", "\\1", staff.record[3])
 	ID <- paste(n, d, sep="-")
 	ID
-}
-
-download.MTMTrecords <- function(mtmt.id, outfile) {
-	mtmt.url <- "https://m2.mtmt.hu/api/publication?cond=published%3Beq%3Btrue&cond=core%3Beq%3Btrue&cond=authors.mtid%3Beq%3B<-mtmtid->&ty_on=1&ty_on_check=1&st_on=1&st_on_check=1&url_on=1&url_on_check=1&cite_type=2&sort=publishedYear%2Cdesc&sort=firstAuthor%2Casc&size=5000&page=1&format=json"
-	mtmt.url <- sub("<-mtmtid->", mtmt.id, mtmt.url)
-	#outfile <- paste(outfileID, "json", sep=".")
-	download.file(mtmt.url, outfile, method="libcurl")
 }
 
 calc.bib.measures.old <- function(cikkek) {
