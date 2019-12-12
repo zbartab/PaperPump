@@ -98,9 +98,9 @@ We calculate the following measures for each article:
 
 
 ```{r load-records}
-records.file <- "load-records_20191130.Rdata"
-if(file.exists(records.file)) {
-	load(records.file)
+saved.records <- "load-records.Rdata"
+if(file.exists(saved.records)) {
+	load(saved.records)
 } else {
 	json.files <- list.files(path="MTMT-downloads", pattern=".*\\.json",
 													 full.names=TRUE)
@@ -108,10 +108,9 @@ if(file.exists(records.file)) {
 	au.info <- list()
 	au.ids <- list()
 	i <- 1
-	#saved.records <- "load-records.Rdata"
 	for(f in json.files) {
-		if(i %% 100 == 0) print(i)
-		#print(i)
+		#if(i %% 100 == 0) print(i)
+		print(i)
 		id <- sub(".*/(.*)_.*", "\\1", f)
 		id.hash <- hash.id(as.numeric(id))
 		cikkek <- read.MTMT(f)
@@ -139,6 +138,8 @@ We create an author database, to contain the authors' MTMT ID, name, affiliation
 ```{r rm-au-id}
 i <- names(au.ids) %in% names(au.info)
 au.ids <- au.ids[i]
+i <- names(papers.ls) %in% names(au.info)
+papers.ls <- papers.ls[i]
 ```
 
 Now the creation of the database.
@@ -182,7 +183,6 @@ author.info <- author.info[names(papers.ls),]
 
 We calculate a couple of derived bibliographic measures for each author:
 
-- number of papers
 - total number of independent citations
 - total number of coauthors
 - number of D1 papers
@@ -218,18 +218,29 @@ $$
 p_{A,B} = \frac{A \cap B}{A \cup B}
 $$
 
-First, we create an association matrix from the bibliography data and convert it to a graph:
+First, we create an association matrix from the bibliography data:
 
 ```{r create-assoc-mat}
 graph.file <- "assoc_mat.Rdata"
 if(file.exists(graph.file)) {
 	load(graph.file)
 } else {
-	assoc.mat <- create.assoc.mat(papers.ls)
+	#assoc.mat <- create.assoc.mat(papers.ls)
+	assoc.mat <- create.assoc.mat.from.file(papers.ls)
+	#assoc.mat <- assoc.mat[names(papers.ls), names(papers.ls)]
+	save(assoc.mat, file=graph.file)
 }
-assoc.mat <- assoc.mat[names(papers.ls), names(papers.ls)]
-g.pubs <- graph.adjacency(assoc.mat, mode="undirected", weighted=TRUE,
+```
+
+It seems, that in a couple of cases the MTMT database contains error, i.e. the list of common articles of pairs of authors does not match. We have 72 such cases. We simply ignore these mismatches and use only the upper triangle of the association matrix to create the collaboration graph.
+
+```{r create-pub-graph}
+d.a <- assoc.mat - t(assoc.mat)
+sum(d.a != 0)
+g.pubs <- graph.adjacency(assoc.mat, mode="upper", weighted=TRUE,
 													diag=FALSE)
+vcount(g.pubs)
+ecount(g.pubs)
 ```
 
 Then we plot the graph. Here the width of the edges is proportional to $p_{A,B}$, i.e. the proportion of shared articles. The size of the nodes is proportional the number of edges, i.e. to the number of coauthors.
@@ -285,7 +296,7 @@ barplot(t.size.sc, xlab="size of guilds",
 				ylab="frequency")
 ```
 
-The above shows that most of these guilds contain two authors, but there are several components with at least four authors. About 17% of all authors take part in these components.
+The above shows that most of these guilds contain two authors, but there are several components with at least four authors. About 20% of all authors take part in these components.
 
 ```{r plot-evoeco-guilds}
 g.pubs.st <- subgraph.edges(g.pubs, E(g.pubs)[E(g.pubs)$weight > w.cut],
