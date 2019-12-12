@@ -2,6 +2,7 @@
 # functions to process MTMT publication records json
 
 library("rjson")
+library(Matrix)
 #library("jsonlite")
 
 read.MTMT <- function(file) {
@@ -175,11 +176,49 @@ create.directed.assoc.mat <- function() {
 	assoc.mat
 }
 
+create.assoc.mat.from.file <- function(papers.l, authors=NULL,
+																			 data.dir="MTMT-downloads",
+																			 pattern=".*\\.json$",
+																			 a.info=author.info, verbose=TRUE) {
+	# create an undirected association matrix based on common papers from
+	# files in sparse way
+	# hash table to translate hash id to mtmt id
+	mtmt.ids <- as.character(a.info$mtmt.id)
+	names(mtmt.ids) <- rownames(a.info)
+	json.files <- list.files(path=data.dir, pattern=pattern,
+													 full.names=TRUE)
+	if(is.null(authors)) {
+		authors <- names(papers.l)
+	}
+	n.authors <- length(authors)
+	assoc.mat <- Matrix(0.0, ncol=n.authors, nrow=n.authors)
+	rownames(assoc.mat) <- authors
+	colnames(assoc.mat) <- authors
+	i <- 1
+	for(a in authors) {
+		MTMT.id <- mtmt.ids[a]
+		f <- json.files[grepl(paste("/", MTMT.id, "_", sep=""), json.files)]
+		#print(f)
+		if(verbose) {cat(i, ": ", f, "\n", sep="")}
+		cas <- get.coauthors(read.MTMT(f))
+		for(ca in cas) {
+			ca.hash <- hash.id(ca)
+			#print(ca.hash)
+			if(!(ca.hash %in% authors)) next
+			m1 <- papers.l[[a]]$id
+			m2 <- papers.l[[ca.hash]]$id
+			assoc.mat[a, ca.hash] <- length(intersect(m1, m2))/length(union(m1,m2))
+		}
+		i <- i+1
+	}
+	assoc.mat	
+}
+
 create.assoc.mat <- function(staff.measures) {
 	# create an undirected association matrix based on common papers
 	staff <- names(staff.measures)
 	n.staff <- length(staff)
-	assoc.mat <- matrix(0, ncol=n.staff, nrow=n.staff)
+	assoc.mat <- Matrix(0.0, ncol=n.staff, nrow=n.staff)
 	#i <- BOI.staff$mtmt.id %in% staff
 	#staffID <- apply(BOI.staff[i,], 1, create.nameID)
 	rownames(assoc.mat) <- staff
