@@ -25,6 +25,7 @@ source("~/lib/markdown/produce_output.R")
 
 # TODOs
 
+- calculate statistics for cut off values other than 0.4
 
 # Set up
 
@@ -81,7 +82,20 @@ seed.ids3 <- get.all.coauthors(pattern=".*2019-11-24\\.json$")
 
 # Load publication data
 
-We load the publication records from the local repository. At the same time we also process them and calculate some basic measures for each article. We only consider those articles which has valid ranking (D1, Q1, ...).
+We load the publication records from the local repository. At the same time we also process them and calculate some basic measures for each article. We only consider those articles which has valid ranking (D1, Q1, ...), i.e. those having an impact factor.
+
+We calculate the following measures for each article:
+
+- the paper unique MTMT ID,
+- the types of the paper, e.g. article, review,
+- year of publication,
+- the paper's rank according to [Scimago Journal ranking](https://www.scimagojr.com/),
+- the number of independent citations the paper received so far,
+- the number of people authored the paper,
+- the order of the focal author in the author list,
+- is the focal author the first author,
+- is the focal author the last author.
+
 
 ```{r load-records}
 records.file <- "load-records_20191130.Rdata"
@@ -94,10 +108,10 @@ if(file.exists(records.file)) {
 	au.info <- list()
 	au.ids <- list()
 	i <- 1
-	saved.records <- "load-records.Rdata"
+	#saved.records <- "load-records.Rdata"
 	for(f in json.files) {
-		#if(i %% 100 == 0) print(i)
-		print(i)
+		if(i %% 100 == 0) print(i)
+		#print(i)
 		id <- sub(".*/(.*)_.*", "\\1", f)
 		id.hash <- hash.id(as.numeric(id))
 		cikkek <- read.MTMT(f)
@@ -120,7 +134,7 @@ au.info <- unlist(au.info)
 au.ids <- unlist(au.ids)
 ```
 
-We create an author database, to contain the authors, MTMT ID, name, affiliation and subject field. For some unknown reason `au.info` contain one less records than `au.ids`, so first we remove this record from `au.ids`.
+We create an author database, to contain the authors' MTMT ID, name, affiliation and subject field. For some unknown reason `au.info` contain one less records than `au.ids`, so first we remove this record from `au.ids`.
 
 ```{r rm-au-id}
 i <- names(au.ids) %in% names(au.info)
@@ -168,17 +182,20 @@ author.info <- author.info[names(papers.ls),]
 
 We calculate a couple of derived bibliographic measures for each author:
 
+- number of papers
 - total number of independent citations
 - total number of coauthors
-- average number of citations per papers
-- number of citations corrected for the number of coauthors
-- number of papers
-- number of papers corrected for the number of coauthors
-- number of ranked papers (i.e. papers with label of D1, Q1, etc.)
-- number of ranked papers corrected for the number of coauthors
 - number of D1 papers
-- number of D1 papers corrected for the number of coauthors
+- average number of citations per papers
 - proportion of D1 papers
+- number of papers weighted by
+	- the equal contribution scheme
+	- the sequence determined contribution scheme
+	- the first, last author emphasis scheme
+	- the bonus for first authorship scheme
+	- the bonus for last authorship scheme
+- number of independent citations weighted by the same schemes as used for the number of papers
+- number of D1 papers weighted by the same schemes as used for the number of papers
 
 ```{r calc-pup-measures}
 sum.pubs <- NULL
@@ -215,18 +232,15 @@ g.pubs <- graph.adjacency(assoc.mat, mode="undirected", weighted=TRUE,
 													diag=FALSE)
 ```
 
-Then we plot the graph. Here the width of the edges is proportional to $p_{A,B}$, i.e. the proportion of shared articles. The size of the nodes is proportional the number of D1 articles published by the given person (node).
+Then we plot the graph. Here the width of the edges is proportional to $p_{A,B}$, i.e. the proportion of shared articles. The size of the nodes is proportional the number of edges, i.e. to the number of coauthors.
 
 ```{r plot-assoc-mat}
 #set.seed(11)
 cols <- rep("lightblue", length(V(g.pubs)))
 V(g.pubs)$color <- cols
 #V(g.pubs)$size = 0.1
-V(g.pubs)$size = 0.1*sqrt(sum.pubs$n.D1)
-#V(g.pubs)$size = 10*sqrt(sum.pubs$n.D1.corr)
-pub.comm <- cluster_fast_greedy(g.pubs)
-m <- membership(pub.comm)
-m.l <- tapply(names(m), m, unique)
+#V(g.pubs)$size = 0.1*sqrt(sum.pubs$n.D1)
+V(g.pubs)$size = 0.1*sqrt(degree(g.pubs))
 png(file="full-graph-map-D1.png", width=20000, height=20000)
 plot(g.pubs, vertex.label.cex=0.1, edge.width=10*E(g.pubs)$weight)
 dev.off()
@@ -287,7 +301,7 @@ dev.off()
 
 The guilds scattered all over the publication graph.
 
-## Productivity of members of guilds
+## Productivity of guilds
 
 First we identify authors part of a guild in the productivity database.
 
@@ -305,6 +319,155 @@ full.au$guild.member[i] <- "yes"
 full.au$guild.member[j] <- "no"
 full.au$guild.member <- factor(full.au$guild.member)
 ```
+
+Next, we compare the productivity of guilds to that of 'guilds' compiled from random individuals. We define the following function to do the calculations.
+
+The first function calculates several measures of guild productivity. Guild productivity is measured for both the number of papers and citations. Guilds are characterised by (i) the total number of papers (and their citations) produced by the guild as a whole, (ii) the total number of papers (and their citations) produced by the guild members (in this case papers and citations can overlap between members), and (iii) the weighted numbers of papers (and their citations) produced by the members according to several scheme.
+
+The second function generates `n.rep` guilds randomly compiled from authors not being member of any guilds and then calculates the above measures for each random guild.
+
+The third function performs a randomisation test to see if the given measure for the focal guild differs from that of the random guilds.
+
+The fourth function calculates the quantile of the guild measures relative to the distribution of random guild values.
+
+```{r prod-fun}
+guild.productivity <- function(guild, cikkek=papers.ls, szerzok=ee.prod) {
+	g.cikkek <- cikkek[guild]
+	p <- lapply(g.cikkek, function(sz) {x <- sz$citations; names(x) <- sz$id; x})
+	d <- data.frame(n=unlist(sapply(p, names)), v=unlist(p))
+	ud <- unique(d)
+	r <- numeric()
+	r["g.papers"] <- nrow(ud)
+	r["g.citations"] <- sum(ud$v)
+	r["m.papers"] <- sum(szerzok[guild, "n.papers"])
+	r["m.citations"] <- sum(szerzok[guild, "n.citations"])
+	n <- names(szerzok)
+	n <- n[grep("^w.*papers$", n)]
+	for(nn in n) {
+		r[nn] <- sum(szerzok[guild, nn])
+		nc <- sub("papers$", "citations", nn)
+		r[nc] <- sum(szerzok[guild, nc])
+	}
+	r/length(guild)
+}
+rnd.guild.productivity <- function(guild.size, n.rep=1000, cikkek=papers.ls,
+																		szerzok=ee.prod) {
+	n.c.a <- rownames(szerzok)[szerzok$guild.member == "no"]
+	res <- matrix(0, ncol=14, nrow=n.rep)
+	for(i in 1:n.rep) {
+		s <- sample(n.c.a, guild.size)
+		r <- guild.productivity(s, cikkek=cikkek, szerzok=szerzok)
+		res[i,] <- r
+	}
+	colnames(res) <- names(r)
+	res
+}
+guild.productivity.test <- function(guild, p.value=0.05, cikkek=papers.ls,
+																		szerzok=ee.prod) {
+	res.g <- guild.productivity(guild, cikkek=cikkek, szerzok=szerzok)
+	res.r <- rnd.guild.productivity(length(guild), 999, cikkek, szerzok)
+	res.r <- rbind(res.g, res.r)
+	value <- res.g
+	l.crit <- numeric(ncol(res.r))
+	u.crit <- numeric(ncol(res.r))
+	for(i in 1:ncol(res.r)) {
+		p <- quantile(res.r[,i], c(p.value/2, 1-p.value/2))
+		l.crit[i] <- p[1]
+		u.crit[i] <- p[2]
+	}
+	data.frame(value=res.g, l.crit=l.crit, u.crit=u.crit,
+						 sig.mark=ifelse(l.crit < res.g & res.g < u.crit, "", "*"),
+						 variable=names(res.g))
+}
+guild.productivity.q <- function(guild, p.value=0.05, n.rep=999,
+																 cikkek=papers.ls, szerzok=ee.prod) {
+	res.g <- guild.productivity(guild, cikkek=cikkek, szerzok=szerzok)
+	res.r <- rnd.guild.productivity(length(guild), n.rep, cikkek, szerzok)
+	res.r <- rbind(res.g, res.r)
+	d <- numeric(ncol(res.r))
+	m <- numeric(ncol(res.r))
+	for(i in 1:ncol(res.r)) {
+		d[i] <- sum(res.r[,i] > res.g[i])
+		m[i] <- mean(res.r[,i])
+	}
+	data.frame(measure=names(res.g), value=res.g, rnd.mean=m,
+						 quantile=d/nrow(res.r), guild.size=length(guild))
+}
+```
+
+In the following we calculate the statistics for the guilds identified previously.
+
+```{r guild-prod}
+l.memb.red <- tapply(names(memb.red), memb.red, unique)
+l <- sapply(l.memb.red, length)
+i <- names(l.memb.red)[order(l, decreasing=TRUE)]
+l.memb.red <- l.memb.red[i]
+gd.file <- "guild_measures.Rdata"
+if(file.exists(gd.file)) {
+	load(gd.file)
+} else {
+	cl.p <- lapply(l.memb.red, guild.productivity.q, szerzok=full.au)
+	cl.df <- data.frame()
+	for(n in names(cl.p)) {
+		l <- cl.p[[n]]
+		l$guild <- n
+		rownames(l) <- NULL
+		cl.df <- rbind(cl.df, l)
+	}
+	cl.df$sig <- ifelse(cl.df$quantile > 0.975 | cl.df$quantile < 0.025, "*", "")
+	cl.df$g2rnd <- cl.df$value/cl.df$rnd.mean
+	save(cl.df, file=gd.file)
+}
+```
+
+And finally, some analyses.
+
+```{r analyse-guild-prod}
+library(lme4)
+library(emmeans)
+cits <- grepl("citations$", cl.df$measure)
+m.papers <- lmer(log10(g2rnd) ~ measure + (1|guild), cl.df, subset=!cits)
+drop1(m.papers, test="Chisq")
+summary(m.papers)
+(em.p <- emmeans(m.papers, ~measure, type="response"))
+pairs(em.p)
+plot(em.p, horizontal=FALSE, xlab="measures", ylab="ratio of focal to random",
+		 comparison=TRUE)
+```
+
+The result of the mixed effect model clearly shows that in guilds members achieve higher success if one considers success as the sum of the achievements documented individually (here number of papers) than when one measures the composite productivity of the whole guild. Even using the weighted individual measures does not help this situation. This analyses were based on all guilds identified.
+
+```{r analyse-guild-prod-citations}
+m.citations <- lmer(log10(g2rnd+1) ~ measure + (1|guild), cl.df, subset=cits)
+drop1(m.citations, test="Chisq")
+summary(m.citations)
+(em.c <- emmeans(m.citations, ~measure, type="response"))
+pairs(em.c)
+plot(em.c, horizontal=FALSE, xlab="measures", ylab="ratio of focal to random",
+		 comparison=TRUE)
+```
+
+Analysing the citation measures shows the same patterns, guild members have higher success if we consider their productivity independently from each other.
+
+
+We now analyse only those guilds which show higher than random productivity on the basis of the unweighted individual measure.
+
+```{r analyse-guild-prod-1}
+i <- grepl("^m\\.", cl.df$measure) & cl.df$g2rnd > 1
+success.guilds <- as.character(cl.df$guild)[i]
+i <- cl.df$guild %in% success.guilds
+m.1 <- lmer(log10(g2rnd) ~ measure + (1|guild), cl.df, subset=i & !cits)
+drop1(m.1, test="Chisq")
+summary(m.1)
+(em.1 <- emmeans(m.1, ~measure, type="response"))
+pairs(em.1)
+plot(em.1, horizontal=FALSE, xlab="measures", ylab="ratio of focal to random",
+		 comparison=TRUE)
+```
+
+We arrived at the same conclusions; being part of a guild is advantageous if individual measures are considered.
+
+### Analyses of members
 
 ```{r test-guild-member-prod}
 (w.papers <- wilcox.test(n.papers ~ guild.member, full.au))
@@ -445,157 +608,6 @@ p.cl <- predict(l.ee.RF)
 table(p.cl, l.ee.prod$guild.member)
 partialPlot(l.ee.RF, l.ee.prod, "strength")
 ```
-
-## Productivity of guilds
-
-Next, we compare the productivity of guilds to that of 'guilds' compiled from random individuals. We define the following function to do the calculations.
-
-The first measures the productivity of a guild, by counting (i) the number of unique papers produced by the guild as whole, `guild`, (ii) the sum of the number of papers authored by the guild members, `members`, and (iii) the sum of number of papers authored by the guild members, weighted by the equal contribution scheme, `members.weighted`. All three measures are divided by the number of members.
-
-The second function generates `n.rep` guilds randomly compiled from authors not being member of any guilds and then calculates the above measures for each random guild.
-
-The third function performs a randomisation test to see if the given measure for the focal guild differs from that of the random guilds.
-
-The fourth function calculates the quantile of the guild measures relative to the distribution of random guild values.
-
-```{r prod-fun}
-guild.productivity <- function(guild, cikkek=papers.ls, szerzok=ee.prod) {
-	g.cikkek <- cikkek[guild]
-	p <- lapply(g.cikkek, function(sz) {x <- sz$citations; names(x) <- sz$id; x})
-	d <- data.frame(n=unlist(sapply(p, names)), v=unlist(p))
-	ud <- unique(d)
-	r <- numeric()
-	r["g.papers"] <- nrow(ud)
-	r["g.citations"] <- sum(ud$v)
-	r["m.papers"] <- sum(szerzok[guild, "n.papers"])
-	r["m.citations"] <- sum(szerzok[guild, "n.citations"])
-	n <- names(szerzok)
-	n <- n[grep("^w.*papers$", n)]
-	for(nn in n) {
-		r[nn] <- sum(szerzok[guild, nn])
-		nc <- sub("papers$", "citations", nn)
-		r[nc] <- sum(szerzok[guild, nc])
-	}
-	r/length(guild)
-}
-guild.productivity.old <- function(guild, cikkek=papers.ls, szerzok=ee.prod) {
-	p <- unique(unlist(sapply(cikkek[guild], function(y) y$id)))
-	c(guild=length(p)/length(guild), members=mean(szerzok[guild, "n.papers"]),
-		members.weighted=mean(szerzok[guild, "w.ec.papers"]))
-}
-rnd.guild.productivity <- function(guild.size, n.rep=1000, cikkek=papers.ls,
-																		szerzok=ee.prod) {
-	n.c.a <- rownames(szerzok)[szerzok$guild.member == "no"]
-	res <- matrix(0, ncol=14, nrow=n.rep)
-	for(i in 1:n.rep) {
-		s <- sample(n.c.a, guild.size)
-		r <- guild.productivity(s, cikkek=cikkek, szerzok=szerzok)
-		res[i,] <- r
-	}
-	colnames(res) <- names(r)
-	res
-}
-guild.productivity.test <- function(guild, p.value=0.05, cikkek=papers.ls,
-																		szerzok=ee.prod) {
-	res.g <- guild.productivity(guild, cikkek=cikkek, szerzok=szerzok)
-	res.r <- rnd.guild.productivity(length(guild), 999, cikkek, szerzok)
-	res.r <- rbind(res.g, res.r)
-	value <- res.g
-	l.crit <- numeric(ncol(res.r))
-	u.crit <- numeric(ncol(res.r))
-	for(i in 1:ncol(res.r)) {
-		p <- quantile(res.r[,i], c(p.value/2, 1-p.value/2))
-		l.crit[i] <- p[1]
-		u.crit[i] <- p[2]
-	}
-	data.frame(value=res.g, l.crit=l.crit, u.crit=u.crit,
-						 sig.mark=ifelse(l.crit < res.g & res.g < u.crit, "", "*"),
-						 variable=names(res.g))
-}
-guild.productivity.q <- function(guild, p.value=0.05, n.rep=999,
-																 cikkek=papers.ls, szerzok=ee.prod) {
-	res.g <- guild.productivity(guild, cikkek=cikkek, szerzok=szerzok)
-	res.r <- rnd.guild.productivity(length(guild), n.rep, cikkek, szerzok)
-	res.r <- rbind(res.g, res.r)
-	d <- numeric(ncol(res.r))
-	m <- numeric(ncol(res.r))
-	for(i in 1:ncol(res.r)) {
-		d[i] <- sum(res.r[,i] > res.g[i])
-		m[i] <- mean(res.r[,i])
-	}
-	data.frame(variable=names(res.g), value=res.g, rnd.mean=m,
-						 quantile=d/nrow(res.r), guild.size=length(guild))
-}
-```
-
-In the following we calculate the statistics for the guilds identified previously.
-
-```{r guild-prod}
-gd.file <- "guild_measures.Rdata"
-if(file.exists(gd.file)) {
-	load(gd.file)
-} else {
-	l.memb.red <- tapply(names(memb.red), memb.red, unique)
-	l <- sapply(l.memb.red, length)
-	i <- names(l.memb.red)[order(l, decreasing=TRUE)]
-	l.memb.red <- l.memb.red[i]
-	cl.p <- lapply(l.memb.red, guild.productivity.q, szerzok=full.au)
-	cl.df <- data.frame()
-	for(n in names(cl.p)) {
-		l <- cl.p[[n]]
-		l$guild <- n
-		rownames(l) <- NULL
-		cl.df <- rbind(cl.df, l)
-	}
-	cl.df$sig <- ifelse(cl.df$quantile > 0.975 | cl.df$quantile < 0.025, "*", "")
-	cl.df$g2rnd <- cl.df$value/cl.df$rnd.mean
-	save(cl.df, file="guild_measures.Rdata")
-}
-```
-
-And finally, some analyses.
-
-```{r analyse-guild-prod}
-library(lme4)
-library(emmeans)
-cits <- grepl("citations$", cl.df$variable)
-m.papers <- lmer(log10(g2rnd) ~ variable + (1|guild), cl.df, subset=!cits)
-drop1(m.papers, test="Chisq")
-summary(m.papers)
-(em.p <- emmeans(m.papers, ~variable, type="response"))
-pairs(em.p)
-plot(em.p, horizontal=FALSE, xlab="measures", ylab="ratio of focal to random",
-		 comparison=TRUE)
-```
-
-The result of the mixed effect model clearly shows that in guilds members achieve higher success if one considers success as the sum of the achievements documented individually than when one measures the composite productivity of the whole guild. Even using the weighted individual measures does not help this situation. This analyses were based on all guilds identified.
-
-```{r analyse-guild-prod-citations}
-m.citations <- lmer(log10(g2rnd+1) ~ variable + (1|guild), cl.df, subset=cits)
-drop1(m.citations, test="Chisq")
-summary(m.citations)
-(em.c <- emmeans(m.citations, ~variable, type="response"))
-pairs(em.c)
-plot(em.c, horizontal=FALSE, xlab="measures", ylab="ratio of focal to random",
-		 comparison=TRUE)
-```
-
-We now analyse only those guilds which show higher than random productivity on the basis of the unweighted individual measure.
-
-```{r analyse-guild-prod-1}
-i <- cl.df$variable == "members" & cl.df$g2rnd > 1
-success.guilds <- as.character(cl.df$guild)[i]
-i <- cl.df$guild %in% success.guilds
-m.1 <- lmer(log10(g2rnd) ~ variable + (1|guild), cl.df, subset=i)
-drop1(m.1, test="Chisq")
-summary(m.1)
-(em.1 <- emmeans(m.1, ~variable, type="response"))
-pairs(em.1)
-plot(em.1, horizontal=FALSE, xlab="measures", ylab="ratio of focal to random",
-		 comparison=TRUE)
-```
-
-We arrived at the same conclusions; being part of a guild is advantageous if individual measures are considered.
 
 
 # Analyses the field of evolution, ecology and natural history
