@@ -280,6 +280,8 @@ hash2name <- function(hash, au.info=author.info) {
 calc.bib.measures <- function(cikkek, b=0.2) {
 	m <- c(n.papers = nrow(cikkek),
 				 n.citations = sum(cikkek$citations),
+				 h.index = sum(sort(cikkek$citations, decreasing=TRUE) >
+											 1:nrow(cikkek)),
 				 n.coauthors = sum(cikkek$n.authors),
 				 n.D1 = sum(cikkek$ranks == "D1", na.rm=TRUE))
 	m["avg.citations"] <- m["n.citations"] / m["n.papers"]
