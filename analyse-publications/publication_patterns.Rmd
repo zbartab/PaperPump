@@ -133,7 +133,7 @@ au.info <- unlist(au.info)
 au.ids <- unlist(au.ids)
 ```
 
-We create an author database, to contain the authors' MTMT ID, name, affiliation and subject field. For some unknown reason `au.info` contain one less records than `au.ids`, so first we remove this record from `au.ids`.
+We create an author database, to contain the authors' MTMT ID, name, affiliation and subject field. For some unknown reason `au.info` contain two less records than `au.ids` and `papers.ls`, so first we remove these records from them.
 
 ```{r rm-au-id}
 i <- names(au.ids) %in% names(au.info)
@@ -176,14 +176,83 @@ We also update the author database.
 author.info <- author.info[names(papers.ls),]
 ```
 
+We create a paper database too. This contains data about all distinct papers in the records.
+
+```{r create-paper-df}
+papers.Rdata <- "papers-df.Rdata"
+if(file.exists(papers.Rdata)) {
+	load(papers.Rdata)
+} else {
+	papers.df <- papers.ls[[1]]
+	for(p in papers.ls[-1]) {
+		papers.df <- rbind(papers.df, p)
+	}
+	save(papers.df, file=papers.Rdata)
+}
+```
+
+As several fields (e.g. `first.au`) are irrelevant for this data frame we remove them.
+
+```{r rm-field-paper-df}
+papers.df$types <- NULL
+papers.df$r.author <- NULL
+papers.df$first.au <- NULL
+papers.df$last.au <- NULL
+```
+
+Next we remove the duplicates.
+```{r rm-duplicates}
+pids <- tapply(1:nrow(papers.df), papers.df$id, function(y) min(y))
+papers.df <- papers.df[pids,]
+f <- as.character(papers.df$ranks)
+```
 
 # Analyses of the whole dataset
+
+## Some preliminary analyses
+
+The number of authors in the analyses:
+```{r n-authors}
+length(papers.ls)
+```
+
+The number of unique papers on which the analyses base, i.e. the union of the sets of the authors' papers:
+```{r n-papers}
+p <- lapply(papers.ls, function(y) y$id)
+ta <- table(unlist(p))
+length(ta)
+```
+
+The total number of papers authored by the researchers in the database:
+```{r n-total-papers}
+sum(ta)
+```
+
+The number of papers authored by only one researcher:
+```{r n-alone}
+table(ta)['1']
+```
+
+The log-log distribution of the number of papers by authors.
+```{r dist-papers}
+l <- sapply(p, length)
+summary(l)
+bins <- 2^seq(-1,10,1)
+ll <- cut(l, bins)
+t.ll <- table(ll)
+m.bins <- rowMeans(cbind(bins[-length(bins)], bins[-1]))
+plot(m.bins, as.numeric(t.ll), pch=16, bty="l", xlab="number of papers",
+		 ylab="frequency", log="xy")
+```
+
 
 ## Calculate publication measures
 
 We calculate a couple of derived bibliographic measures for each author:
 
+- number of papers
 - total number of independent citations
+- Hirsch index
 - total number of coauthors
 - number of D1 papers
 - average number of citations per papers
@@ -263,11 +332,11 @@ dev.off()
 The next step is to identify the strongly connected components. We define strongly connected components as nodes connected with edges of weight more than 0.4. Hereafter, we refer these strongly connected components as _guilds_.
 
 ```{r hist-weights}
-w.cut <- 0.4
+w.cut <- 0.5
 w <- E(g.pubs)$weight
 hist(w, seq(0,1,0.01), main="", xlab="edge weight")
 abline(v=w.cut, lty=2)
-(p.cut <- sum(w >= 0.4)/length(w))
+(p.cut <- sum(w >= w.cut)/length(w))
 text(0.8, 15000, paste(round(p.cut*100, 2), "% of edges", sep=""))
 ```
 
@@ -943,7 +1012,7 @@ And finally, some analyses.
 ```{r analyse-guild-prod}
 library(lme4)
 library(emmeans)
-m.all <- lmer(log10(g2rnd) ~ variable + (1|guild), cl.df)
+m.all <- lmer(log10(g2rnd) ~ measure + (1|guild), cl.df)
 drop1(m.all, test="Chisq")
 summary(m.all)
 (em <- emmeans(m.all, ~variable, type="response"))
