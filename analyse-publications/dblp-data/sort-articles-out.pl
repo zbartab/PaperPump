@@ -23,8 +23,13 @@ while (my $line = <>) {
 	$print++ if ($store and $line =~ m+<ee>\s*https://doi\.org+);
 	if ($line =~ m+^</article+) {
 		if ($print > 0) {
-			$record =~ s/&(.)[a-z]+;/$1/g;
-			print $record;
+			$record =~ s/&(.)[a-zA-Z]+;/$1/g;
+			my @entities = split "\n", $record;
+			foreach my $rec (@entities) {
+				print $rec, "\n" if ($rec =~ m+</*article+ or $rec =~ /<author>/
+						or $rec =~ /<year>/ or $rec =~ m+<ee>\s*https://doi\.org+);
+			}
+			#print $record;
 		}
 		$store = 0;
 		$print = 0;
