@@ -2,7 +2,7 @@
 # prepare the publication database from dblp xml file
 
 parsed-dblp-list.Rdata: parse-dblp_xml.R dblp-articles.xml
-	#Rscript $< > /dev/null
+	Rscript $< > /dev/null
 
 dblp-articles.xml: dblp-nl.xml sort-articles-out.pl
 	./sort-articles-out.pl $< > $@

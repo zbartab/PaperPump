@@ -1,7 +1,10 @@
 
 library(XML)
 
+
 parsed.object <- "parsed-dblp.Rdata"
-d <- xmlParse("dblp-2019-12-01.xml")
-dblp.ls <- xmlToList(d)
-save(dblp.ls, file=parsed.object)
+parsed.list <- "parsed-dblp-list.Rdata"
+d.parsed <- xmlParse("dblp-articles.xml")
+save(d.parsed, file=parsed.object)
+dblp.ls <- xmlToList(d.parsed)
+save(dblp.ls, file=parsed.list)
