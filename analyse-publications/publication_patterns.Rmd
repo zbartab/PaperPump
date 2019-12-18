@@ -42,7 +42,13 @@ source("process_MTMT-json-functions.R")
 par(xpd=FALSE)
 ```
 
-# Create the publication database
+# The dblp dataset
+
+We downloaded the `dblp` publication database, which covers computational sciences.
+
+# The MTMTM dataset
+
+## Create the publication database
 
 We collected publication data from the Hungarian publication database, [MTMT](http://www.mtmt.hu). As we do not have the MTMT ID of large number of authors, we use a recursive technique to collect the publication data. In this recursive algorithm we download the publication records of some researchers and then use their record to obtain further IDs. We repeat this procedure for the newly downloaded records too, for a couple of times.
 
@@ -80,7 +86,7 @@ seed.ids3 <- get.all.coauthors(pattern=".*2019-11-24\\.json$")
 #download.MTMT.batch(seed.ids3)
 ```
 
-# Load publication data
+## Load publication data
 
 We load the publication records from the local repository. At the same time we also process them and calculate some basic measures for each article. We only consider those articles which has valid ranking (D1, Q1, ...), i.e. those having an impact factor.
 
@@ -205,11 +211,13 @@ Next we remove the duplicates.
 pids <- tapply(1:nrow(papers.df), papers.df$id, function(y) min(y))
 papers.df <- papers.df[pids,]
 f <- as.character(papers.df$ranks)
+f <- factor(f, levels=c("D1", paste("Q", 1:4, sep="")))
+papers.df$ranks <- f
 ```
 
-# Analyses of the whole dataset
+## Analyses of the whole dataset
 
-## Some preliminary analyses
+### Some preliminary analyses
 
 The number of authors in the analyses:
 ```{r n-authors}
@@ -246,7 +254,7 @@ plot(m.bins, as.numeric(t.ll), pch=16, bty="l", xlab="number of papers",
 ```
 
 
-## Calculate publication measures
+### Calculate publication measures
 
 We calculate a couple of derived bibliographic measures for each author:
 
@@ -279,7 +287,7 @@ for(s in papers.ls) {
 rownames(sum.pubs) <- names(papers.ls)
 ```
 
-## Build collaboration network
+### Build collaboration network
 
 We build a collaboration network based on the proportion of shared publications, $p_{A,B}$: the weight of an edge is the number of shared papers divided by the sum of the shared papers and the papers unique to each author connected by the edge.
 
@@ -327,7 +335,7 @@ dev.off()
 ```
 
 
-## Strongly connected components
+### Strongly connected components
 
 The next step is to identify the strongly connected components. We define strongly connected components as nodes connected with edges of weight more than 0.4. Hereafter, we refer these strongly connected components as _guilds_.
 
@@ -381,7 +389,7 @@ dev.off()
 
 The guilds scattered all over the publication graph.
 
-## Productivity of guilds
+### Productivity of guilds
 
 First we identify authors part of a guild in the productivity database.
 
@@ -547,7 +555,7 @@ plot(em.1, horizontal=FALSE, xlab="measures", ylab="ratio of focal to random",
 
 We arrived at the same conclusions; being part of a guild is advantageous if individual measures are considered.
 
-### Analyses of members
+#### Analyses of members
 
 ```{r test-guild-member-prod}
 (w.papers <- wilcox.test(n.papers ~ guild.member, full.au))
@@ -668,7 +676,7 @@ abline(h=0, lty=2)
 
 ```
 
-### Correlates of being a strong component member
+#### Correlates of being a strong component member
 
 ```{r RF-guilds, eval=FALSE}
 library(randomForest)
@@ -690,7 +698,7 @@ partialPlot(l.ee.RF, l.ee.prod, "strength")
 ```
 
 
-# Analyses the field of evolution, ecology and natural history
+## Analyses the field of evolution, ecology and natural history
 
 It seems that the field of evolution and ecology field is very fragmented, its authors belong to several components identified by the fast greedy algorithm. So we have to find a methods to get this field.
 
@@ -716,7 +724,7 @@ plot(ee.g, vertex.label.cex=0.01, edge.width=0.1, layout=coords)
 dev.off()
 ```
 
-## Strongly connected components
+### Strongly connected components
 
 The next step is to identify the strongly connected components. We define strongly connected components as nodes connected with edges of weight more than 0.4. Hereafter, we refer these strongly connected components as _guilds_.
 
@@ -769,7 +777,7 @@ dev.off()
 
 The guilds scattered all over the publication graph.
 
-## Productivity of members of guilds
+### Productivity of members of guilds
 
 First we identify authors part of a guild in the productivity database.
 
@@ -906,7 +914,7 @@ abline(h=0, lty=2)
 
 ```
 
-### Correlates of being a strong component member
+#### Correlates of being a strong component member
 
 ```{r RF-guilds, eval=FALSE}
 library(randomForest)
@@ -925,7 +933,7 @@ table(p.cl, l.ee.prod$guild.member)
 partialPlot(l.ee.RF, l.ee.prod, "strength")
 ```
 
-## Productivity of guilds
+### Productivity of guilds
 
 Next, we compare the productivity of guilds to that of 'guilds' compiled from random individuals. We define the following function to do the calculations.
 
