@@ -5,6 +5,15 @@ library("rjson")
 library(Matrix)
 #library("jsonlite")
 
+## plot distribution data on log-log scale, using logaritmic bins
+plot.loglog <- function(x, pbins=seq(-1,10,1), ...) {
+	bins <- 2^pbins
+	ll <- cut(x, bins)
+	t.ll <- table(ll)
+	m.bins <- rowMeans(cbind(bins[-length(bins)], bins[-1]))
+	plot(m.bins, as.numeric(t.ll), log="xy", ...)
+}
+
 read.MTMT <- function(file) {
 	mtmt.json <- try(fromJSON(file=file), silent=TRUE)
 	if ("try-error" %in% class(mtmt.json)) {
