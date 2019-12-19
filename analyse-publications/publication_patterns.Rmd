@@ -26,6 +26,7 @@ source("~/lib/markdown/produce_output.R")
 # TODOs
 
 - calculate statistics for cut off values other than 0.4
+	- plot the number of guilds, percentage of authors in guilds and percentage of edged affected as a function of the cut off value
 
 # Set up
 
@@ -44,7 +45,120 @@ par(xpd=FALSE)
 
 # The dblp dataset
 
-We downloaded the `dblp` publication database, which covers computational sciences.
+We downloaded the [dblp publication database](https://dblp.org), which covers computational sciences. Then we extracted all article records from the database `xml` which have a `doi.org` id. During the extraction we dropped all but the `author`, `year` and `doi` fields. Next, we imported the resulted `xml` file into `R` and created a list from it. The process is documented in `dblp-data/Makefile`.
+
+## Load the dblp dataset
+
+Now we load the dataset.
+
+```{r load-dblp}
+load("dblp-data/parsed-dblp-list.Rdata")
+length(dblp.ls)
+head(dblp.ls, 4)
+```
+
+## Some description about the dataset
+
+The dblp dataset contains more than one and half million records. The distribution of articles over the years is as follows.
+
+```{r dblp-years}
+years <- sapply(dblp.ls, function(y) y$year)
+plot(table(years), ylab="number of articles")
+```
+
+The distribution of number of authors by articles.
+
+```{r dblp-authors}
+n.authors <- sapply(dblp.ls, function(y) length(y$authors))
+plot(table(n.authors))
+plot.loglog(n.authors, pch=16, bty="l", xlab="number of authors per paper",
+						ylab="frequency")
+```
+
+The number of distinct authors in the dataset:
+
+```{r dblp-distinct-authors}
+d.authors <- unlist(lapply(dblp.ls, function(y) y$authors))
+length(d.authors)
+length(unique(d.authors))
+t.authors <- table(d.authors)
+t.authors <- sort(t.authors)
+plot.loglog(as.numeric(t.authors), pch=16, bty="l",
+		 xlab="number of papers per author", ylab="frequency")
+```
+
+## Reducing the dblp dataset
+
+We have a huge number of articles so for the first time we concentrate only articles between 2001 and 2010.
+
+```{r select-2001-2010}
+years <- as.numeric(years)
+i <- years >= 2001 & years <= 2010
+sum(i)
+dblp.red <- dblp.ls[i]
+rm("dblp.ls")
+gc()
+```
+
+This is still a huge number, but we make a try.
+
+```{r dblp-authors}
+n.authors <- sapply(dblp.red, function(y) length(y$authors))
+plot(table(n.authors))
+plot.loglog(n.authors, pch=16, bty="l", xlab="number of authors per paper",
+						ylab="frequency")
+```
+
+
+```{r dblp-distinct-authors-red}
+a.authors <- unlist(lapply(dblp.red, function(y) y$authors))
+length(a.authors)
+d.authors <- unique(a.authors)
+length(d.authors)
+t.authors <- table(a.authors)
+t.authors <- sort(t.authors)
+plot.loglog(as.numeric(t.authors), pch=16, bty="l",
+		 xlab="number of papers per author", ylab="frequency")
+```
+
+## Process the article data
+
+We are create a sparse matrix and fill it with the coauthorship data.
+
+```{r dblp-create-Matrix}
+p.ls <- dblp.red[1:100]
+d.authors <- unique(unlist(lapply(p.ls, function(y) y$authors)))
+d.mat <- Matrix(0.0, ncol=length(d.authors), nrow=length(d.authors))
+colnames(d.mat) <- d.authors
+rownames(d.mat) <- d.authors
+for(p in p.ls) {
+	n.a <- length(p$authors)
+	for(a in p$authors) {
+		d.mat[a, a] <- d.mat[a, a] + 1
+	}
+	if(n.a > 1) {
+		for(i in 1:(n.a-1)) {
+			a1 <- p$authors[i]
+			for(j in (i+1):n.a) {
+				a2 <- p$authors[j]
+				d.mat[a1, a2] <- d.mat[a1, a2] + 1
+			}
+		}
+	}
+}
+for(i  in 1:(ncol(d.mat)-1)) {
+	for(j in (i+1):ncol(d.mat)) {
+		d.sec <- d.mat[i,j] + d.mat[j,i]
+		if(d.sec > 0) {
+			d.uni <- d.mat[i, i] + d.mat[j, j] - d.sec
+			d.mat[i, j] <- d.sec/d.uni
+			d.mat[j, i] <- 0
+		}
+	}
+}
+g.dblp <- graph.adjacency(d.mat, mode="upper", weighted=TRUE, diag=FALSE)
+```
+
 
 # The MTMTM dataset
 
