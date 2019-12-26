@@ -5,6 +5,18 @@ library("rjson")
 library(Matrix)
 #library("jsonlite")
 
+## compute cartels for a given cut off
+cartels.comp <- function(g, w.cut=0.4) {
+	w <- E(g)$weight
+	g.red <- subgraph.edges(g, E(g)[w >= w.cut])
+	c.red <- cluster_fast_greedy(g.red)
+	m.red <- membership(c.red)
+	t.red <- table(m.red)
+	c(n.authors=length(m.red), n.cartels=length(t.red), max.cartel=max(t.red),
+		no.cartels2=sum(t.red == 2), p.authors=length(m.red)/vcount(g),
+		p.edges=sum(w >=w.cut)/length(w))
+}
+
 ## plot distribution data on log-log scale, using logaritmic bins
 plot.loglog <- function(x, pbins=seq(-1,10,1), ...) {
 	bins <- 2^pbins
@@ -14,6 +26,30 @@ plot.loglog <- function(x, pbins=seq(-1,10,1), ...) {
 	plot(m.bins, as.numeric(t.ll), log="xy", ...)
 }
 
+download.MTMT.authors.batch <- function(author.ids, data.dir="MTMT-downloads") {
+	json.files <- list.files(path=data.dir, pattern=".*-author\\.json$")
+	#json.files <- jl[1:20]
+	#ids.done <- sub(".*/(.*)_.*", "\\1", json.files)
+	ids.done <- sub("(.*)_.*", "\\1", json.files)
+	author.ids <- author.ids[!(author.ids %in% ids.done)]
+	for(i in author.ids) {
+		ofile <- paste(data.dir, "/", i, "_", Sys.Date(), "-author.json", sep="")
+		download.MTMT.author.records(i, ofile)
+	}
+}
+
+download.MTMT.batch <- function(seed.ids, data.dir="MTMT-downloads") {
+	json.files <- list.files(path=data.dir, pattern=".*\\.json$")
+	#json.files <- jl[1:20]
+	#ids.done <- sub(".*/(.*)_.*", "\\1", json.files)
+	ids.done <- sub("(.*)_.*", "\\1", json.files)
+	seed.ids <- seed.ids[!(seed.ids %in% ids.done)]
+	for(i in seed.ids) {
+		ofile <- paste(data.dir, "/", i, "_", Sys.Date(), ".json", sep="")
+		download.MTMTrecords(i, ofile)
+	}
+}
+
 read.MTMT <- function(file) {
 	mtmt.json <- try(fromJSON(file=file), silent=TRUE)
 	if ("try-error" %in% class(mtmt.json)) {
@@ -21,6 +57,13 @@ read.MTMT <- function(file) {
 	} else {
 		return(mtmt.json$content)
 	}
+}
+
+download.MTMT.author.records <- function(mtmt.id, outfile) {
+	mtmt.url <- "https://m2.mtmt.hu/api/author/<-mtmtid->?&format=json"
+	mtmt.url <- sub("<-mtmtid->", mtmt.id, mtmt.url)
+	#outfile <- paste(outfileID, "json", sep=".")
+	res <- try(download.file(mtmt.url, outfile, method="libcurl"), silent=TRUE)
 }
 
 download.MTMTrecords <- function(mtmt.id, outfile) {
@@ -37,13 +80,6 @@ read.MTMT.jsonlite <- function(file) {
 	} else {
 		return(mtmt.json$content)
 	}
-}
-
-wrong.read.MTMT <- function(file) {
-	json.txt <- scan(file, what=character())
-	json.txt <- paste(json.txt, collapse=" ")
-	mtmt.json <- fromJSON(json.txt, unexpected.escape="keep")
-	mtmt.json$content
 }
 
 p.rank <- function(cikk) {
@@ -311,18 +347,6 @@ calc.bib.measures <- function(cikkek, b=0.2) {
 	m["w.bf.D1"] <- sum(w.bf(cikkek, b)*(cikkek$ranks == "D1"))
 	m["w.bfl.D1"] <- sum(w.bfl(cikkek, b)*(cikkek$ranks == "D1"))
 	m
-}
-
-download.MTMT.batch <- function(seed.ids, data.dir="MTMT-downloads") {
-	json.files <- list.files(path=data.dir, pattern=".*\\.json$")
-	#json.files <- jl[1:20]
-	#ids.done <- sub(".*/(.*)_.*", "\\1", json.files)
-	ids.done <- sub("(.*)_.*", "\\1", json.files)
-	seed.ids <- seed.ids[!(seed.ids %in% ids.done)]
-	for(i in seed.ids) {
-		ofile <- paste(data.dir, "/", i, "_", Sys.Date(), ".json", sep="")
-		download.MTMTrecords(i, ofile)
-	}
 }
 
 records.to.download <- function(seed.ids, data.dir="MTMT-downloads") {
