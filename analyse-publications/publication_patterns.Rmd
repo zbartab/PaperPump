@@ -27,6 +27,7 @@ source("~/lib/markdown/produce_output.R")
 
 - calculate statistics for cut off values other than 0.4
 	- plot the number of guilds, percentage of authors in guilds and percentage of edged affected as a function of the cut off value
+- use the MTMT dataset to calculate cartels for different scientific fields
 
 # Set up
 
@@ -37,6 +38,8 @@ Here we load some packages and custom codes.
 ## load the libraries
 library(openxlsx)
 library(igraph)
+library(lme4)
+library(emmeans)
 ## load local code
 source("process_MTMT-json-functions.R")
 ## set options
@@ -286,7 +289,8 @@ Because we only consider papers with ranks, several author remained without publ
 l <- sapply(papers.ls, nrow)
 n.p <- as.numeric(names(table(l)))
 f.p <- as.numeric(table(l))
-plot((n.p+1), f.p, log="xy")
+plot.loglog(l, bty="l", pch=16, xlab="number of papers per authors",
+						ylab="frequency")
 papers.ls <- papers.ls[l != 0]
 ```
 
@@ -329,6 +333,7 @@ f <- factor(f, levels=c("D1", paste("Q", 1:4, sep="")))
 papers.df$ranks <- f
 ```
 
+
 ## Analyses of the whole dataset
 
 ### Some preliminary analyses
@@ -350,6 +355,11 @@ The total number of papers authored by the researchers in the database:
 sum(ta)
 ```
 
+A paper, in average, occurs in the dataset several times:
+```{r mtmt-mult-occ}
+sum(ta)/length(ta)
+```
+
 The number of papers authored by only one researcher:
 ```{r n-alone}
 table(ta)['1']
@@ -363,8 +373,16 @@ bins <- 2^seq(-1,10,1)
 ll <- cut(l, bins)
 t.ll <- table(ll)
 m.bins <- rowMeans(cbind(bins[-length(bins)], bins[-1]))
-plot(m.bins, as.numeric(t.ll), pch=16, bty="l", xlab="number of papers",
-		 ylab="frequency", log="xy")
+plot.loglog(l, pch=16, bty="l", xlab="number of papers per author",
+						ylab="frequency")
+```
+
+The number of authors on a paper.
+
+```{r mtmt-no-authors}
+summary(papers.df$n.authors)
+plot.loglog(papers.df$n.authors, pbins=seq(-1, 13, 1), pch=16, bty="l",
+						xlab="number of authors per paper", ylab="frequency")
 ```
 
 
@@ -503,6 +521,34 @@ dev.off()
 
 The guilds scattered all over the publication graph.
 
+Next, we investigate how attributes of cartels changes with the cut off values.
+
+```{r mtmt-cartels-vs-cutoff}
+cartels.cutoff <- data.frame()
+cutoffs <- seq(0.3, 0.95, 0.01)
+for(w.cut in cutoffs) {
+	r <- cartels.comp(g.pubs, w.cut)
+	cartels.cutoff <- rbind(cartels.cutoff, r)
+}
+names(cartels.cutoff) <- names(r)
+cartels.cutoff$cutoff <- cutoffs
+```
+
+Some plots:
+
+```{r mtmt-plot-cutoffs}
+layout(1:2)
+plot(n.authors ~ cutoff, cartels.cutoff, type="o", log="xy")
+plot(max.cartel ~ cutoff, cartels.cutoff, type="o", log="xy")
+layout(1)
+
+plot(p.authors ~ cutoff, cartels.cutoff, type="o", log="xy")
+plot(n.authors ~ n.cartels, cartels.cutoff, log="xy")
+plot(I(n.authors/n.cartels) ~ cutoff, cartels.cutoff)
+plot(p.edges ~ cutoff, cartels.cutoff)
+plot(I(n.authors/n.cartels) ~ p.edges, cartels.cutoff)
+```
+
 ### Productivity of guilds
 
 First we identify authors part of a guild in the productivity database.
@@ -536,26 +582,31 @@ The fourth function calculates the quantile of the guild measures relative to th
 guild.productivity <- function(guild, cikkek=papers.ls, szerzok=ee.prod) {
 	g.cikkek <- cikkek[guild]
 	p <- lapply(g.cikkek, function(sz) {x <- sz$citations; names(x) <- sz$id; x})
-	d <- data.frame(n=unlist(sapply(p, names)), v=unlist(p))
+	pp <- lapply(g.cikkek, function(sz) {x <- sz$ranks; names(x) <- sz$id; x})
+	d <- data.frame(n=unlist(sapply(p, names)), v=unlist(p), vv=unlist(pp))
 	ud <- unique(d)
 	r <- numeric()
 	r["g.papers"] <- nrow(ud)
 	r["g.citations"] <- sum(ud$v)
+	r["g.D1"] <- sum(ud$vv == "D1")
 	r["m.papers"] <- sum(szerzok[guild, "n.papers"])
 	r["m.citations"] <- sum(szerzok[guild, "n.citations"])
+	r["m.D1"] <- sum(szerzok[guild, "n.D1"])
 	n <- names(szerzok)
 	n <- n[grep("^w.*papers$", n)]
 	for(nn in n) {
 		r[nn] <- sum(szerzok[guild, nn])
 		nc <- sub("papers$", "citations", nn)
 		r[nc] <- sum(szerzok[guild, nc])
+		nd <- sub("papers$", "D1", nn)
+		r[nd] <- sum(szerzok[guild, nd])
 	}
 	r/length(guild)
 }
 rnd.guild.productivity <- function(guild.size, n.rep=1000, cikkek=papers.ls,
 																		szerzok=ee.prod) {
 	n.c.a <- rownames(szerzok)[szerzok$guild.member == "no"]
-	res <- matrix(0, ncol=14, nrow=n.rep)
+	res <- matrix(0, ncol=21, nrow=n.rep)
 	for(i in 1:n.rep) {
 		s <- sample(n.c.a, guild.size)
 		r <- guild.productivity(s, cikkek=cikkek, szerzok=szerzok)
@@ -625,10 +676,8 @@ if(file.exists(gd.file)) {
 And finally, some analyses.
 
 ```{r analyse-guild-prod}
-library(lme4)
-library(emmeans)
-cits <- grepl("citations$", cl.df$measure)
-m.papers <- lmer(log10(g2rnd) ~ measure + (1|guild), cl.df, subset=!cits)
+cits <- grepl("papers$", cl.df$measure)
+m.papers <- lmer(log10(g2rnd) ~ measure + (1|guild), cl.df, subset=cits)
 drop1(m.papers, test="Chisq")
 summary(m.papers)
 (em.p <- emmeans(m.papers, ~measure, type="response"))
@@ -640,6 +689,7 @@ plot(em.p, horizontal=FALSE, xlab="measures", ylab="ratio of focal to random",
 The result of the mixed effect model clearly shows that in guilds members achieve higher success if one considers success as the sum of the achievements documented individually (here number of papers) than when one measures the composite productivity of the whole guild. Even using the weighted individual measures does not help this situation. This analyses were based on all guilds identified.
 
 ```{r analyse-guild-prod-citations}
+cits <- grepl("citations$", cl.df$measure)
 m.citations <- lmer(log10(g2rnd+1) ~ measure + (1|guild), cl.df, subset=cits)
 drop1(m.citations, test="Chisq")
 summary(m.citations)
@@ -650,6 +700,17 @@ plot(em.c, horizontal=FALSE, xlab="measures", ylab="ratio of focal to random",
 ```
 
 Analysing the citation measures shows the same patterns, guild members have higher success if we consider their productivity independently from each other.
+
+```{r analyse-guild-prod-D1}
+cits <- grepl("D1$", cl.df$measure)
+m.D1 <- lmer(log10(g2rnd+1) ~ measure + (1|guild), cl.df, subset=cits)
+drop1(m.D1, test="Chisq")
+summary(m.D1)
+(em.d <- emmeans(m.D1, ~measure, type="response"))
+pairs(em.d)
+plot(em.d, horizontal=FALSE, xlab="measures", ylab="ratio of focal to random",
+		 comparison=TRUE)
+```
 
 
 We now analyse only those guilds which show higher than random productivity on the basis of the unweighted individual measure.
@@ -669,7 +730,39 @@ plot(em.1, horizontal=FALSE, xlab="measures", ylab="ratio of focal to random",
 
 We arrived at the same conclusions; being part of a guild is advantageous if individual measures are considered.
 
-#### Analyses of members
+### Diversity in cartels
+
+A major difference between manufactures (groups where individuals with different skills work together) and cartels (group of individuals collude to increase publication counts) is the diversity of within group expertise. In manufactures one would expect a high diversity while in cartels individuals do the same. A further distinction can be the diversity of affiliations. In manufactures individuals can come from many different places, while in cartels they likely come from the same place. To make a distinction between these two work models we first download data about the authors and then analyse their expertise and their affiliation.
+
+#### Download individuals' data
+
+```{r mtmt-download-authors, eval=FALSE}
+download.MTMT.authors.batch(as.character(author.info$mtmt.id))
+```
+
+Get the speciality.
+
+```{r mtmt-get-spec-1}
+json.list <- list.files(path="MTMT-downloads/", pattern=".*-author.json$",
+												full.names=TRUE)
+author.ls <- list()
+for(f in json.list) {
+	mtmt.id <- sub(".*\\/([0-9]+)_.*", "\\1", f)
+	author.ls[[mtmt.id]] <- read.MTMT(f)
+}
+sci.fields <- sapply(author.ls,
+										 function(a) if(is.null(a$auxName)) {NA} else {a$auxName})
+sci.fields <- gsub("\\<a ", "", sci.fields)
+sci.fields <- gsub("\\<és\\>", "", sci.fields)
+sci.fields <- tolower(gsub("[-,)(]", "", sci.fields))
+sci.fields <- gsub(" +", " ", sci.fields)
+sci.ta <- sort(table(sci.fields))
+names(sci.fields) <- sapply(as.numeric(names(sci.fields)), hash.id)
+author.info$scientific.field <- NA
+author.info[names(sci.fields), "scientific.field"] <- sci.fields
+```
+
+### Analyses of members
 
 ```{r test-guild-member-prod}
 (w.papers <- wilcox.test(n.papers ~ guild.member, full.au))
