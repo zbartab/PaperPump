@@ -19,7 +19,8 @@ authorship relation. To represent a !pubnet we use SparseMatrices.
 ```julia
 using StatsBase, Statistics, PyPlot, Compose, Cairo
 using LightGraphs, MetaGraphs, GraphPlot
-include("CollaborationNetworks.jl")
+include("RandomPublicationNetworks.jl")
+include("../CollaborationNetworks.jl")
 ```
 
 Next, we set the basic parameters.
