@@ -472,7 +472,7 @@ dev.off()
 The next step is to identify the strongly connected components. We define strongly connected components as nodes connected with edges of weight more than 0.4. Hereafter, we refer these strongly connected components as _guilds_.
 
 ```{r hist-weights}
-w.cut <- 0.5
+w.cut <- 0.4
 w <- E(g.pubs)$weight
 hist(w, seq(0,1,0.01), main="", xlab="edge weight")
 abline(v=w.cut, lty=2)
