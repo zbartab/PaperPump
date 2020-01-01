@@ -1,0 +1,8 @@
+*.sw[op]
+*~
+*.png
+*.pdf
+*.docx
+*.xlsx
+*.Rdata
+*.html
