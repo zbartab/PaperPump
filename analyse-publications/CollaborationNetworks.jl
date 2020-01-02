@@ -5,8 +5,11 @@
 ## set up packages
 
 using SparseArrays
-using JSON
+using JSON, CSV, DataFrames
+using Random, StatsBase, Statistics
 using Colors
+using PyPlot, Cairo, Compose
+using LightGraphs, MetaGraphs, GraphPlot
 
 ## The functions
 
@@ -152,6 +155,15 @@ function Weights(colnet)
 end
 
 """
+    labels(g)
+
+Return the vertex labels in graph `g`
+"""
+function labels(g)
+	map((v) -> get_prop(g, v, :id), vertices(g))
+end
+
+"""
     subnet(colnet, cutoff)
 
 Return a subnet of `colnet`.
@@ -237,7 +249,7 @@ end
 Produce a pdf plot of graph `g`
 """
 function graphplot(g; cutoff=0.4, backend=PDF, filename="proba",
-									 layout=random_layout)
+									 nodelabel=true, layout=random_layout)
 	backend == PDF && (filename *= ".pdf")
 	backend == PNG && (filename *= ".png")
 	W = Weights(g)
@@ -247,6 +259,11 @@ function graphplot(g; cutoff=0.4, backend=PDF, filename="proba",
 	edgecolor = [colorant"lightgrey" for i in 1:length(W)]
 	edgecolor[tocutoff] .= colorant"black"
 	nodesize = degree(g)
+	if nodelabel
+		nodelabs = labels(g)
+	else
+		nodelabs = ""
+	end
 	#nodefillc = distinguishable_colors(nv(g), colorant"blue")
 	#nodefillc = range(colorant"lightsalmon", stop=colorant"darksalmon",
 										#length=nv(g))
@@ -259,6 +276,7 @@ function graphplot(g; cutoff=0.4, backend=PDF, filename="proba",
 	Compose.draw(backend(filename, 50cm, 50cm),
 							 gplot(g, layout=layout, edgelinewidth=edgewidth,
 										 EDGELINEWIDTH=maxlinewidth, nodesize=nodesize,
+										 nodelabel=nodelabs,
 										 nodefillc=nodefillc, edgestrokec=edgecolor))
 end
 
@@ -290,4 +308,38 @@ function read_spmatrix(file)
 	mat[1,1] == -9999.0 && (mat[1,1] = 0.0)
 	mat[s1,s2] == -9999.0 && (mat[s1,s2] = 0.0)
 	return dropzeros!(mat)
+end
+
+"""
+    rewire(mat, niter)
+
+Randomly rewire the bipartite graph represented by the `mat` adjacency
+matrix, `niter` times.
+"""
+function rewire!(mat::SparseMatrixCSC{Float64, Int64}, niter=100)
+	countwiring = 0
+	while countwiring < niter
+		rowind, colind, vals = findnz(mat)
+		n_entries = length(rowind)
+		ri = randperm(n_entries)
+		wi = 2
+		#println("outer: ", countwiring)
+		while wi < n_entries
+			i1 = rowind[ri[wi-1]]
+			i2 = rowind[ri[wi]]
+			j1 = colind[ri[wi-1]]
+			j2 = colind[ri[wi]]
+			if mat[i1, j2] == 0 && mat[i2, j1] == 0
+				mat[i1, j1] = 0
+				mat[i2, j2] = 0
+				mat[i1, j2] = 1
+				mat[i2, j1] = 1
+				countwiring += 1
+				#println("inner: ", countwiring)
+			end
+			wi += 2
+		end
+		dropzeros!(mat)
+	end
+	return countwiring
 end
