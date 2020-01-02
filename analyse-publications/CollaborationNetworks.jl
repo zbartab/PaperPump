@@ -5,6 +5,8 @@
 ## set up packages
 
 using SparseArrays
+using JSON
+using Colors
 
 ## The functions
 
@@ -239,18 +241,24 @@ function graphplot(g; cutoff=0.4, backend=PDF, filename="proba",
 	backend == PDF && (filename *= ".pdf")
 	backend == PNG && (filename *= ".png")
 	W = Weights(g)
+	tocutoff = W .> cutoff
 	edgewidth = ones(length(W))
-	edgewidth[W .> cutoff] .= 5
+	edgewidth[tocutoff] .= 5
 	edgecolor = [colorant"lightgrey" for i in 1:length(W)]
-	edgecolor[W .> cutoff] .= colorant"darkgrey"
+	edgecolor[tocutoff] .= colorant"black"
 	nodesize = degree(g)
 	#nodefillc = distinguishable_colors(nv(g), colorant"blue")
-	nodefillc = range(colorant"lightsalmon", stop=colorant"darksalmon",
-										length=nv(g))
-	#nodefillc = colorant"turquoise"
+	#nodefillc = range(colorant"lightsalmon", stop=colorant"darksalmon",
+										#length=nv(g))
+	nodefillc = colorant"turquoise"
+	if sum(tocutoff) == 0
+		maxlinewidth = 0.2
+	else
+		maxlinewidth = 2
+	end
 	Compose.draw(backend(filename, 50cm, 50cm),
 							 gplot(g, layout=layout, edgelinewidth=edgewidth,
-										 EDGELINEWIDTH=2, nodesize=nodesize,
+										 EDGELINEWIDTH=maxlinewidth, nodesize=nodesize,
 										 nodefillc=nodefillc, edgestrokec=edgecolor))
 end
 
