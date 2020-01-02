@@ -262,20 +262,32 @@ function graphplot(g; cutoff=0.4, backend=PDF, filename="proba",
 										 nodefillc=nodefillc, edgestrokec=edgecolor))
 end
 
-## Handle MTMT records
+"""
+    write_spmatrix(mat)
+
+Write a sparse matrix `mat` to a csv file.
+"""
+function write_spmatrix(file, mat::SparseMatrixCSC{Float64,Int64})
+	matcp = copy(mat)
+	s1, s2 = size(matcp)
+	matcp[1,1] <= 0.0 && (matcp[1,1] = -9999.0)
+	matcp[s1,s2] <= 0.0 && (matcp[s1,s2] = -9999.0)
+	rowis, colis, vals = findnz(matcp)
+	df = DataFrame(Dict(:rowis => rowis, :colis => colis, :vals => vals))
+	CSV.write(file, df)
+	return nothing
+end
 
 """
-    read_MTMT(file)
+    read_spmatrix(file)
 
-Read the MTMT records of an author from JSON file downloaded from
-mtmt.hu.
+Read a sparse matrix from csv file `file`.
 """
-function read_MTMT(file)
-	local r
-	try
-		r = JSON.parsefile(file)
-	catch
-		return nothing
-	end
-	return r["content"]
+function read_spmatrix(file)
+	df = CSV.read(file)
+	mat = sparse(df[:,:rowis], df[:,:colis], df[:,:vals])
+	s1, s2 = size(mat)
+	mat[1,1] == -9999.0 && (mat[1,1] = 0.0)
+	mat[s1,s2] == -9999.0 && (mat[s1,s2] = 0.0)
+	return dropzeros!(mat)
 end
