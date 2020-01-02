@@ -156,11 +156,12 @@ function addcartel!(pubmat, cartel, collprob=1.0)
 	cartpub = pubmat[:, cartel]
 	i = sum(cartpub, dims=2) .> 0
 	i = reshape(i, size(pubmat, 1))
-	for j in eachindex(pubmat[i, cartel])
-		if pubmat[j] <= 0 && rand() < collprob
-			pubmat[j] = 1
-		end
-	end
+	#for j in eachindex(pubmat[i, cartel])
+		#if pubmat[j] <= 0 && rand() < collprob
+			#pubmat[j] = 1
+		#end
+	#end
+	pubmat[i, cartel] .= 1
 	return nothing
 end
 
@@ -170,10 +171,10 @@ end
 Visualise the collaboration graph created from the publication matrix
 `pubmat`.
 """
-function showpubmat(pubmat)
+function showpubmat(pubmat, cutoff=0.4)
 	coma = collaborationmatrix(pubmat)
 	coga = collaborationgraph(coma)
-	d = describecartels(coga)
+	d = describecartels(coga, cutoff)
 	for k in keys(d)
 		println(k, ": ", d[k])
 	end
