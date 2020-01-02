@@ -47,8 +47,11 @@ follows [Barabási's Network Science book (BOX
 - `k_sat`: the saturation point
 	- the power law distribution is flattened for k < k_sat
 - `k_cut`: the distribution drops when k > k_cut
+
+Default values are those derived for the MTMT dataset.
 """
-function saturatedexpectedpapers(A, p, gamma, k_sat, k_cut, alpha=1.0)
+function saturatedexpectedpapers(A, p=100000, gamma=2.5, k_sat=10,
+																 k_cut=450, alpha=1.0)
 	k = float.(collect(1:p))
 	px = (alpha .* (k .+ k_sat) .^ -gamma) .* exp.(k ./(-k_cut))
 	#px = @. (alpha * (k + k_sat) ^ -gamma) * exp(k /(-k_cut))
@@ -149,16 +152,31 @@ end
 Create publication cartel in the publication matrix. A cartel is a set
 of authors who take part each others publications.
 """
-function addcartel!(pubmat, cartel)
+function addcartel!(pubmat, cartel, collprob=1.0)
 	cartpub = pubmat[:, cartel]
 	i = sum(cartpub, dims=2) .> 0
 	i = reshape(i, size(pubmat, 1))
-	println(typeof(i))
-	println(size(i))
-	println(length(i))
-	ii = collect(1:size(pubmat, 1))
-	print(ii)
-	ii = ii[i]
-	pubmat[ii, cartel] .= 1
+	for j in eachindex(pubmat[i, cartel])
+		if pubmat[j] <= 0 && rand() < collprob
+			pubmat[j] = 1
+		end
+	end
+	return nothing
 end
 
+"""
+    showpubmat)pubmat)
+
+Visualise the collaboration graph created from the publication matrix
+`pubmat`.
+"""
+function showpubmat(pubmat)
+	coma = collaborationmatrix(pubmat)
+	coga = collaborationgraph(coma)
+	d = describecartels(coga)
+	for k in keys(d)
+		println(k, ": ", d[k])
+	end
+	graphplot(coga)
+	return nothing
+end
