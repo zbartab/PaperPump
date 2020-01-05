@@ -6,3 +6,5 @@
 *.xlsx
 *.Rdata
 *.html
+*.gz
+*.csv
