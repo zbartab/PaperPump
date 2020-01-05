@@ -5,7 +5,7 @@
 ## set up packages
 
 using SparseArrays
-using CSV, DataFrames
+using Random, CSV, DataFrames
 using LightGraphs, MetaGraphs
 
 ## The functions
