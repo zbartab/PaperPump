@@ -14,6 +14,27 @@ using LightGraphs, MetaGraphs, GraphPlot
 ## The functions
 
 """
+    plothistogram(histdict)
+
+Draw a bar plot on the result of `histogram`.
+"""
+function plothistogram(histdict::Dict{Any,Any}; xlab="", ylab="",
+											 plottitle="")
+	x = []
+	y = []
+	for k in keys(histdict)
+		push!(x, k)
+		push!(y, histdict[k])
+	end
+	bar(x, y)
+	title(plottitle)
+	xlabel(xlab)
+	ylabel(ylab)
+	PyPlot.grid(true)
+	tight_layout()
+end
+
+"""
     histogram(s)
 
 Count how many times different items occur in `s`.
@@ -213,15 +234,15 @@ function describecartels(colnet, cutoff=0.4)
 end
 
 """
-    plotloglog(x)
+    plotloglog(x, plottitle)
 
 Plot the distribution of `x` on a log-log scale.
 """
-function plotloglog(x)
+function plotloglog(x, plottitle="")
 	d = loglogbins(x)
 	plot(log10.(d["kn"]), log10.(d["pk"]))
 	scatter(log10.(d["kn"]), log10.(d["pk"]))
-	title("Number of papers per author")
+	title(plottitle)
 	xlabel(L"$\log_{10}(k)$")
 	ylabel(L"$\log_{10}(p_k)$")
 	PyPlot.grid(true)
@@ -311,10 +332,10 @@ function read_spmatrix(file)
 end
 
 """
-    rewire(mat, niter)
+    rewire!(mat, niter)
 
-Randomly rewire the bipartite graph represented by the `mat` adjacency
-matrix, `niter` times.
+Randomly rewire in-place the bipartite graph represented by the `mat`
+adjacency matrix, `niter` times.
 """
 function rewire!(mat::SparseMatrixCSC{Float64, Int64}, niter=100)
 	countwiring = 0
@@ -344,59 +365,14 @@ function rewire!(mat::SparseMatrixCSC{Float64, Int64}, niter=100)
 	return countwiring
 end
 
-
 """
-    collectpapers(aurecs)
+    rewire(mat, niter)
 
-Return a dict of unique paper IDs.
+Randomly rewire a copy of `mat` `niter` times.
 """
-function collectpapers(aurecs::Dict{UInt64, Array{UInt64,1}})
-	papers = Dict{UInt64,Int}()
-	for ps in values(aurecs)
-		length(ps) == 0 && continue
-		for p in ps
-			papers[p] = 1
-		end
-	end
-	i = 1
-	for k in keys(papers)
-		papers[k] = i
-		i += 1
-	end
-	return papers
+function rewire(mat::SparseMatrixCSC{Float64, Int64}, niter=100)
+	matcp = copy(mat)
+	rewire!(matcp, niter)
+	return matcp
 end
 
-"""
-    collectauthors(aurecs)
-
-Return a dict of unique authors IDs.
-"""
-function collectauthors(aurecs::Dict{UInt64, Array{UInt64,1}})
-	authors = Dict{UInt64,Int}()
-	i = 1
-	for k in keys(aurecs)
-		authors[k] = i
-		i += 1
-	end
-	return authors
-end
-
-"""
-    recs2pubmat(aurecs)
-
-Create a publication matrix from the author records. It returns (as a
-tuple) the publication matrix and a hash table to allow the
-identification of authors in the publication matrix.
-"""
-function recs2pubmat(aurecs::Dict{UInt64, Array{UInt64,1}})
-	ps = collectpapers(aurecs)
-	as = collectauthors(aurecs)
-	pubmat = spzeros(length(ps), length(as))
-	for k in keys(aurecs)
-		ai = as[k]
-		for p in aurecs[k]
-			pubmat[ps[p], ai] = 1
-		end
-	end
-	return pubmat, as
-end
