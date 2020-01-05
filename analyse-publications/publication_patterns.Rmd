@@ -149,6 +149,7 @@ for(p in p.ls) {
 		}
 	}
 }
+save(d.mat, file="dblp-assoc-matrix-1.Rdata")
 for(i  in 1:(ncol(d.mat)-1)) {
 	for(j in (i+1):ncol(d.mat)) {
 		d.sec <- d.mat[i,j] + d.mat[j,i]
@@ -159,6 +160,7 @@ for(i  in 1:(ncol(d.mat)-1)) {
 		}
 	}
 }
+save(d.mat, file="dblp-assoc-matrix-2.Rdata")
 g.dblp <- graph.adjacency(d.mat, mode="upper", weighted=TRUE, diag=FALSE)
 ```
 
