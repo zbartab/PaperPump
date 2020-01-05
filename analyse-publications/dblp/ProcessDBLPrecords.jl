@@ -1,6 +1,8 @@
 
 # code to process the dblp records and produce collection of papers
 
+using SparseArrays
+
 """
     read_dblprecords(file)
 
@@ -80,9 +82,10 @@ end
 """
     recs2pubmat(aurecs)
 
-Create a publication matrix from the author records. It returns (as a
-tuple) the publication matrix and a hash table to allow the
-identification of authors in the publication matrix.
+Create a publication matrix from the author records (i..e. it works on
+the result of `recordpapers`). It returns (as a tuple) the publication
+matrix and a hash table to allow the identification of authors in the
+publication matrix.
 """
 function recs2pubmat(aurecs::Dict{UInt64,
 																	Dict{String,Union{Int64,
