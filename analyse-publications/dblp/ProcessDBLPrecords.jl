@@ -1,5 +1,5 @@
 
-# code to process the dblp records
+# code to process the dblp records and produce collection of papers
 
 """
     read_dblprecords(file)
