@@ -5,34 +5,10 @@
 ## set up packages
 
 using SparseArrays
-using JSON, CSV, DataFrames
-using Random, StatsBase, Statistics
-using Colors
-using PyPlot, Cairo, Compose
-using LightGraphs, MetaGraphs, GraphPlot
+using CSV, DataFrames
+using LightGraphs, MetaGraphs
 
 ## The functions
-
-"""
-    plothistogram(histdict)
-
-Draw a bar plot on the result of `histogram`.
-"""
-function plothistogram(histdict::Dict{Any,Any}; xlab="", ylab="",
-											 plottitle="")
-	x = []
-	y = []
-	for k in keys(histdict)
-		push!(x, k)
-		push!(y, histdict[k])
-	end
-	bar(x, y)
-	title(plottitle)
-	xlabel(xlab)
-	ylabel(ylab)
-	PyPlot.grid(true)
-	tight_layout()
-end
 
 """
     histogram(s)
@@ -118,7 +94,6 @@ function collaborationmatrix(pubmat::SparseMatrixCSC{Float64,Int64})
 			icupj = sum(pubmat[:,i]) + sum(pubmat[:,j]) - icapj
 			wij = icapj/icupj
 			colnet[i,j] = wij
-			#colnet[j,i] = wij
 		end
 	end
 	return colnet
@@ -199,11 +174,11 @@ function subnet(colnet, cutoff)
 end
 
 """
-    cartels(colnet)
+    cartel_sizes(colnet)
 
 Return an array of the sizes of the connected components of `colnet`.
 """
-function cartels(colnet)
+function cartel_sizes(colnet)
 	ca = connected_components(colnet)
 	map(length, ca)
 end
@@ -225,28 +200,12 @@ Returns a Dict with the following fields:
 function describecartels(colnet, cutoff=0.4)
 	W = Weights(colnet)
 	sub_cn = subnet(colnet, cutoff)
-	carts = cartels(sub_cn)
+	carts = cartel_sizes(sub_cn)
 	histcarts = histogram(carts)
 	no_v = nv(colnet)
 	Dict("no_nodes" => no_v, "cartel_nodes" => nv(sub_cn),
 			 "no_edges" => length(W), "no_strongedges" => sum(W .> cutoff),
 			 "cartel_sizes" => histcarts)
-end
-
-"""
-    plotloglog(x, plottitle)
-
-Plot the distribution of `x` on a log-log scale.
-"""
-function plotloglog(x, plottitle="")
-	d = loglogbins(x)
-	plot(log10.(d["kn"]), log10.(d["pk"]))
-	scatter(log10.(d["kn"]), log10.(d["pk"]))
-	title(plottitle)
-	xlabel(L"$\log_{10}(k)$")
-	ylabel(L"$\log_{10}(p_k)$")
-	PyPlot.grid(true)
-	tight_layout()
 end
 
 """
@@ -262,43 +221,6 @@ function coauthorsnumber(pubmat)
 		n_authors[i] = sum(pubmat[i,:])
 	end
 	return n_authors
-end
-
-"""
-    graphplot(g)
-
-Produce a pdf plot of graph `g`
-"""
-function graphplot(g; cutoff=0.4, backend=PDF, filename="proba",
-									 nodelabel=true, layout=random_layout)
-	backend == PDF && (filename *= ".pdf")
-	backend == PNG && (filename *= ".png")
-	W = Weights(g)
-	tocutoff = W .> cutoff
-	edgewidth = ones(length(W))
-	edgewidth[tocutoff] .= 5
-	edgecolor = [colorant"lightgrey" for i in 1:length(W)]
-	edgecolor[tocutoff] .= colorant"black"
-	nodesize = degree(g)
-	if nodelabel
-		nodelabs = labels(g)
-	else
-		nodelabs = ""
-	end
-	#nodefillc = distinguishable_colors(nv(g), colorant"blue")
-	#nodefillc = range(colorant"lightsalmon", stop=colorant"darksalmon",
-										#length=nv(g))
-	nodefillc = colorant"turquoise"
-	if sum(tocutoff) == 0
-		maxlinewidth = 0.2
-	else
-		maxlinewidth = 2
-	end
-	Compose.draw(backend(filename, 50cm, 50cm),
-							 gplot(g, layout=layout, edgelinewidth=edgewidth,
-										 EDGELINEWIDTH=maxlinewidth, nodesize=nodesize,
-										 nodelabel=nodelabs,
-										 nodefillc=nodefillc, edgestrokec=edgecolor))
 end
 
 """
