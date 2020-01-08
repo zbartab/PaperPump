@@ -6,16 +6,23 @@
 include("../CollaborationNetworks.jl")
 include("ProcessDBLPrecords.jl")
 
-function main(filein::String)
-	filein == "" && (filein = "dblppubmat.csv")
+function main(ARGV::Array{String,})
+	filein = "dblppubmat.csv"
+	npapers = -Inf
+	if length(ARGV) >= 2
+		filein = ARGV[1]
+		npapers = ARGV[2]
+	else if length(ARGV) == 1
+		filein = ARGV[1]
+	end
 	dblppubmat = read_spmatrix(filein)
 	println("publication matrix `$(filein)` read")
-	dblppubmat = selectauthors(dblppubmat, 3)
+	dblppubmat = selectauthors(dblppubmat, npapers)
 	fileout = replace(filein, "pub" => "col")
 	dblpcolmat = collaborationmatrix(dblppubmat);
-	write_spmatrix("dblpcolmat.csv", dblpcolmat)
+	write_spmatrix(fileout, dblpcolmat)
 	println("collaboration matrix `$(fileout)` written")
 	return nothing
 end
 
-main(ARGS[1])
+main(ARGS)
