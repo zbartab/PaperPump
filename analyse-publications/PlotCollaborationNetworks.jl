@@ -34,10 +34,10 @@ end
 
 Plot the distribution of `x` on a log-log scale.
 """
-function plotloglog(x, plottitle="")
+function plotloglog(x, label="", plottitle="")
 	d = loglogbins(x)
-	plot(log10.(d["kn"]), log10.(d["pk"]))
-	scatter(log10.(d["kn"]), log10.(d["pk"]))
+	plot(log10.(d["kn"]), log10.(d["pk"]), label=label)
+	scatter(log10.(d["kn"]), log10.(d["pk"]), label=label)
 	title(plottitle)
 	xlabel(L"$\log_{10}(k)$")
 	ylabel(L"$\log_{10}(p_k)$")
