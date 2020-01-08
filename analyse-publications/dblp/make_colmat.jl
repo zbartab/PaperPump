@@ -10,6 +10,7 @@ function main(filein::String)
 	filein == "" && (filein = "dblppubmat.csv")
 	dblppubmat = read_spmatrix(filein)
 	println("publication matrix `$(filein)` read")
+	dblppubmat = selectauthors(dblppubmat, 3)
 	fileout = replace(filein, "pub" => "col")
 	dblpcolmat = collaborationmatrix(dblppubmat);
 	write_spmatrix("dblpcolmat.csv", dblpcolmat)
