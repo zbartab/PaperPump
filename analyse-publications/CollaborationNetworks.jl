@@ -298,3 +298,85 @@ function rewire(mat::SparseMatrixCSC{Float64, Int64}, niter=100)
 	return matcp
 end
 
+"""
+    samplepapers(npapers, pm)
+
+Sample `npapers` papers randomly from publication matrix `pm`. It
+removes authors with zero papers from the resulting matrix.
+"""
+function samplepapers(npapers::Int, pm::SparseMatrixCSC{Float64,Int64})
+	spm =  size(pm)
+	npapers > spm[1] && (npapers = spm[1])
+	npapers = sample(1:spm[1], npapers, replace=false)
+	np = papernumbers(pm[npapers,:])
+	return pm[npapers, np .> 0]
+end
+
+"""
+    sampleauthors(nauthors, pm)
+
+Sample `nauthors` authors randomly from publication matrix `pm`. It
+removes papers with zero authors from the resulting matrix.
+"""
+function sampleauthors(nauthors::Int, pm::SparseMatrixCSC{Float64,Int64})
+	spm =  size(pm)
+	nauthors > spm[2] && (nauthors = spm[2])
+	nauthors = sample(1:spm[2], nauthors, replace=false)
+	na = authornumbers(pm[:, nauthors])
+	return pm[na .> 0, nauthors]
+end
+
+"""
+    papernumbers(pm)
+
+Returns an array with the number of papers each author in publication
+matrix `pm` authored.
+"""
+function papernumbers(pm::SparseMatrixCSC{Float64,Int64})
+	no_papers = sum(pm, dims=1)
+	no_papers = reshape(no_papers, size(no_papers, 2))
+	return no_papers
+end
+
+"""
+    authornumbers(pm)
+
+Returns an array with the number of authors each paper in publication
+matrix `pm` has.
+"""
+function authornumbers(pm::SparseMatrixCSC{Float64,Int64})
+	no_authors = sum(pm, dims=2)
+	no_authors = reshape(no_authors, size(no_authors, 1))
+	return no_authors
+end
+
+"""
+    selectauthors(pm, npapers)
+
+Select only those authors from publication matrix `pm` who have more
+papers than `npapers`. Papers with zero authors also removed from the
+resulting matrix.
+"""
+function selectauthors(pm::SparseMatrixCSC{Float64,Int64}, npapers=-Inf)
+	np = papernumbers(pm)
+	pmred = pm[:, np .> npapers]
+	na = authornumbers(pmred)
+	pmred = pmred[na .> 0, :]
+	return pmred
+end
+
+"""
+    selectpapers(pm, nauthors)
+
+Select only those papers from publication matrix `pm` which have more
+authors than `nauthors`. Papers with zero authors also removed from the
+resulting matrix.
+"""
+function selectpapers(pm::SparseMatrixCSC{Float64,Int64}, nauthors=-Inf)
+	np = authornumbers(pm)
+	pmred = pm[np .> nauthors, :]
+	na = papernumbers(pmred)
+	pmred = pmred[:, na .> 0]
+	return pmred
+end
+
