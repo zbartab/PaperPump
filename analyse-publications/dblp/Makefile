@@ -2,18 +2,22 @@
 # this file documents the production of publication and collaboration
 # matrices from the dbpl dataset
 
-.PHONY: all
-all: dblppubmat-full.csv dblpcolmat-full.csv rewired
+PUBMAT = dblppubmat-full.csv
+COLMAT = dblpcolmat-full.csv
+DBLPDATA = dbpl/dbpl-articles.txt
 
-dblppubmat-full.csv: make_pubmat.jl dblp-data/dblp-articles.txt
+.PHONY: all
+all: $(PUBMAT) $(COLMAT) rewired
+
+$(PUBMAT): make_pubmat.jl $(DBLPDATA)
 	./make_pubmat.jl 0 1000000 $@ 
 
-dblpcolmat-full.csv: dblppubmat-full.csv make_colmat.jl 
+$(COLMAT): $(PUBMAT) make_colmat.jl 
 	./make_colmat.jl $< 3
 
-rewired: dblppubmat-full.csv rewire_pubmat.jl
+rewired: $(PUBMAT) rewire_pubmat.jl
 	./rewire_pubmat.jl $< 20 1000000
 	touch $@
 
-dblp-data/dblp-articles.txt:
+$(DBLPDATA):
 	$(MAKE) --directory=dblp-data
