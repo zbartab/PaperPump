@@ -12,7 +12,7 @@ function main(ARGV::Array{String,})
 	if length(ARGV) >= 2
 		filein = ARGV[1]
 		npapers = ARGV[2]
-	else if length(ARGV) == 1
+	elseif length(ARGV) == 1
 		filein = ARGV[1]
 	end
 	MTMTpubmat = read_scimat(filein)
