@@ -132,7 +132,7 @@ function files2MTMTpubmat(datadir::String)
 	fMTMT = readdir(MTMT_dir);
 	filter!((x) -> occursin(r"[0-9]\.json$", x), fMTMT);
 	fMTMT = joinpath.(MTMT_dir, fMTMT);
-	fMTMT = fMTMT[1:100]
+	#fMTMT = fMTMT[1:100]
 	recs, auIDs, pIDs = recordauthors(fMTMT)
 	return recs2pubmat(recs, auIDs, pIDs)
 end
