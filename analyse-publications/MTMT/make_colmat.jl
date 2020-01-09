@@ -11,7 +11,7 @@ function main(ARGV::Array{String,})
 	npapers = -Inf
 	if length(ARGV) >= 2
 		filein = ARGV[1]
-		npapers = ARGV[2]
+		npapers = parse(Float64, ARGV[2])
 	elseif length(ARGV) == 1
 		filein = ARGV[1]
 	end
