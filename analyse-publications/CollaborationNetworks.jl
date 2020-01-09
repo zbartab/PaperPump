@@ -8,6 +8,22 @@ using SparseArrays
 using Random, CSV, DataFrames
 using LightGraphs, MetaGraphs
 
+## The data structures
+
+
+abstract type ScienceMat end
+
+mutable struct PubMat <: ScienceMat
+	mat::SparseMatrixCSC{Float64,Int64}
+	authorIDs::Array{String,1}
+	paperIDs::Array{String,1}
+end
+
+mutable struct ColMat <: ScienceMat
+	mat::SparseMatrixCSC{Float64,Int64}
+	authorIDs::Array{String,1}
+end
+
 ## The functions
 
 """
@@ -84,38 +100,19 @@ Create a collaboration matrix (showing which author publishes which
 other authors) from a publication matrix (showing which paper
 (co)authored by which authors).
 """
-function collaborationmatrix(pubmat::SparseMatrixCSC{Float64,Int64})
-	A = size(pubmat, 2)
-	colnet = spzeros(A,A)
+function collaborationmatrix(pubmat::PubMat)
+	A = size(pubmat.mat, 2)
+	colmat = spzeros(A,A)
 	for i in 1:(A-1)
 		for j in (i+1):A
-			icapj = sum(pubmat[:, i] .* pubmat[:, j])
+			icapj = sum(pubmat.mat[:, i] .* pubmat.mat[:, j])
 			icapj == 0.0 && continue
-			icupj = sum(pubmat[:,i]) + sum(pubmat[:,j]) - icapj
+			icupj = sum(pubmat.mat[:,i]) + sum(pubmat.mat[:,j]) - icapj
 			wij = icapj/icupj
-			colnet[i,j] = wij
+			colmat[i,j] = wij
 		end
 	end
-	return colnet
-end
-
-
-"""
-    ind2id(ind)
-
-Produce an id from an index.
-"""
-function ind2id(ind)
-	string(ind, base=36, pad=5)
-end
-
-"""
-    id2ind(id)
-	
-Recover the index from an id.
-"""
-function id2ind(id)
-	parse(Int, id, base=36)
+	return ColMat(colmat, pubmat.authorIDs)
 end
 
 
@@ -127,13 +124,12 @@ Create a collaboration graph from the collaboration matrix.
 The nodes store ids created from the indexes of the nodes in the
 collaboration matrix.
 """
-function collaborationgraph(colmat)
+function collaborationgraph(colmat::ColMat)
 	g=MetaGraph()
-	for v in 1:size(colmat, 1)
-		hh = ind2id(v)
-		add_vertex!(g, :id, hh)
+	for v in 1:size(colmat.mat, 1)
+		add_vertex!(g, :id, colmat.authorIDs[v])
 	end
-	src, dst, vals = findnz(colmat)
+	src, dst, vals = findnz(colmat.mat)
 	for i in 1:length(src)
 		add_edge!(g, src[i], dst[i], :weight, vals[i])
 	end
@@ -209,34 +205,98 @@ function describecartels(colnet, cutoff=0.4)
 end
 
 """
-    coauthorsnumber(pubmat)
+    write_spmatrix(f, mat)
 
-Calculate the number of authors a paper has from the publication matrix
-`pubmat`.
+Write the sparse matrix part of ScienceMat into IOStream `f`.
 """
-function coauthorsnumber(pubmat)
-	n_papers = size(pubmat, 1)
-	n_authors = zeros(n_papers)
-	for i in 1:n_papers
-		n_authors[i] = sum(pubmat[i,:])
+function write_spmatrix(f::IOStream, mat::SparseMatrixCSC{Float64, Int64})
+	rowis, colis, vals = findnz(mat)
+	for i in 1:length(rowis)
+		println(f, rowis[i], ",", colis[i], ",", vals[i])
 	end
-	return n_authors
+	return nothing
 end
 
 """
-    write_spmatrix(mat)
+    write_IDs(f, IDs)
 
-Write a sparse matrix `mat` to a csv file.
+Write the IDs part of ScienceMat in to IOStream `f`.
 """
-function write_spmatrix(file, mat::SparseMatrixCSC{Float64,Int64})
-	matcp = copy(mat)
-	s1, s2 = size(matcp)
-	matcp[1,1] <= 0.0 && (matcp[1,1] = -9999.0)
-	matcp[s1,s2] <= 0.0 && (matcp[s1,s2] = -9999.0)
-	rowis, colis, vals = findnz(matcp)
-	df = DataFrame(Dict(:rowis => rowis, :colis => colis, :vals => vals))
-	CSV.write(file, df)
+function write_IDs(f::IOStream, IDs::Array{String,})
+	for id in IDs
+		println(f, id)
+	end
 	return nothing
+end
+
+"""
+    write_scimat(file, mat)
+
+Write a representation of ScienceMat `mat` to `file`.
+"""
+function write_scimat(file::String, mat::ScienceMat)
+	smat = size(mat.mat)
+	f = open(file, "w")
+	if typeof(mat) == PubMat
+		print(f, "#### pubmat,")
+	else
+		print(f, "#### colmat,")
+	end
+	println(f, smat[1], ",", smat[2], ",", nnz(mat.mat))
+	write_spmatrix(f, mat.mat)
+	println(f, "#### authorIDs,", length(mat.authorIDs))
+	write_IDs(f, mat.authorIDs)
+	if typeof(mat) == PubMat
+		println(f, "#### paperIDs,", length(mat.paperIDs))
+		write_IDs(f, mat.paperIDs)
+	end
+	close(f)
+	return nothing
+end
+
+"""
+"""
+function read_scimat(file::String)
+	f = open(file)
+	lines = readlines(f)
+	close(f)
+	i = 1
+	matrix_type, nr, nc, ne = split(lines[i], ",")
+	nrow = parse(Int, nr)
+	ncol = parse(Int, nc)
+	nrec = parse(Int, ne)
+	ris = Array{Int,1}(undef, nrec)
+	cis = Array{Int,1}(undef, nrec)
+	vis = Array{Float64,1}(undef, nrec)
+	for j in (i+1):(nrec+i)
+		jj= j-i
+		ri, ci, vi = split(lines[j], ",")
+		ris[jj] = parse(Int, ri)
+		cis[jj] = parse(Int, ci)
+		vis[jj] = parse(Float64, vi)
+	end
+	mat = sparse(ris, cis, vis, nrow, ncol)
+	i += nrec+1
+	id_type, ne = split(lines[i], ",")
+	nrec = parse(Int, ne)
+	authorIDs = Array{String,1}(undef, nrec)
+	for j in (i+1):(i+nrec)
+		jj = j-i
+		authorIDs[jj] = lines[j]
+	end
+	if occursin(r"colmat$", matrix_type)
+		return ColMat(mat, authorIDs)
+	else
+		i += nrec+1
+		id_type, ne = split(lines[i], ",")
+		nrec = parse(Int, ne)
+		paperIDs = Array{String,1}(undef, nrec)
+		for j in (i+1):(i+nrec)
+			jj = j-i
+			paperIDs[jj] = lines[j]
+		end
+		return PubMat(mat, authorIDs, paperIDs)
+	end
 end
 
 """
@@ -292,19 +352,20 @@ end
 
 Randomly rewire a copy of `mat` `niter` times.
 """
-function rewire(mat::SparseMatrixCSC{Float64, Int64}, niter=100)
-	matcp = copy(mat)
-	rewire!(matcp, niter)
+function rewire(pubmat::PubMat, niter=100)
+	matcp = deepcopy(pubmat)
+	rewire!(matcp.mat, niter)
 	return matcp
 end
 
+#=
 """
     samplepapers(npapers, pm)
 
 Sample `npapers` papers randomly from publication matrix `pm`. It
 removes authors with zero papers from the resulting matrix.
 """
-function samplepapers(npapers::Int, pm::SparseMatrixCSC{Float64,Int64})
+function samplepapers(pm::PubMat, npapers::Int)
 	spm =  size(pm)
 	npapers > spm[1] && (npapers = spm[1])
 	npapers = sample(1:spm[1], npapers, replace=false)
@@ -325,6 +386,7 @@ function sampleauthors(nauthors::Int, pm::SparseMatrixCSC{Float64,Int64})
 	na = authornumbers(pm[:, nauthors])
 	return pm[na .> 0, nauthors]
 end
+=#
 
 """
     papernumbers(pm)
@@ -332,8 +394,11 @@ end
 Returns an array with the number of papers each author in publication
 matrix `pm` authored.
 """
-function papernumbers(pm::SparseMatrixCSC{Float64,Int64})
-	no_papers = sum(pm, dims=1)
+function papernumbers(pm::PubMat)
+	return papernumbers(pm.mat)
+end
+function papernumbers(mat::SparseMatrixCSC{Float64,Int64})
+	no_papers = sum(mat, dims=1)
 	no_papers = reshape(no_papers, size(no_papers, 2))
 	return no_papers
 end
@@ -344,8 +409,11 @@ end
 Returns an array with the number of authors each paper in publication
 matrix `pm` has.
 """
-function authornumbers(pm::SparseMatrixCSC{Float64,Int64})
-	no_authors = sum(pm, dims=2)
+function authornumbers(pm::PubMat)
+	return authornumbers(pm.mat)
+end
+function authornumbers(mat::SparseMatrixCSC{Float64,Int64})
+	no_authors = sum(mat, dims=2)
 	no_authors = reshape(no_authors, size(no_authors, 1))
 	return no_authors
 end
@@ -357,12 +425,12 @@ Select only those authors from publication matrix `pm` who have more
 papers than `npapers`. Papers with zero authors also removed from the
 resulting matrix.
 """
-function selectauthors(pm::SparseMatrixCSC{Float64,Int64}, npapers=-Inf)
+function selectauthors(pm::PubMat, npapers=-Inf)
 	np = papernumbers(pm)
-	pmred = pm[:, np .> npapers]
+	pmred = pm.mat[:, np .> npapers]
 	na = authornumbers(pmred)
 	pmred = pmred[na .> 0, :]
-	return pmred
+	return PubMat(pmred, pm.authorIDs[np .> npapers], pm.paperIDs[na .> 0])
 end
 
 """
@@ -372,11 +440,11 @@ Select only those papers from publication matrix `pm` which have more
 authors than `nauthors`. Papers with zero authors also removed from the
 resulting matrix.
 """
-function selectpapers(pm::SparseMatrixCSC{Float64,Int64}, nauthors=-Inf)
+function selectpapers(pm::PubMat, nauthors=-Inf)
 	np = authornumbers(pm)
-	pmred = pm[np .> nauthors, :]
+	pmred = pm.mat[np .> nauthors, :]
 	na = papernumbers(pmred)
 	pmred = pmred[:, na .> 0]
-	return pmred
+	return PubMat(pmred, pm.authorIDs[na .> 0], pm.paperIDs[np .> nauthors])
 end
 

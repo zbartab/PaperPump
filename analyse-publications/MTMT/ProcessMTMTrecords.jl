@@ -1,6 +1,8 @@
 
 # Handle MTMT records
 
+using JSON
+
 """
     read_MTMT(file)
 
@@ -26,6 +28,7 @@ Record the papers written by authors stored in MTMT json files in
 function recordauthors(filelist::Array{String,1})
 	authorrecs = Dict{UInt64, Array{UInt64,1}}()
 	authorIDs = Dict{UInt64, String}()
+	papersIDs = Dict{UInt64, String}()
 	for f in filelist
 		(recs = read_MTMT(f)) == nothing && continue
 		idstr = replace(f, r".*/(.*)_.*$" => s"\1")
@@ -33,11 +36,16 @@ function recordauthors(filelist::Array{String,1})
 		authorIDs[id] = idstr
 		!haskey(authorrecs, id) && (authorrecs[id] = Array{UInt64}[])
 		for r in recs
-			hasranking(r) && push!(authorrecs[id], hash(r["mtid"]))
+			if hasranking(r) 
+				p = r["mtid"]
+				pid = hash(p)
+				papersIDs[pid] = string(p)
+				push!(authorrecs[id], pid)
+			end
 		end
 		length(authorrecs[id]) == 0 && delete!(authorrecs, id)
 	end
-	return authorrecs, authorIDs
+	return authorrecs, authorIDs, papersIDs
 end
 
 """
@@ -92,15 +100,39 @@ Create a publication matrix from the author records. It returns (as a
 tuple) the publication matrix and a hash table to allow the
 identification of authors in the publication matrix.
 """
-function recs2pubmat(aurecs::Dict{UInt64, Array{UInt64,1}})
+function recs2pubmat(aurecs::Dict{UInt64, Array{UInt64,1}},
+										 auIDs::Dict{UInt64, String},
+										 pIDs::Dict{UInt64, String})
 	ps = collectpapers(aurecs)
 	as = collectauthors(aurecs)
 	pubmat = spzeros(length(ps), length(as))
+	paperIDs = Array{String,1}(undef, length(ps))
+	authorIDs = Array{String,1}(undef, length(as))
 	for k in keys(aurecs)
 		ai = as[k]
+		authorIDs[ai] = auIDs[k]
 		for p in aurecs[k]
-			pubmat[ps[p], ai] = 1
+			p_i = ps[p]
+			pubmat[p_i, ai] = 1
+			paperIDs[p_i] = pIDs[p]
 		end
 	end
-	return pubmat, as
+	return PubMat(pubmat, authorIDs, paperIDs)
+end
+
+"""
+    files2MTMTpubmat()
+
+Create a publication matrix from the files containing MTMT records.
+Return a dict with the matrix and its row and column names. `datadir`
+gives the directory where the files reside.
+"""
+function files2MTMTpubmat(datadir::String)
+	MTMT_dir = joinpath(pwd(), datadir);
+	fMTMT = readdir(MTMT_dir);
+	filter!((x) -> occursin(r"[0-9]\.json$", x), fMTMT);
+	fMTMT = joinpath.(MTMT_dir, fMTMT);
+	fMTMT = fMTMT[1:100]
+	recs, auIDs, pIDs = recordauthors(fMTMT)
+	return recs2pubmat(recs, auIDs, pIDs)
 end
