@@ -8,3 +8,5 @@
 *.html
 *.gz
 *.csv
+*-rewired-*.txt
+*/*/dblp-data/*
