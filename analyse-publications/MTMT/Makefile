@@ -6,7 +6,7 @@ PUBMAT = MTMTpubmat.txt
 COLMAT = MTMTcolmat.txt
 MK_PUBMAT = make_pubmat.jl
 MK_COLMAT = make_colmat.jl
-REWIRE = rewire_pubmat.jl
+REWIRE = parallel_rewire_pubmat.jl
 NPAPERS = 3
 
 .PHONY: all
