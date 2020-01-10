@@ -9,6 +9,11 @@
 end
 
 function readargs(ARGV::Array{String,1})
+	if length(ARGV) == 4
+		npapers = parse(Int, pop!(ARGV))
+	else
+		npapers = -1
+	end
 	if length(ARGV) == 3
 		niter = parse(Int, pop!(ARGV))
 	else
@@ -24,11 +29,11 @@ function readargs(ARGV::Array{String,1})
 	else
 		filein = "dblppubmat.txt"
 	end
-	return filein, nrewire, niter
+	return filein, nrewire, niter, npapers
 end
 
 function main(ARGV::Array{String,1})
-	filein, nrewire, niter = readargs(ARGV)
+	filein, nrewire, niter, npapers = readargs(ARGV)
 	dblppubmat = read_scimat(filein)
 	println("publication matrix `$(filein)` read")
 	filein = replace(filein, r"\.txt$" => "")
@@ -36,6 +41,7 @@ function main(ARGV::Array{String,1})
 	dorewire = function(i)
 		re_pubmat = rewire(dblppubmat, niter)
 		write_scimat(string(filein, "-rewired-", i, ".txt"), re_pubmat)
+		re_pubmat = selectauthors(re_pubmat, npapers)
 		re_colmat = collaborationmatrix(re_pubmat)
 		write_scimat(string(fileout, "-rewired-", i, ".txt"), re_colmat)
 		return nothing
