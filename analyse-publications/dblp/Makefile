@@ -7,7 +7,7 @@ COLMAT = dblpcolmat.txt
 DBLPDATA = dbpl/dbpl-articles.txt
 MK_PUBMAT = make_pubmat.jl
 MK_COLMAT = make_colmat.jl
-REWIRE = rewire_pubmat.jl
+REWIRE = parallel_rewire_pubmat.jl
 
 .PHONY: all
 all: $(PUBMAT) $(COLMAT) rewired
@@ -19,7 +19,7 @@ $(COLMAT): $(PUBMAT) $(MK_COLMAT)
 	./$(MK_COLMAT) $< 3
 
 rewired: $(PUBMAT) $(REWIRE)
-	./$(REWIRE) $< 2 10
+	./$(REWIRE) $< 20 1000000
 	touch $@
 
 $(DBLPDATA):
