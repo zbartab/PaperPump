@@ -1,4 +1,4 @@
-#! /home/apa/bin/julia -p 3
+#! /home/apa/bin/julia -p 6
 
 # produce the publication and collaboration matrices for the dblp
 # dataset
