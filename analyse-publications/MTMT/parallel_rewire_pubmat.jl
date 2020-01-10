@@ -3,8 +3,10 @@
 # produce the publication and collaboration matrices for the dblp
 # dataset
 
-include("../CollaborationNetworks.jl")
-include("ProcessMTMTrecords.jl")
+@everywhere begin
+	include("../CollaborationNetworks.jl")
+	include("ProcessMTMTrecords.jl")
+end
 
 function readargs(ARGV::Array{String,1})
 	if length(ARGV) == 4
