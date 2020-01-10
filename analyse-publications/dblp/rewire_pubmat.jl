@@ -20,22 +20,22 @@ function readargs(ARGV::Array{String,1})
 	if length(ARGV) == 1
 		filein = pop!(ARGV)
 	else
-		filein = "dblppubmat.csv"
+		filein = "dblppubmat.txt"
 	end
 	return filein, nrewire, niter
 end
 
 function main(ARGV::Array{String,1})
 	filein, nrewire, niter = readargs(ARGV)
-	dblppubmat = read_spmatrix(filein)
+	dblppubmat = read_scimat(filein)
 	println("publication matrix `$(filein)` read")
-	filein = replace(filein, r"\.csv$" => "")
+	filein = replace(filein, r"\.txt$" => "")
 	fileout = replace(filein, "pub" => "col")
 	for i in 1:nrewire
 		re_pubmat = rewire(dblppubmat, niter)
-		write_spmatrix(string(filein, "-rewired-", i, ".csv"), re_pubmat)
+		write_scimat(string(filein, "-rewired-", i, ".txt"), re_pubmat)
 		re_colmat = collaborationmatrix(re_pubmat)
-		write_spmatrix(string(fileout, "-rewired-", i, ".csv"), re_colmat)
+		write_scimat(string(fileout, "-rewired-", i, ".txt"), re_colmat)
 	end
 	return nothing
 end
