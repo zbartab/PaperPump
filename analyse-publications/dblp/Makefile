@@ -2,8 +2,8 @@
 # this file documents the production of publication and collaboration
 # matrices from the dbpl dataset
 
-PUBMAT = dblppubmat-full.csv
-COLMAT = dblpcolmat-full.csv
+PUBMAT = dblppubmat.txt
+COLMAT = dblpcolmat.txt
 DBLPDATA = dbpl/dbpl-articles.txt
 MK_PUBMAT = make_pubmat.jl
 MK_COLMAT = make_colmat.jl
