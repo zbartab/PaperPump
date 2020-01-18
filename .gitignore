@@ -10,3 +10,4 @@
 *.csv
 *-rewired-*.txt
 */*/dblp-data/*
+*.mat
