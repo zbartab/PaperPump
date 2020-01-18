@@ -14,13 +14,14 @@ using GraphPlot
 Draw a bar plot on the result of `histogram`.
 """
 function plothistogram(histdict::Dict{Any,Any}; xlab="", ylab="",
-											 plottitle="")
+											 plottitle="", relfreq=false)
 	x = []
 	y = []
 	for k in keys(histdict)
 		push!(x, k)
 		push!(y, histdict[k])
 	end
+	relfreq && (y = y ./ sum(y))
 	bar(x, y)
 	title(plottitle)
 	xlabel(xlab)
@@ -37,7 +38,8 @@ Plot the distribution of `x` on a log-log scale.
 function plotloglog(x, label="", plottitle="")
 	d = loglogbins(x)
 	plot(log10.(d["kn"]), log10.(d["pk"]), label=label)
-	scatter(log10.(d["kn"]), log10.(d["pk"]), label=label)
+	scatter(log10.(d["kn"]), log10.(d["pk"]))
+	legend()
 	title(plottitle)
 	xlabel(L"$\log_{10}(k)$")
 	ylabel(L"$\log_{10}(p_k)$")
