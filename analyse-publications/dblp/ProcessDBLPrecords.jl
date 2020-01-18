@@ -94,15 +94,15 @@ function recs2pubmat(aurecs::Dict{String,
 	ps = collectpapers(aurecs)
 	as = collectauthors(aurecs)
 	pubmat = spzeros(length(ps), length(as))
-	paperIDs = Array{String,1}(undef, length(ps))
-	authorIDs = Array{String,1}(undef, length(as))
+	paperIDs = Dict{String,Int64}()
+	authorIDs = Dict{String,Int64}()
 	for k in keys(aurecs)
 		p_i = ps[k]
-		paperIDs[p_i] = k
+		paperIDs[k] = p_i
 		for a in aurecs[k]["authors"]
 			ai = as[a]
 			pubmat[p_i, ai] = 1
-			authorIDs[ai] = a
+			authorIDs[a] = ai
 		end
 	end
 	return PubMat(pubmat, authorIDs, paperIDs)

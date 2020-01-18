@@ -15,13 +15,13 @@ abstract type ScienceMat end
 
 mutable struct PubMat <: ScienceMat
 	mat::SparseMatrixCSC{Float64,Int64}
-	authorIDs::Array{String,1}
-	paperIDs::Array{String,1}
+	authorIDs::Dict{String,Int64}
+	paperIDs::Dict{String,Int64}
 end
 
 mutable struct ColMat <: ScienceMat
 	mat::SparseMatrixCSC{Float64,Int64}
-	authorIDs::Array{String,1}
+	authorIDs::Dict{String,Int64}
 end
 
 ## The functions
@@ -127,7 +127,8 @@ collaboration matrix.
 function collaborationgraph(colmat::ColMat)
 	g=MetaGraph()
 	for v in 1:size(colmat.mat, 1)
-		add_vertex!(g, :id, colmat.authorIDs[v])
+		idstring = findfirst((x) -> x == v, colmat.authorIDs)
+		add_vertex!(g, :id, idstring)
 	end
 	src, dst, vals = findnz(colmat.mat)
 	for i in 1:length(src)
@@ -222,9 +223,9 @@ end
 
 Write the IDs part of ScienceMat in to IOStream `f`.
 """
-function write_IDs(f::IOStream, IDs::Array{String,})
-	for id in IDs
-		println(f, id)
+function write_IDs(f::IOStream, IDs::Dict{String,Int64})
+	for id in keys(IDs)
+		println(f, id, ",", IDs[id])
 	end
 	return nothing
 end
@@ -255,6 +256,9 @@ function write_scimat(file::String, mat::ScienceMat)
 end
 
 """
+    read_scimat(file)
+
+Read `ScienceMat` data from file `file`.
 """
 function read_scimat(file::String)
 	f = open(file)
@@ -279,10 +283,12 @@ function read_scimat(file::String)
 	i += nrec+1
 	id_type, ne = split(lines[i], ",")
 	nrec = parse(Int, ne)
-	authorIDs = Array{String,1}(undef, nrec)
+	authorIDs = Dict{String, Int64}()
 	for j in (i+1):(i+nrec)
 		jj = j-i
-		authorIDs[jj] = lines[j]
+		id, ind = split(lines[j], ",")
+		ni = parse(Int, ind)
+		authorIDs[id] = ni
 	end
 	if occursin(r"colmat$", matrix_type)
 		return ColMat(mat, authorIDs)
@@ -290,10 +296,12 @@ function read_scimat(file::String)
 		i += nrec+1
 		id_type, ne = split(lines[i], ",")
 		nrec = parse(Int, ne)
-		paperIDs = Array{String,1}(undef, nrec)
+		paperIDs = Dict{String, Int64}()
 		for j in (i+1):(i+nrec)
 			jj = j-i
-			paperIDs[jj] = lines[j]
+			id, ind = split(lines[j], ",")
+			ni = parse(Int, ind)
+			paperIDs[id] = ni
 		end
 		return PubMat(mat, authorIDs, paperIDs)
 	end
@@ -419,6 +427,22 @@ function authornumbers(mat::SparseMatrixCSC{Float64,Int64})
 end
 
 """
+"""
+function updateIDs(IDs::Dict{String,Int64}, index::BitArray{1})
+	@assert length(IDs) == length(index) "IDs length does not match index length!"
+	id_s = Array{String,1}(undef, length(IDs))
+	for k in keys(IDs)
+		id_s[IDs[k]] = k
+	end
+	id_s = id_s[index]
+	newIDs = Dict{String,Int64}()
+	for i in 1:length(id_s)
+		newIDs[id_s[i]] = i
+	end
+	return newIDs
+end
+
+"""
     selectauthors(pm, npapers)
 
 Select only those authors from publication matrix `pm` who have more
@@ -427,10 +451,14 @@ resulting matrix.
 """
 function selectauthors(pm::PubMat, npapers=-Inf)
 	np = papernumbers(pm)
-	pmred = pm.mat[:, np .> npapers]
+	i = np .> npapers
+	pmred = pm.mat[:, i]
 	na = authornumbers(pmred)
-	pmred = pmred[na .> 0, :]
-	return PubMat(pmred, pm.authorIDs[np .> npapers], pm.paperIDs[na .> 0])
+	j = na .> 0
+	pmred = pmred[j, :]
+	return PubMat(pmred,
+								updateIDs(pm.authorIDs, i),
+								updateIDs(pm.paperIDs, j))
 end
 
 """
@@ -442,9 +470,13 @@ resulting matrix.
 """
 function selectpapers(pm::PubMat, nauthors=-Inf)
 	np = authornumbers(pm)
-	pmred = pm.mat[np .> nauthors, :]
+	j = np .> nauthors
+	pmred = pm.mat[j, :]
 	na = papernumbers(pmred)
-	pmred = pmred[:, na .> 0]
-	return PubMat(pmred, pm.authorIDs[na .> 0], pm.paperIDs[np .> nauthors])
+	i = na .> 0
+	pmred = pmred[:, i]
+	return PubMat(pmred,
+								updateIDs(pm.authorIDs, i),
+								updateIDs(pm.paperIDs, j))
 end
 
