@@ -1,6 +1,8 @@
 
 # Functions used to simulate publication networks and cartels
 
+using StatsBase
+
 """
     expectedpapers(A, p, gamma, k_sat)
 
@@ -68,7 +70,7 @@ end
 
 
 """
-    generate_publicationmatrix(k_rand, scaling=1.0)
+    generate_publicationmatrix(k_rand, maxpapers=100_000)
 
 Generate a random publication network.
 
@@ -79,11 +81,11 @@ to a paper if the author (co)writes that paper.
 # Arguments
 
 - `k_rand`: is the number of papers each author produces.
-- `scaling`: scales the total number of papers the authors produce.
+- `maxpapers`: the maximal number of papers the authors can produce.
 """
-function generate_publicationmatrix(k_rand, scaling=1.0)
+function generate_publicationmatrix(k_rand, maxpapers=100_000)
 	A = length(k_rand)
-	p = Int(ceil(scaling * sum(k_rand)))
+	p = maxpapers
 	if p < maximum(k_rand)
 		p = Int(maximum(k_rand))
 	end
@@ -94,18 +96,26 @@ function generate_publicationmatrix(k_rand, scaling=1.0)
 			pubnet[j, i] = 1
 		end
 	end
-	return pubnet
+	auIDs = Dict{String,Int64}()
+	for i in 1:A
+		auIDs["A$(i)"] = i
+	end
+	paIDs = Dict{String,Int64}()
+	for i in 1:p
+		paIDs["p$(i)"] = i
+	end
+	return PubMat(pubnet, auIDs, paIDs)
 end
 
 """
-    rnd_collaborationnetwork(A, gamma, k_sat, k_cut, scaling, p)
+    rnd_collaborationnetwork(A, gamma, k_sat, k_cut, maxpapers, p)
 
 Create a random collaboration network.
 """
 function rnd_collaborationnetwork(A; gamma=2.5, k_sat=10, k_cut=450,
-																	scaling=1.0, p=100000)
+																	maxpapers=100_000, p=100_000)
 	k_rand = saturatedexpectedpapers(A, p, gamma, k_sat, k_cut)
-	pubmat = generate_publicationmatrix(k_rand, scaling)
+	pubmat = generate_publicationmatrix(k_rand, maxpapers)
 	colmat = collaborationmatrix(pubmat)
 	colnet = collaborationgraph(colmat)
 	return colnet
@@ -127,21 +137,22 @@ cartels.
 - `scaling`: scales the total number of papers the authors produce.
 """
 function sim_collaborationnetwork(A, cutoff=0.4, gamma=2.5, k_sat=5,
-																		scaling=1.0)
-	cn = rnd_collaborationnetwork(A, gamma, k_sat, scaling, 100000)
+																		maxpapers=100_000)
+	cn = rnd_collaborationnetwork(A, gamma, k_sat, maxpapers, 100000)
 	return describecartels(cn, cutoff)
 end
 
 """
-    run_sims(A, n_iter, cutoff, gamma, k_sat, scaling)
+    run_sims(A, n_iter, cutoff, gamma, k_sat, maxpapers)
 
 Run a series of simulation to collect data on cartels over `n_iter`
 random collaboration network.
 """
-function run_sims(A; n_iter=10, cutoff=0.4, gamma=2.5, k_sat=5, scaling=1.0)
+function run_sims(A; n_iter=10, cutoff=0.4, gamma=2.5, k_sat=5,
+									maxpapers=100_000)
 	res = Dict()
 	for i in 1:n_iter
-		res[i] = sim_collaborationnetwork(A, cutoff, gamma, k_sat, scaling)
+		res[i] = sim_collaborationnetwork(A, cutoff, gamma, k_sat, maxpapers)
 	end
 	return res
 end
@@ -152,16 +163,17 @@ end
 Create publication cartel in the publication matrix. A cartel is a set
 of authors who take part each others publications.
 """
-function addcartel!(pubmat, cartel, collprob=1.0)
-	cartpub = pubmat[:, cartel]
+function addcartel!(pubmat::PubMat, cartel::Array{Int,1}, collprob=1.0)
+	cartpub = pubmat.mat[:, cartel]
 	i = sum(cartpub, dims=2) .> 0
-	i = reshape(i, size(pubmat, 1))
-	#for j in eachindex(pubmat[i, cartel])
-		#if pubmat[j] <= 0 && rand() < collprob
-			#pubmat[j] = 1
-		#end
-	#end
-	pubmat[i, cartel] .= 1
+	i = reshape(i, size(pubmat.mat, 1))
+	j = collect(1:size(pubmat.mat, 1))[i]
+	for jj in j, c in cartel
+		if pubmat.mat[jj,c] <= 0 && rand() < collprob
+			pubmat.mat[jj,c] = 1
+		end
+	end
+	#pubmat.mat[i, cartel] .= 1
 	return nothing
 end
 
@@ -179,5 +191,6 @@ function showpubmat(pubmat, cutoff=0.4)
 		println(k, ": ", d[k])
 	end
 	graphplot(coga)
+	hist(Weights(coga), 0:0.025:1)
 	return nothing
 end
