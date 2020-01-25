@@ -96,6 +96,9 @@ function generate_publicationmatrix(k_rand, maxpapers=100_000)
 			pubnet[j, i] = 1
 		end
 	end
+	an = authornumbers(pubnet)
+	pubnet = pubnet[an .> 0,:]
+	p, A = size(pubnet)
 	auIDs = Dict{String,Int64}()
 	for i in 1:A
 		auIDs["A$(i)"] = i
