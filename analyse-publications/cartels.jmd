@@ -52,6 +52,7 @@ using LightGraphs, MetaGraphs, GraphPlot
 ## load local code
 include("CollaborationNetworks.jl")
 include("PlotCollaborationNetworks.jl")
+include("StatCollaborationNetworks.jl")
 include("simulations/RandomPublicationNetworks.jl")
 #include("ProcessMTMTrecords.jl")
 #include("ProcessDBLPrecords.jl")
@@ -59,6 +60,201 @@ include("simulations/RandomPublicationNetworks.jl")
 
 # Random networks
 
+## Illustrating cartels
+
+### Authors with equal productivity
+
+We generate a random publication network where all authors produce three papers. Then we create a cartel by that five author invite each others to be a coauthor on each others papers.
+
+```julia
+#k2 = repeat([3], 30)
+#k2 = collect(1:30) .^ 2
+k2 = collect(1:30)
+cartel = collect([1,2,3,29,30])
+noncartel = setdiff(1:length(k2), cartel)
+pnnc, pnwc = generate_rndnet(k2, 1000, cartel, 1.0)
+psnc =pubnetstats(pnnc)
+pswc =pubnetstats(pnwc)
+```
+
+We next analyse, how forming cartels influence the authors publication productivity. First, we calculate several measures for the nodes (authors).
+
+The formation of cartel increases the productivity of its all members. Note, however, that the most productive members' productivity increases less. If the productivity of cartel members are very different then the highly productive members are actually lost in productivity on becoming members iff we use weighted paper numbers as measure of productivity. This suggests that cartels should be formed by authors of similar productivity given that weighted paper numbers is used for ranking authors.
+
+TODO: investigate, how ranking of authors changes by becoming cartel members.
+
+
+```julia
+close("all")
+figure(figsize=(12,8))
+subplot(2,3,1)
+plotcartelseffects(psnc, pswc, :npapers, mytitle="number of papers")
+subplot(2,3,4)
+plotcartelseffects(psnc, pswc, :npapers, f=ordinalrank, mytitle="rank of number of papers")
+subplot(2,3,2)
+plotcartelseffects(psnc, pswc, :wpapers, mytitle="weighted papers")
+subplot(2,3,5)
+plotcartelseffects(psnc, pswc, :wpapers, f=ordinalrank, mytitle="rank of weighted papers")
+subplot(2,3,3)
+hist(psnc[:weights], 0:0.05:1)
+hist(pswc[:weights], 0:0.05:1, alpha=0.5)
+title("weights")
+tight_layout()
+```
+
+
+```julia
+b = hcat(psnc[:npapers][cartel], pswc[:npapers][cartel])
+b[:,2] ./ b[:,1]
+a = hcat(psnc[:wpapers][cartel], pswc[:wpapers][cartel])
+r = a[:,2] ./ a[:,1]
+```
+
+The productivity of non-members of the cartel decreases in almost all cases, if we count the weighted paper numbers. If we count simply the full number of papers their productivity remained unchanged. This indicates, that even using the weighted paper numbers as measure productivity does not correct for forming cartels it does decrease the productivity of collaborators' productivity giving rise to a conflict of interest between members and non-members of cartels which may results in a resistance of non-members to collaborate with cartel members.
+
+```julia
+b = hcat(psnc[:npapers][noncartel], pswc[:npapers][noncartel])
+b[:,2] ./ b[:,1]
+a = hcat(psnc[:wpapers][noncartel], pswc[:wpapers][noncartel])
+a[:,2] ./ a[:,1]
+```
+
+```julia
+b = hcat(psnc[:degree][cartel], pswc[:degree][cartel])
+b[:,2] ./ b[:,1]
+b = hcat(psnc[:degree][noncartel], pswc[:degree][noncartel])
+b[:,2] ./ b[:,1]
+```
+
+The effect of random rewiring the !pubmats.
+
+```julia
+pnnc, pnwc = generate_rndnet(collect(1:30), 50, [1,2,3,29,30], 0.9)
+rpnnc = rewire(pnnc, 100000)
+rpnwc = rewire(pnwc, 100000)
+close("all");
+figure(figsize=(8,4));
+subplot(1,2,1);
+hist(Weights(pnnc[:coga]), 0:0.1:1, label="no cartel");
+hist(Weights(rpnnc[:coga]), 0:0.1:1, label="random, no cartel", alpha=0.5);
+legend();
+subplot(1,2,2);
+hist(Weights(pnwc[:coga]), 0:0.1:1, label="with cartel");
+hist(Weights(rpnwc[:coga]), 0:0.1:1, label="random, with cartel", alpha=0.5);
+legend();
+tight_layout();
+describecartels(pnnc[:coga])
+describecartels(rpnnc[:coga])
+describecartels(pnwc[:coga])
+describecartels(rpnwc[:coga])
+
+```
+
+```julia
+#wM = Weights(colnets[:MTMT])
+#wd = Weights(colnets[:dblp])
+#rwM = Weights(rcolnet[:MTMT1])
+#rwd = Weights(rcolnet[:dblp1])
+#k = round.(collect(1:300) .^ 1.2)
+k = saturatedexpectedpapers(100)
+#k = repeat([3], 50)
+csizes = Dict(2 => 10, 3 => 8, 4 => 3, 5 => 2, 6 => 1)
+cartels = generate_cartels(100, csizes)
+pnnc, pnwc = generate_rndnet(k, 10000, cartels, 0.5)
+rpnnc_1 = rewire(pnnc, 100000)
+rpnwc_1 = rewire(pnwc, 100000)
+rpnnc_2 = rewire(pnnc, 100000)
+rpnwc_2 = rewire(pnwc, 100000)
+close("all");
+figure(figsize=(8,4));
+#subplot(1,2,1);
+semilogy(eCCDF(Weights(pnnc[:coga]))..., label="no cartel");
+semilogy(eCCDF(Weights(rpnnc_1[:coga]))..., label="random1, no cartel");
+semilogy(eCCDF(Weights(rpnnc_2[:coga]))..., label="random2, no cartel");
+#legend();
+#subplot(1,2,2);
+semilogy(eCCDF(Weights(pnwc[:coga]))..., label="with cartel");
+semilogy(eCCDF(Weights(rpnwc_1[:coga]))..., label="random1, with cartel");
+semilogy(eCCDF(Weights(rpnwc_2[:coga]))..., label="random2, with cartel");
+semilogy(eCCDF(wM)..., label="MTMT");
+semilogy(eCCDF(rwM)..., label="random MTMT");
+semilogy(eCCDF(wd)..., label="dblp");
+semilogy(eCCDF(rwd)..., label="random dblp");
+xlabel("weights")
+ylabel("survival function")
+legend();
+tight_layout();
+
+figure(figsize=(8,4));
+loglog(eCCDF(degree(pnnc[:coga]))..., label="no cartel");
+loglog(eCCDF(degree(rpnnc_1[:coga]))..., label="random1, no cartel");
+loglog(eCCDF(degree(rpnnc_2[:coga]))..., label="random2, no cartel");
+loglog(eCCDF(degree(pnwc[:coga]))..., label="with cartel");
+loglog(eCCDF(degree(rpnwc_1[:coga]))..., label="random1, with cartel");
+loglog(eCCDF(degree(rpnwc_2[:coga]))..., label="random2, with cartel");
+loglog(eCCDF(degree(colnets[:MTMT]))..., label="MTMT");
+loglog(eCCDF(degree(rcolnet[:MTMT1]))..., label="random, MTMT");
+loglog(eCCDF(degree(colnets[:dblp]))..., label="dblp");
+loglog(eCCDF(degree(rcolnet[:dblp1]))..., label="random, dblp");
+xlabel("degree")
+ylabel("survival function")
+legend()
+tight_layout()
+
+describecartels(pnnc[:coga])
+describecartels(rpnnc_1[:coga])
+describecartels(rpnnc_2[:coga])
+describecartels(pnwc[:coga])
+describecartels(rpnwc_1[:coga])
+describecartels(rpnwc_2[:coga])
+
+```
+
+
+We create a random network with parameters similar to real datasets.
+
+```julia
+close("all")
+fig = figure(figsize=(8,4.75))
+k_rand = saturatedexpectedpapers(500, 1000000)
+ks = sortperm(k_rand)
+subplot(2,2,1)
+plotloglog(k_rand, "", "Number of papers per authors")
+r_puma = generate_publicationmatrix(k_rand, 10000)
+r_coma = collaborationmatrix(r_puma)
+r_coga = collaborationgraph(r_coma)
+r_puma_c = deepcopy(r_puma)
+cartel = collect(Iterators.flatten([ks[1:3],ks[(end-1):end]])) # cartels from mixed productivity authors
+#cartel = ks[1:5] # cartels from low productivity authors
+#cartel = ks[(end-4):end] # cartels from high productivity authors
+addcartel!(r_puma_c, cartel, 1.0)
+r_coma_c = collaborationmatrix(r_puma_c)
+r_coga_c = collaborationgraph(r_coma_c)
+lx, ly = spring_layout(r_coga_c, C=20)
+graphplot(r_coga_c, lx, ly, filename="rand_g_cart")
+graphplot(r_coga, lx, ly, filename="rand_g")
+npn = papernumbers(r_puma)
+npc = papernumbers(r_puma_c)
+npwn = weightedpapers(r_puma)
+npwc = weightedpapers(r_puma_c)
+subplot(2,2,2)
+for i in cartel
+	plot([1,2], [npn[i], npc[i]])
+	plot([3,4], [npwn[i], npwc[i]])
+end
+subplot(2,2,3)
+plotloglog(degree(r_coga), "no cartel")
+plotloglog(degree(r_coga_c), "with cartel")
+subplot(2,2,4)
+xn, yn = eCCDF(Weights(r_coga))
+xc, yc = eCCDF(Weights(r_coga_c))
+plot(xn, yn, label="no cartel")
+plot(xc, yc, label="with cartel")
+legend()
+tight_layout()
+hcat(weightedpapers(r_puma)[cartel], papernumbers(r_puma)[cartel],
+			weightedpapers(r_puma_c)[cartel], papernumbers(r_puma_c)[cartel])
+```
 
 
 # The datasets
@@ -89,11 +285,11 @@ Here we load and process the available datasets and produce !pubmats, !colmats a
 pubmats = Dict()
 colmats = Dict()
 colnets = Dict()
-pubmats[:MTMT] = read_scimat("MTMT/MTMTpubmat.txt")
-colmats[:MTMT] = read_scimat("MTMT/MTMTcolmat.txt")
+pubmats[:MTMT] = read_scimat("MTMT/MTMTpubmat.mat")
+colmats[:MTMT] = read_scimat("MTMT/MTMTcolmat.mat")
 colnets[:MTMT] = collaborationgraph(colmats[:MTMT])
-pubmats[:dblp] = read_scimat("dblp/dblppubmat.txt")
-colmats[:dblp] = read_scimat("dblp/dblpcolmat.txt")
+pubmats[:dblp] = read_scimat("dblp/dblppubmat.mat")
+colmats[:dblp] = read_scimat("dblp/dblpcolmat.mat")
 colnets[:dblp] = collaborationgraph(colmats[:dblp])
 ```
 
@@ -175,10 +371,10 @@ end
 rpubmat = Dict()
 rcolmat = Dict()
 rcolnet = Dict()
-rpubmat[:dblp1] = read_scimat("dblp/dblppubmat-rewired-1.txt")
-rpubmat[:MTMT1] = read_scimat("MTMT/MTMTpubmat-rewired-1.txt")
-rcolmat[:dblp1] = read_scimat("dblp/dblpcolmat-rewired-1.txt")
-rcolmat[:MTMT1] = read_scimat("MTMT/MTMTcolmat-rewired-1.txt")
+rpubmat[:dblp1] = read_scimat("dblp/dblppubmat-rewired-1.mat")
+rpubmat[:MTMT1] = read_scimat("MTMT/MTMTpubmat-rewired-1.mat")
+rcolmat[:dblp1] = read_scimat("dblp/dblpcolmat-rewired-1.mat")
+rcolmat[:MTMT1] = read_scimat("MTMT/MTMTcolmat-rewired-1.mat")
 rcolnet[:dblp1] = collaborationgraph(rcolmat[:dblp1])
 rcolnet[:MTMT1] = collaborationgraph(rcolmat[:MTMT1])
 Ws = Dict()
