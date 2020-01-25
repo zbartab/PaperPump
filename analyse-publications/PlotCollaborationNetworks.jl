@@ -37,9 +37,13 @@ Plot the distribution of `x` on a log-log scale.
 """
 function plotloglog(x, label="", plottitle="")
 	d = loglogbins(x)
-	plot(log10.(d["kn"]), log10.(d["pk"]), label=label)
+	if label == ""
+		plot(log10.(d["kn"]), log10.(d["pk"]))
+	else
+		plot(log10.(d["kn"]), log10.(d["pk"]), label=label)
+		legend()
+	end
 	scatter(log10.(d["kn"]), log10.(d["pk"]))
-	legend()
 	title(plottitle)
 	xlabel(L"$\log_{10}(k)$")
 	ylabel(L"$\log_{10}(p_k)$")
@@ -52,16 +56,10 @@ end
 
 Produce a pdf plot of graph `g`
 """
-function graphplot(g; cutoff=0.4, backend=PDF, filename="proba",
-									 nodelabel=true, layout=random_layout)
+function graphplot(g, loc_x, loc_y; cutoff=0.4, backend=PDF, filename="proba",
+									 nodelabel=true)
 	backend == PDF && (filename *= ".pdf")
 	backend == PNG && (filename *= ".png")
-	W = Weights(g)
-	tocutoff = W .> cutoff
-	edgewidth = ones(length(W))
-	edgewidth[tocutoff] .= 5
-	edgecolor = [colorant"lightgrey" for i in 1:length(W)]
-	edgecolor[tocutoff] .= colorant"black"
 	nodesize = degree(g)
 	if nodelabel
 		nodelabs = labels(g)
@@ -72,15 +70,66 @@ function graphplot(g; cutoff=0.4, backend=PDF, filename="proba",
 	#nodefillc = range(colorant"lightsalmon", stop=colorant"darksalmon",
 										#length=nv(g))
 	nodefillc = colorant"turquoise"
-	if sum(tocutoff) == 0
-		maxlinewidth = 0.2
+	if ne(g) == 0
+		Compose.draw(backend(filename, 50cm, 50cm),
+								 gplot(g, loc_x, loc_y, nodelabel=nodelabs,
+											 nodefillc=nodefillc))
 	else
-		maxlinewidth = 2
+		W = Weights(g)
+		tocutoff = W .> cutoff
+		edgewidth = ones(length(W))
+		edgewidth[tocutoff] .= 5
+		edgecolor = [colorant"lightgrey" for i in 1:length(W)]
+		edgecolor[tocutoff] .= colorant"darkgrey"
+		if sum(tocutoff) == 0
+			maxlinewidth = 0.4
+		else
+			maxlinewidth = 2
+		end
+		Compose.draw(backend(filename, 50cm, 50cm),
+								 gplot(g, loc_x, loc_y, edgelinewidth=edgewidth,
+											 EDGELINEWIDTH=maxlinewidth, nodesize=nodesize,
+											 nodelabel=nodelabs,
+											 nodefillc=nodefillc, edgestrokec=edgecolor))
 	end
-	Compose.draw(backend(filename, 50cm, 50cm),
-							 gplot(g, layout=layout, edgelinewidth=edgewidth,
-										 EDGELINEWIDTH=maxlinewidth, nodesize=nodesize,
-										 nodelabel=nodelabs,
-										 nodefillc=nodefillc, edgestrokec=edgecolor))
+	return nothing
+end
+function graphplot(g; layout::Function=random_layout, keyargs...)
+	graphplot(g, layout(g)...; keyargs...)
+	return nothing
 end
 
+"""
+    donothing(x)
+
+Do nothing, just return `x`. It acts as a placeholder.
+"""
+function donothing(x)
+	return x
+end
+
+"""
+    plotcartelseffects(psnc, pswc, measure, mytitle)
+
+Plot how the authors' measure changes as a result of adding a cartel to
+the pubkication network.
+"""
+function plotcartelseffects(psnc, pswc, measure; f=donothing, mytitle="")
+	dx = 0.3
+	boxplot(f(psnc[measure])[cartel], patch_artist=true, positions=[1],
+					boxprops=Dict("facecolor" => "blue"))
+	boxplot(f(pswc[measure])[cartel], patch_artist=true, positions=[2],
+					boxprops=Dict("facecolor" => "lightblue"))
+	boxplot(f(psnc[measure])[noncartel], patch_artist=true, positions=[3],
+					boxprops=Dict("facecolor" => "red"))
+	boxplot(f(pswc[measure])[noncartel], patch_artist=true, positions=[4],
+					boxprops=Dict("facecolor" => "orange"))
+	for i in cartel
+		plot([1.0+dx,2.0-dx], [f(psnc[measure])[i], f(pswc[measure])[i]])
+	end
+	for i in noncartel
+		plot([3.0+dx,4.0-dx], [f(psnc[measure])[i], f(pswc[measure])[i]])
+	end
+	title(mytitle)
+	tight_layout()
+end
