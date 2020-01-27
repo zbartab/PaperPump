@@ -131,6 +131,17 @@ end
 Calculate the empirical complementary cummulative distribution function
 of `x`.
 """
+function eCCDF(x::Array{Float64, 1})
+	hx = histogram(x)
+	xs = sort(collect(keys(hx)))
+	y = Int[]
+	for k in xs
+		push!(y, hx[k])
+	end
+	y = 1 .- (cumsum(y) ./ sum(y))
+	y = vcat(1, y[1:(end-1)])
+	return xs, y
+end
 function eCCDF(x::Array{Int, 1})
 	hx = histogram(x)
 	xs = sort(collect(keys(hx)))
