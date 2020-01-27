@@ -129,19 +129,49 @@ b[:,2] ./ b[:,1]
 The effect of random rewiring the !pubmats.
 
 ```julia
-pnnc, pnwc = generate_rndnet(collect(1:30), 50, [1,2,3,29,30], 0.9)
-rpnnc = rewire(pnnc, 100000)
-rpnwc = rewire(pnwc, 100000)
+#pnnc, pnwc = generate_rndnet(collect(1:30), 500, [1,2,3,29,30], 0.9)
+k = saturatedexpectedpapers(1000)
+pnnc, pnwc = generate_rndnet(k, 100000, [1,2,3,29,30], 0.9)
+Wnc = Weights(pnnc[:coga])
+Wwc = Weights(pnwc[:coga])
 close("all");
-figure(figsize=(8,4));
-subplot(1,2,1);
-hist(Weights(pnnc[:coga]), 0:0.1:1, label="no cartel");
-hist(Weights(rpnnc[:coga]), 0:0.1:1, label="random, no cartel", alpha=0.5);
-legend();
-subplot(1,2,2);
-hist(Weights(pnwc[:coga]), 0:0.1:1, label="with cartel");
-hist(Weights(rpnwc[:coga]), 0:0.1:1, label="random, with cartel", alpha=0.5);
-legend();
+figure(figsize=(8,4.5));
+subplot(2,2,2);
+for i in 1:10
+	rpnwc = rewire(pnwc, 100000)
+	semilogy(eCCDF(Weights(rpnwc[:coga]))..., label="", color="gray", alpha=0.10);
+end
+semilogy(eCCDF(Wwc)..., ".-", label="with cartel");
+xlim(-0.05,1.05)
+yl = ylim()
+#legend();
+title("cartels added")
+#xlabel("weights")
+ylabel("CCDF")
+subplot(2,2,1);
+for i in 1:10
+	rpnnc = rewire(pnnc, 100000)
+	semilogy(eCCDF(Weights(rpnnc[:coga]))..., label="", color="gray", alpha=0.10);
+end
+semilogy(eCCDF(Wnc)..., ".-", label="no cartels");
+xlim(-0.05,1.05)
+ylim(yl)
+#legend();
+title("no cartels added")
+#xlabel("weights")
+ylabel("CCDF")
+subplot(2,2,3)
+hist(Wnc, 0:0.1:1)
+xlim(-0.05,1.05)
+xlabel("weights")
+ylabel("frequency")
+#title("no cartels added")
+subplot(2,2,4)
+hist(Wwc, 0:0.1:1)
+xlim(-0.05,1.05)
+ylabel("frequency")
+xlabel("weights")
+#title("cartels added")
 tight_layout();
 describecartels(pnnc[:coga])
 describecartels(rpnnc[:coga])
@@ -166,7 +196,7 @@ rpnwc_1 = rewire(pnwc, 100000)
 rpnnc_2 = rewire(pnnc, 100000)
 rpnwc_2 = rewire(pnwc, 100000)
 close("all");
-figure(figsize=(8,4));
+figure(figsize=(8,4.5));
 #subplot(1,2,1);
 semilogy(eCCDF(Weights(pnnc[:coga]))..., label="no cartel");
 semilogy(eCCDF(Weights(rpnnc_1[:coga]))..., label="random1, no cartel");
@@ -182,7 +212,7 @@ semilogy(eCCDF(wd)..., label="dblp");
 semilogy(eCCDF(rwd)..., label="random dblp");
 xlabel("weights")
 ylabel("survival function")
-legend();
+legend(ncol=2);
 tight_layout();
 
 figure(figsize=(8,4));
@@ -198,7 +228,7 @@ loglog(eCCDF(degree(colnets[:dblp]))..., label="dblp");
 loglog(eCCDF(degree(rcolnet[:dblp1]))..., label="random, dblp");
 xlabel("degree")
 ylabel("survival function")
-legend()
+legend(ncol=2);
 tight_layout()
 
 describecartels(pnnc[:coga])
