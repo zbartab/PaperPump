@@ -57,7 +57,7 @@ end
 Produce a pdf plot of graph `g`
 """
 function graphplot(g, loc_x, loc_y; cutoff=0.4, backend=PDF, filename="proba",
-									 nodelabel=true)
+									 nodelabel=true, maxlinewidth=5, width=50cm, height=50cm)
 	backend == PDF && (filename *= ".pdf")
 	backend == PNG && (filename *= ".png")
 	nodesize = degree(g)
@@ -71,22 +71,18 @@ function graphplot(g, loc_x, loc_y; cutoff=0.4, backend=PDF, filename="proba",
 										#length=nv(g))
 	nodefillc = colorant"turquoise"
 	if ne(g) == 0
-		Compose.draw(backend(filename, 50cm, 50cm),
+		Compose.draw(backend(filename, width, height),
 								 gplot(g, loc_x, loc_y, nodelabel=nodelabs,
 											 nodefillc=nodefillc))
 	else
 		W = Weights(g)
 		tocutoff = W .> cutoff
-		edgewidth = ones(length(W))
-		edgewidth[tocutoff] .= 5
+		edgewidth = 5.0*W
+		maxlinewidth *= maximum(W)
+		#edgewidth[tocutoff] .= 5
 		edgecolor = [colorant"lightgrey" for i in 1:length(W)]
 		edgecolor[tocutoff] .= colorant"darkgrey"
-		if sum(tocutoff) == 0
-			maxlinewidth = 0.4
-		else
-			maxlinewidth = 2
-		end
-		Compose.draw(backend(filename, 50cm, 50cm),
+		Compose.draw(backend(filename, width, height),
 								 gplot(g, loc_x, loc_y, edgelinewidth=edgewidth,
 											 EDGELINEWIDTH=maxlinewidth, nodesize=nodesize,
 											 nodelabel=nodelabs,
