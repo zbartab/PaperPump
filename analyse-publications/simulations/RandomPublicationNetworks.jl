@@ -109,6 +109,18 @@ function generate_publicationmatrix(k_rand, maxpapers=100_000)
 	end
 	return PubMat(pubnet, auIDs, paIDs)
 end
+function generate_publicationmatrix(mat::SparseMatrixCSC{Float64,Int64})
+	p, A = size(mat)
+	auIDs = Dict{String,Int64}()
+	for i in 1:A
+		auIDs["A$(i)"] = i
+	end
+	paIDs = Dict{String,Int64}()
+	for i in 1:p
+		paIDs["p$(i)"] = i
+	end
+	return PubMat(mat, auIDs, paIDs)
+end
 
 """
     rnd_collaborationnetwork(A, gamma, k_sat, k_cut, maxpapers, p)
