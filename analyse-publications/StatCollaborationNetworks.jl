@@ -164,14 +164,16 @@ previous one except that authors listed in `cartel` form a cartel, i.e.
 they invite each others to be coauthors with probability `pc`.
 """
 function generate_rndnet(k, p, cartel::Array{Int64,1}, pc;
-												 filename="proba", doplot=true)
+												 filename="proba", doplot=true, papercutoff=0)
 	pnnc = Dict()
 	pnwc = Dict()
 	pnnc[:puma] = generate_publicationmatrix(k, p)
+	papercutoff > 0 && (pnnc[:puma] = selectauthors(pnnc[:puma], papercutoff))
 	pnnc[:coma] = collaborationmatrix(pnnc[:puma])
 	pnnc[:coga] = collaborationgraph(pnnc[:coma])
 	pnwc[:puma] = deepcopy(pnnc[:puma])
 	addcartel!(pnwc[:puma], cartel, pc)
+	papercutoff > 0 && (pnwc[:puma] = selectauthors(pnwc[:puma], papercutoff))
 	pnwc[:coma] = collaborationmatrix(pnwc[:puma])
 	pnwc[:coga] = collaborationgraph(pnwc[:coma])
 	lx, ly = spring_layout(pnwc[:coga], C=20)
@@ -182,16 +184,18 @@ function generate_rndnet(k, p, cartel::Array{Int64,1}, pc;
 	return (pnnc, pnwc)
 end
 function generate_rndnet(k, p, cartel::Array{Array{Int64,1},1}, pc;
-												 filename="proba", doplot=true)
+												 filename="proba", doplot=true, papercutoff=0)
 	pnnc = Dict()
 	pnwc = Dict()
 	pnnc[:puma] = generate_publicationmatrix(k, p)
+	papercutoff > 0 && (pnnc[:puma] = selectauthors(pnnc[:puma], papercutoff))
 	pnnc[:coma] = collaborationmatrix(pnnc[:puma])
 	pnnc[:coga] = collaborationgraph(pnnc[:coma])
 	pnwc[:puma] = deepcopy(pnnc[:puma])
 	for c in cartel
 		addcartel!(pnwc[:puma], c, pc)
 	end
+	papercutoff > 0 && (pnwc[:puma] = selectauthors(pnwc[:puma], papercutoff))
 	pnwc[:coma] = collaborationmatrix(pnwc[:puma])
 	pnwc[:coga] = collaborationgraph(pnwc[:coma])
 	lx, ly = spring_layout(pnwc[:coga], C=20)
@@ -209,15 +213,42 @@ Generate an array of arrays containing members of cartels randomly drawn
 from `nauthors` number of authors. The sizes of the generated cartels
 are given by `cartel_sizes`, a `Dict`.
 """
-function generate_cartels(nauthors::Int, cartel_sizes::Dict{Int, Int})
+function generate_cartels(nauthors, cartel_sizes)
 	cartels = Array{Int64,1}[]
-	for c_size in keys(cartel_sizes)
-		for i in 1:cartel_sizes[c_size]
-			a = sample(1:nauthors, c_size, replace=false)
-			push!(cartels, a)
+	nmembers = 0
+	for k in keys(cartel_sizes)
+		nmembers += k*cartel_sizes[k]
+	end
+	members = sample(1:nauthors, nmembers, replace=false)
+	i = 1
+	for k in keys(cartel_sizes)
+		for s in 1:cartel_sizes[k]
+			j = i + k
+			push!(cartels, members[i:(j-1)])
+			i = j
 		end
 	end
 	return cartels
+end
+
+"""
+    prop_cartels(nmembers, sample_cartel)
+
+Make a cartel size distribution based on the distribution given in
+`sample_cartel`. The generated cartel size distribution containse no
+more than `nmembers` members.
+"""
+function prop_cartels(nmembers, sample_cartel)
+	css = Int[]
+	for k in keys(sample_cartel)
+		for i in 1:sample_cartel[k]
+			push!(css, k)
+		end
+	end
+	shuffle!(css)
+	cs = cumsum(css)
+	css = css[cs .<= nmembers]
+	return histogram(css)
 end
 
 """

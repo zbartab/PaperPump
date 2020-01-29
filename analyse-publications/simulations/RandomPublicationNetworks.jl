@@ -123,6 +123,108 @@ function generate_publicationmatrix(mat::SparseMatrixCSC{Float64,Int64})
 end
 
 """
+    grow_pubnet(k, p_new, alfa)
+
+Grow a full publication network.
+"""
+function grow_pubnet(k::Array{Int64,1}, p_new::Float64, alfa::Float64)
+	pn = Dict()
+	pm = grow_publicationmatrix(k, p_new, alfa)
+	pn[:puma] = generate_publicationmatrix(pm)
+	pn[:coma] = collaborationmatrix(pn[:puma])
+	pn[:coga] = collaborationgraph(pn[:coma])
+	return pn
+end
+
+"""
+    grow_publicationmatrix(k, p_new, alfa)
+
+Grow a publication matrix similarly to the Barabási-Albert model. `k`
+gives the number of papers each author should have, `p_new` is the
+probability to start a new paper and `alfa` is the exponent to shape the
+preferential attachement.
+
+An author start a new paper with probability `p_new`. With probability
+`1-p_new` it joins a paper already started by someone else. The
+propbability to join a given paper is proportional to the number of
+authors on that particular paper. This later proportional propbability
+is shaped by `alfa`.
+"""
+function grow_publicationmatrix(k::Array{Int64,1}, p_new::Float64,
+																alfa::Float64)
+	maxpapers = sum(k)
+	A = length(k)
+	pm = spzeros(maxpapers, A)
+	papers = zeros(Int, maxpapers)
+	pk = zeros(Float64, maxpapers)
+	# set the initial authors' node
+	npapers = 0 # counter of papers
+	for j in 1:3
+		pm[(npapers+1):(npapers+k[j]),j] .= 1.0
+		npapers += k[j]
+	end
+	papers[1:npapers] .= 1
+	pk[1:npapers] .= update_pk(papers[1:npapers], alfa)
+	# add new authors
+	for j in 4:A
+		for p in 1:k[j]
+			# step over the number of papers author j has
+			if rand() < p_new
+				# start new paper
+				npapers += 1
+				pm[npapers, j] = 1.0
+				papers[npapers] = 1
+				pk[1:npapers] .= update_pk(papers[1:npapers], alfa)
+			else
+				# join existing paper
+				i = 0
+				ii = 0
+				while true
+					ii += 1
+					i = papertojoin(pk)
+					(pm[i,j] == 0.0 || ii > 2*npapers) && break
+				end
+				pm[i,j] = 1.0
+				papers[i] += 1
+				pk[1:npapers] .= update_pk(papers[1:npapers], alfa)
+			end
+		end
+	end
+	maxpapers = maximum(rowvals(pm))
+	pm = pm[1:maxpapers,:]
+	return pm
+end
+
+"""
+    update_pk(pprs, alfa)
+
+Update the probability distribution of choosing an existing paper to
+join. `pk` contains the distribution, `papers` has the number of authors
+for each paper.
+"""
+function update_pk(pprs::Array{Int64,1}, alfa::Float64)
+	pk = pprs .^ alfa
+	return pk ./ sum(pk)
+end
+
+"""
+    papertojoin(pk)
+
+Return the index of already exisiting paper to join. The probability
+distribution of choosing a paper is given in `pk`.
+"""
+function papertojoin(pk::Array{Float64,})
+	l_pk = length(pk)
+	p = rand()
+	sump = 0.0
+	for i in 1:l_pk
+		sump += pk[i]
+		sump > p && return i
+	end
+	#return l_pk
+end
+
+"""
     rnd_collaborationnetwork(A, gamma, k_sat, k_cut, maxpapers, p)
 
 Create a random collaboration network.
@@ -193,7 +295,7 @@ function addcartel!(pubmat::PubMat, cartel::Array{Int,1}, collprob=1.0)
 end
 
 """
-    showpubmat)pubmat)
+    showpubmat(pubmat)
 
 Visualise the collaboration graph created from the publication matrix
 `pubmat`.
