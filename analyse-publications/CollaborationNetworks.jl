@@ -37,10 +37,12 @@ function collaborationmatrix(pubmat::PubMat)
 	A = size(pubmat.mat, 2)
 	colmat = spzeros(A,A)
 	for i in 1:(A-1)
+		mi = pubmat.mat[:,i]
 		for j in (i+1):A
-			icapj = sum(pubmat.mat[:, i] .* pubmat.mat[:, j])
+			mj = pubmat.mat[:,j]
+			icapj = sum(mi .* mj)
 			icapj == 0.0 && continue
-			icupj = sum(pubmat.mat[:,i]) + sum(pubmat.mat[:,j]) - icapj
+			icupj = sum(mi) + sum(mj) - icapj
 			wij = icapj/icupj
 			colmat[i,j] = wij
 		end
