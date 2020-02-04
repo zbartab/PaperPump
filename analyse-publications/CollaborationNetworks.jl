@@ -81,6 +81,22 @@ function Weights(colnet)
 end
 
 """
+		strength(colmat)
+
+Calculate the strength of each node in `colmat`. Strength of node i is
+the sum of weights of edges connected to node i.
+"""
+function strength(colmat::ColMat)
+	m = colmat.mat
+	n = size(m, 1)
+	s = Array{Float64,1}(undef, n)
+	for i in 1:n
+		s[i] = sum(m[i,:]) + sum(m[:,i])
+	end
+	return s
+end
+
+"""
     labels(g)
 
 Return the vertex labels in graph `g`
@@ -101,6 +117,34 @@ function subnet(colnet, cutoff)
 	heavyW = filter_edges(colnet, (g, e) ->
 												LightGraphs.weights(g)[src(e), dst(e)] > cutoff)
 	return colnet[heavyW]
+end
+
+"""
+    getauthorIDs(colnet)
+
+Return the author IDs in the collaboration graph `colnet`.
+"""
+function getauthorIDs(colnet::MetaGraph{Int64, Float64})
+	ids = String[]
+	for v in vertices(colnet)
+		id = get_prop(colnet, v, :id)
+		push!(ids, id)
+	end
+	return ids
+end
+
+"""
+    getauthorindex(ids, coma)
+
+Return the indices in collaboration matrix `coma` of authors listed in
+`ids`.
+"""
+function getauthorindex(ids::Array{String,1}, coma::ScienceMat)
+	indices = Int[]
+	for id in ids
+		push!(indices, coma.authorIDs[id])
+	end
+	return indices
 end
 
 """
