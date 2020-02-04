@@ -353,7 +353,7 @@ tight_layout()
 ```julia
 c_off = 0.4
 #MTMT[:strongs] = subnet(MTMT[:coga], c_off)
-#wp = weightedpapers(MTMT[:puma])
+wp = weightedpapers(MTMT[:puma])
 id_cm = getauthorIDs(MTMT[:strongs])
 id_all = getauthorIDs(MTMT[:coga])
 in_cm = getauthorindex(id_cm, MTMT[:puma])
@@ -366,9 +366,31 @@ for i in 1:20
 end
 loglog(eCCDF(wp[in_cm])..., ".-", label="cartel members")
 legend()
-xlabel("papers per author")
+xlabel("weighted papers per author")
 ylabel("CCDF")
 title("MTMT dataset")
+tight_layout()
+```
+
+```julia
+c_off = 0.4
+#dblp[:strongs] = subnet(dblp[:coga], c_off)
+wp = weightedpapers(dblp[:puma])
+id_cm = getauthorIDs(dblp[:strongs])
+id_all = getauthorIDs(dblp[:coga])
+in_cm = getauthorindex(id_cm, dblp[:puma])
+in_all = getauthorindex(id_all, dblp[:puma])
+in_nm = setdiff(in_all, in_cm)
+figure()
+for i in 1:20
+	inm = sample(in_nm, length(in_cm), replace=false)
+	loglog(eCCDF(wp[inm])..., ".-", color="lightgray")
+end
+loglog(eCCDF(wp[in_cm])..., ".-", label="cartel members")
+legend()
+xlabel("weighted papers per author")
+ylabel("CCDF")
+title("dblp dataset")
 tight_layout()
 ```
 
