@@ -131,6 +131,7 @@ function grow_pubnet(k::Array{Int64,1}, p_new::Float64, alfa::Float64)
 	pn = Dict()
 	pm = grow_publicationmatrix(k, p_new, alfa)
 	pn[:puma] = generate_publicationmatrix(pm)
+	pn[:puma] = selectauthors(pn[:puma], 3)
 	pn[:coma] = collaborationmatrix(pn[:puma])
 	pn[:coga] = collaborationgraph(pn[:coma])
 	return pn
@@ -154,15 +155,14 @@ function grow_publicationmatrix(k::Array{Int64,1}, p_new::Float64,
 																alfa::Float64)
 	maxpapers = sum(k)
 	A = length(k)
-	pm = spzeros(maxpapers, A)
+	pm = spzeros(maxpapers, A+3)
 	papers = zeros(Int, maxpapers)
 	pk = zeros(Float64, maxpapers)
 	# set the initial authors' node
-	npapers = 0 # counter of papers
-	for j in 1:3
-		pm[(npapers+1):(npapers+k[j]),j] .= 1.0
-		npapers += k[j]
-	end
+	pm[1,1] = 1.0
+	pm[2,2] = 1.0
+	pm[3,3] = 1.0
+	npapers = 3 # counter of papers
 	papers[1:npapers] .= 1
 	pk[1:npapers] .= update_pk(papers[1:npapers], alfa)
 	# add new authors
@@ -174,7 +174,6 @@ function grow_publicationmatrix(k::Array{Int64,1}, p_new::Float64,
 				npapers += 1
 				pm[npapers, j] = 1.0
 				papers[npapers] = 1
-				pk[1:npapers] .= update_pk(papers[1:npapers], alfa)
 			else
 				# join existing paper
 				i = 0
@@ -182,16 +181,22 @@ function grow_publicationmatrix(k::Array{Int64,1}, p_new::Float64,
 				while true
 					ii += 1
 					i = papertojoin(pk)
-					(pm[i,j] == 0.0 || ii > 2*npapers) && break
+					(pm[i,j] == 0.0 || ii > npapers) && break
 				end
-				pm[i,j] = 1.0
-				papers[i] += 1
-				pk[1:npapers] .= update_pk(papers[1:npapers], alfa)
+				if ii > npapers
+					npapers += 1
+					pm[npapers, j] = 1.0
+					papers[npapers] = 1
+				else
+					pm[i,j] = 1.0
+					papers[i] += 1
+				end
 			end
+			pk[1:npapers] .= update_pk(papers[1:npapers], alfa)
 		end
 	end
 	maxpapers = maximum(rowvals(pm))
-	pm = pm[1:maxpapers,:]
+	pm = pm[1:maxpapers, 4:end]
 	return pm
 end
 
