@@ -60,6 +60,319 @@ include("simulations/RandomPublicationNetworks.jl")
 
 # Random networks
 
+## Approaching real networks
+
+We first load real networks.
+
+```julia
+MTMT = Dict()
+MTMT[:puma] = read_scimat("MTMT/MTMTpubmat.mat")
+MTMT[:coma] = read_scimat("MTMT/MTMTcolmat.mat")
+MTMT[:coga] = collaborationgraph(MTMT[:coma])
+rMTMT = Dict()
+rMTMT[:puma] =
+read_scimat("MTMT/MTMTpubmat-rewired-1.mat")
+rMTMT[:coma] =
+read_scimat("MTMT/MTMTcolmat-rewired-1.mat")
+rMTMT[:coga] = collaborationgraph(rMTMT[:coma])
+dblp = Dict()
+dblp[:puma] = read_scimat("dblp/dblppubmat.mat")
+dblp[:coma] = read_scimat("dblp/dblpcolmat.mat")
+dblp[:coga] = collaborationgraph(dblp[:coma])
+rdblp = Dict()
+rdblp[:puma] =
+read_scimat("dblp/dblppubmat-rewired-1.mat")
+rdblp[:coma] =
+read_scimat("dblp/dblpcolmat-rewired-1.mat")
+rdblp[:coga] = collaborationgraph(rdblp[:coma])
+```
+
+We calculate some measures for the networks.
+
+```julia
+cMTMT = describecartels(MTMT[:coga], 0.4)
+wMTMT = Weights(MTMT[:coga])
+dMTMT = degree(MTMT[:coga])
+rwMTMT = Weights(rMTMT[:coga])
+rdMTMT = degree(rMTMT[:coga])
+cdblp = describecartels(dblp[:coga], 0.4)
+wdblp = Weights(dblp[:coga])
+ddblp = degree(dblp[:coga])
+rwdblp = Weights(rdblp[:coga])
+rddblp = degree(rdblp[:coga])
+```
+
+
+The networks' structure.
+
+```julia
+close("all")
+figure(figsize=(8,4))
+subplot(1,2,1)
+semilogy(eCCDF(wdblp)..., ".-", label="dblp")
+semilogy(eCCDF(rwdblp)..., ".-", label="dblp randomised")
+semilogy(eCCDF(wMTMT)..., ".-", label="MTMT")
+semilogy(eCCDF(rwMTMT)..., ".-", label="MTMT randomised")
+xlabel("weights")
+ylabel("CCDF")
+legend()
+subplot(1,2,2)
+loglog(eCCDF(ddblp[ddblp .> 0])..., ".-", label="dblp")
+loglog(eCCDF(rddblp[rddblp .> 0])..., ".-", label="dblp randomised")
+loglog(eCCDF(dMTMT[dMTMT .> 0])..., ".-", label="MTMT")
+loglog(eCCDF(rdMTMT[rdMTMT .> 0])..., ".-", label="MTMT randomised")
+xlabel("degrees")
+ylabel("CCDF")
+legend()
+tight_layout()
+```
+
+The two real networks differ substantially from their randomised counterparts. The real networks are less dense than the randomised ones, their degree distributions indicate. On the other hand, the connections between nodes (authors) are much stronger than in randomised networks. In randomised networks no link with weight higher than 0.2 occurs, oppositely to real networks, where weights of around 1 is rather common.
+
+## Modularity
+
+We calculate local clustering coefficients for the real networks and their randomised counterparts. According to [Barabási's book](http://networksciencebook.com/chapter/9#hierarchical), the relation between local clustering coefficients and the nodes' degrees should be linear on a log-log plot, i.e. local clustering coefficients should decrease with degrees.
+
+First, we calculate the local clustering coefficients.
+
+```julia
+lcMTMT = local_clustering_coefficient(MTMT[:coga])
+lcdblp = local_clustering_coefficient(dblp[:coga])
+rlcMTMT = local_clustering_coefficient(rMTMT[:coga])
+rlcdblp = local_clustering_coefficient(rdblp[:coga])
+```
+
+We also obtain the strongly connected nodes to see how these nodes are placed in the following plots. (Note, randomised nets do not have strongly connected nodes.)
+
+```julia
+c_off = 0.7
+MTMT[:strongs] = subnet(MTMT[:coga], c_off)
+dblp[:strongs] = subnet(dblp[:coga], c_off)
+a = getauthorIDs(MTMT[:strongs])
+istMTMT = getauthorindex(a, MTMT[:coma])
+a = getauthorIDs(dblp[:strongs])
+istdblp = getauthorindex(a, dblp[:coma])
+```
+
+
+Next, the distributions of the local clustering coefficients.
+
+```julia
+figure()
+semilogy(eCCDF(lcMTMT)..., ".-", label="MTMT")
+semilogy(eCCDF(lcdblp)..., ".-", label="dblp")
+semilogy(eCCDF(rlcMTMT)..., ".-", label="rand MTMT")
+semilogy(eCCDF(rlcdblp)..., ".-", label="rand dblp")
+legend()
+xlabel("local clustering coefficients")
+ylabel("CCDF")
+tight_layout()
+```
+
+According to this plot, nodes in the real networks have high clustering coefficients more frequently than nodes in randomised counterparts.
+
+Then the log-log plots between degrees and local clustering coefficients.
+
+```julia
+figure(figsize=(8,4.5))
+subplot(2,2,1)
+loglog(dMTMT, lcMTMT, ".", label="MTMT", alpha=0.01)
+loglog(dMTMT[istMTMT], lcMTMT[istMTMT], ".", label="strong MTMT")
+legend()
+xlabel(L"degrees, $k$")
+ylabel(L"$C(k)$")
+subplot(2,2,2)
+loglog(ddblp, lcdblp, ".", label="dblp", alpha=0.01)
+loglog(ddblp[istdblp], lcdblp[istdblp], ".", label="strong dblp")
+legend()
+xlabel(L"degrees, $k$")
+ylabel(L"$C(k)$")
+subplot(2,2,3)
+loglog(rdMTMT, rlcMTMT, ".", label="rand MTMT", alpha=0.01)
+legend()
+xlabel(L"degrees, $k$")
+ylabel(L"$C(k)$")
+subplot(2,2,4)
+loglog(rddblp, rlcdblp, ".", label="rand dblp", alpha=0.01)
+legend()
+xlabel(L"degrees, $k$")
+ylabel(L"$C(k)$")
+tight_layout()
+```
+
+According to the above plots, there is a decreasing relationship between nodes' degree and local clustering coefficients. This suggests a hierarchical structure in each network. The interesting point is that the randomised networks also have a decreasing relationship, but the [Figure 9.14 in Barabási's book](http://networksciencebook.com/#figure-9-14) suggests that random rewiring a hierarchical network should lead a constant relationship. Note, however, we randomly rewire here the publication networks and not the collaboration networks. Nevertheless, the distribution of local clustering coefficients suggest that community structure of randomised networks is not so obvious.
+
+The nodes being part of strongly connected components spread all over the space occupied by other nodes in the degree vs local clustering components plane. They seem to aggregate towards higher clustering coefficients, but this pattern is not very obvious in the MTMT dataset.
+
+```julia
+sMTMT = strength(MTMT[:coma])
+sdblp = strength(dblp[:coma])
+rsMTMT = strength(rMTMT[:coma])
+rsdblp = strength(rdblp[:coma])
+```
+
+```julia
+figure(figsize=(8,4.5))
+subplot(2,2,1)
+loglog(sMTMT, lcMTMT, ".", label="MTMT", alpha=0.05)
+loglog(sMTMT[istMTMT], lcMTMT[istMTMT], ".", label="strong MTMT")
+legend()
+xlabel("strength")
+ylabel(L"$C(k)$")
+subplot(2,2,2)
+loglog(sdblp, lcdblp, ".", label="dblp", alpha=0.05)
+loglog(sdblp[istdblp], lcdblp[istdblp], ".", label="strong dblp")
+legend()
+xlabel("strength")
+ylabel(L"$C(k)$")
+subplot(2,2,3)
+loglog(rsMTMT, rlcMTMT, ".", label="rand MTMT", alpha=0.05)
+legend()
+xlabel("strength")
+ylabel(L"$C(k)$")
+subplot(2,2,4)
+loglog(rsdblp, rlcdblp, ".", label="rand dblp", alpha=0.05)
+legend()
+xlabel("strength")
+ylabel(L"$C(k)$")
+tight_layout()
+```
+
+There is no strong relationship between the local clustering coefficient of a node and its strength, with the exception of the randomised MTMT dataset. Strongly connected nodes tend to have high strength and high local clustering coefficient.
+
+```julia
+figure(figsize=(8,4.5))
+subplot(2,2,1)
+loglog(sMTMT ./ dMTMT, lcMTMT, ".", label="MTMT", alpha=0.05)
+loglog(sMTMT[istMTMT] ./ dMTMT[istMTMT], lcMTMT[istMTMT], ".", 
+		label="strong MTMT")
+legend()
+xlabel("average strength")
+ylabel(L"$C(k)$")
+subplot(2,2,2)
+loglog(sdblp ./ ddblp, lcdblp, ".", label="dblp", alpha=0.05)
+loglog(sdblp[istdblp] ./ ddblp[istdblp], lcdblp[istdblp], ".", 
+		label="strong dblp")
+legend()
+xlabel("average strength")
+ylabel(L"$C(k)$")
+subplot(2,2,3)
+loglog(rsMTMT ./ rdMTMT, rlcMTMT, ".", label="rand MTMT", alpha=0.05)
+legend()
+xlabel("average strength")
+ylabel(L"$C(k)$")
+subplot(2,2,4)
+loglog(rsdblp ./ rddblp, rlcdblp, ".", label="rand dblp", alpha=0.05)
+legend()
+xlabel("average strength")
+ylabel(L"$C(k)$")
+tight_layout()
+```
+
+There is clear positive relationship between local clustering coefficient and average strength of nodes. Nodes with strong links tends to be cluster at high clustering coefficient and large strength values. Note, however, that for a given strength, strongly connected nodes have rather low local clustering coefficients.
+
+```julia
+figure(figsize=(8,4.5))
+subplot(2,2,1)
+loglog(sMTMT, dMTMT, ".", label="MTMT", alpha=0.1)
+loglog(sMTMT[istMTMT], dMTMT[istMTMT], ".", label="strong MTMT")
+legend()
+xlabel("stregth")
+ylabel("degree")
+subplot(2,2,2)
+loglog(sdblp, ddblp, ".", label="dblp", alpha=0.1)
+loglog(sdblp[istdblp], ddblp[istdblp], ".", label="strong dblp")
+legend()
+xlabel("stregth")
+ylabel("degree")
+subplot(2,2,3)
+loglog(rsMTMT, rdMTMT, ".", label="MTMT")
+legend()
+xlabel("stregth")
+ylabel("degree")
+subplot(2,2,4)
+loglog(rsdblp, rddblp, ".", label="dblp")
+legend()
+xlabel("stregth")
+ylabel("degree")
+tight_layout()
+```
+
+Not surprisingly, nodes of high strength have many connections (high degree). The strongly connected nodes are restricted to have high strength and relatively low degree.
+
+## Productivity of members vs non-members
+
+MTMT dataset:
+
+```julia
+c_off = 0.4
+MTMT[:strongs] = subnet(MTMT[:coga], c_off)
+a = papernumbers(MTMT[:puma])
+id_cm = getauthorIDs(MTMT[:strongs])
+id_all = getauthorIDs(MTMT[:coga])
+in_cm = getauthorindex(id_cm, MTMT[:puma])
+in_all = getauthorindex(id_all, MTMT[:puma])
+in_nm = setdiff(in_all, in_cm)
+figure()
+for i in 1:20
+	inm = sample(in_nm, length(in_cm), replace=false)
+	loglog(eCCDF(a[inm])..., ".-", color="lightgray")
+end
+loglog(eCCDF(a[in_cm])..., ".-", label="cartel members")
+legend()
+xlabel("papers per author")
+ylabel("CCDF")
+title("MTMT dataset")
+tight_layout()
+```
+
+dblp dataset:
+
+```julia
+c_off = 0.4
+dblp[:strongs] = subnet(dblp[:coga], c_off)
+a = papernumbers(dblp[:puma])
+id_cm = getauthorIDs(dblp[:strongs])
+id_all = getauthorIDs(dblp[:coga])
+in_cm = getauthorindex(id_cm, dblp[:puma])
+in_all = getauthorindex(id_all, dblp[:puma])
+in_nm = setdiff(in_all, in_cm)
+figure()
+for i in 1:20
+	inm = sample(in_nm, length(in_cm), replace=false)
+	loglog(eCCDF(a[inm])..., ".-", color="lightgray")
+end
+loglog(eCCDF(a[in_cm])..., ".-", label="cartel members")
+legend()
+xlabel("papers per author")
+ylabel("CCDF")
+title("dblp dataset")
+tight_layout()
+```
+
+```julia
+c_off = 0.4
+#MTMT[:strongs] = subnet(MTMT[:coga], c_off)
+#wp = weightedpapers(MTMT[:puma])
+id_cm = getauthorIDs(MTMT[:strongs])
+id_all = getauthorIDs(MTMT[:coga])
+in_cm = getauthorindex(id_cm, MTMT[:puma])
+in_all = getauthorindex(id_all, MTMT[:puma])
+in_nm = setdiff(in_all, in_cm)
+figure()
+for i in 1:20
+	inm = sample(in_nm, length(in_cm), replace=false)
+	loglog(eCCDF(wp[inm])..., ".-", color="lightgray")
+end
+loglog(eCCDF(wp[in_cm])..., ".-", label="cartel members")
+legend()
+xlabel("papers per author")
+ylabel("CCDF")
+title("MTMT dataset")
+tight_layout()
+```
+
+
 ## Illustrating cartels
 
 ### Authors with equal productivity
