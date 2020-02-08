@@ -11,3 +11,7 @@
 *-rewired-*.txt
 */*/dblp-data/*
 *.mat
+*.bin
+*.weights
+*.tree
+*.Q
