@@ -60,7 +60,7 @@ function graphplot(g, loc_x, loc_y; cutoff=0.4, backend=PDF, filename="proba",
 									 nodelabel=true, maxlinewidth=5, width=50cm, height=50cm)
 	backend == PDF && (filename *= ".pdf")
 	backend == PNG && (filename *= ".png")
-	nodesize = degree(g)
+	nodesize = degree(g) .+ 1
 	if nodelabel
 		nodelabs = labels(g)
 	else
@@ -81,7 +81,7 @@ function graphplot(g, loc_x, loc_y; cutoff=0.4, backend=PDF, filename="proba",
 		maxlinewidth *= maximum(W)
 		#edgewidth[tocutoff] .= 5
 		edgecolor = [colorant"lightgrey" for i in 1:length(W)]
-		edgecolor[tocutoff] .= colorant"darkgrey"
+		edgecolor[tocutoff] .= colorant"red"
 		Compose.draw(backend(filename, width, height),
 								 gplot(g, loc_x, loc_y, edgelinewidth=edgewidth,
 											 EDGELINEWIDTH=maxlinewidth, nodesize=nodesize,
