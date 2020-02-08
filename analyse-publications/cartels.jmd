@@ -300,6 +300,120 @@ tight_layout()
 
 Not surprisingly, nodes of high strength have many connections (high degree). The strongly connected nodes are restricted to have high strength and relatively low degree.
 
+## Hierarchy
+
+Plotting the communities.
+
+```julia
+H = read_louvain_tree("MTMT/MTMTcolmat.tree")
+for i in keys(H[:lev1])
+	fn = string("MTMT-comm-", i, "-graph.pdf")
+	graphplot(MTMT[:coga][H[:lev1][i]]; filename=fn)
+end
+```
+
+Calculating statistics for communities.
+
+
+```julia
+npapers = papernumbers(MTMT[:puma])
+wpapers = weightedpapers(MTMT[:puma])
+p_strongnodes = Float64[]
+p_strongedges = Float64[]
+nnodes = Float64[]
+nedges = Float64[]
+mWeights = Float64[]
+sdWeights = Float64[]
+mdegrees = Float64[]
+sddegrees = Float64[]
+m_npapers = Float64[]
+sd_npapers = Float64[]
+m_wpapers = Float64[]
+sd_wpapers = Float64[]
+for i in keys(H[:lev1])
+	members = H[:lev1][i]
+	g = MTMT[:coga][members]
+	d = describecartels(g)
+	push!(p_strongnodes, d["cartel_nodes"]/d["no_nodes"])
+	push!(p_strongedges, d["no_strongedges"]/d["no_edges"])
+	W = Weights(g)
+	push!(mWeights, mean(W))
+	push!(sdWeights, std(W))
+	dg = degree(g)
+	push!(mdegrees, mean(dg))
+	push!(sddegrees, std(dg))
+	push!(nnodes, nv(g))
+	push!(nedges, ne(g))
+	np = npapers[members]
+	push!(m_npapers, mean(np))
+	push!(sd_npapers, std(np))
+	wp = wpapers[members]
+	push!(m_wpapers, mean(wp))
+	push!(sd_wpapers, std(wp))
+end
+c_df = DataFrame(nnodes = nnodes, nedges = nedges, p_strnodes =
+	p_strongnodes, p_stredges = p_strongedges, mWeights = mWeights, sdWeights =
+	sdWeights, mdegrees = mdegrees, sddegrees = sddegrees, m_npapers = m_npapers,
+	sd_npapers = sd_npapers, m_wpapers = m_wpapers, sd_wpapers = sd_wpapers)
+```
+
+
+```julia
+n = names(c_df)
+for i in 1:(length(n)-1)
+	for j in (i+1):length(n)
+		figure()
+		scatter(c_df[!, n[i]], c_df[!, n[j]])
+		xlabel(string(n[i]))
+		ylabel(string(n[j]))
+		tight_layout()
+	end
+end
+```
+
+
+```julia
+pm = deepcopy(MTMT[:puma])
+for i in keys(H[:lev1])
+#for i in collect(keys(H[:lev1]))[1:10]
+	members = H[:lev1][i]
+	println("i: ", i, ", community size: ", length(members))
+	length(members) <= 2 && continue
+	global pm = rewire_community(pm, members, 10)
+end
+write_scimat("community_rewired-pubmat.mat", pm)
+pm = selectauthors(pm, 3)
+rcm = collaborationmatrix(pm)
+write_scimat("community_rewired-colmat.mat", rcm)
+rcg = collaborationgraph(rcm)
+run(`./comm_detection.sh community_rewired-colmat.mat`)
+```
+
+```julia
+rW = Weights(rcg)
+rd = degree(rcg)
+figure()
+semilogy(eCCDF2(wMTMT)..., "-", label="real")
+semilogy(eCCDF2(rwMTMT)..., "-", label="rand")
+semilogy(eCCDF2(rW)..., "-", label="rand commun.")
+legend()
+ylabel("ECCDF")
+xlabel("weight")
+title("MTMT")
+tight_layout()
+figure()
+semilogy(eCCDF2(dMTMT)..., "-", label="real")
+semilogy(eCCDF2(rdMTMT)..., "-", label="rand")
+semilogy(eCCDF2(rd)..., "-", label="rand commun.")
+legend()
+ylabel("ECCDF")
+xlabel("degree")
+title("MTMT")
+tight_layout()
+```
+
+
+
 ## Productivity of members vs non-members
 
 MTMT dataset:
