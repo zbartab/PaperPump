@@ -20,13 +20,17 @@ TXTF=`echo $MATF|sed 's/\.mat$/.txt/'`
 BINF=`echo $MATF|sed 's/\.mat$/.bin/'`
 WEIGHTF=`echo $MATF|sed 's/\.mat$/.weights/'`
 TREEF=`echo $MATF|sed 's/\.mat$/.tree/'`
+QF=`echo $MATF|sed 's/\.mat$/.Q/'`
 
-sed -n '/.*,.*,.*/p' $MATF > $TXTF
-sed -i 1d $TXTF
-sed -i 's/,/ /g' $TXTF
+if [ ! -f "$BINF" ]; then
 
-convert-louvain -i $TXTF -o $BINF -w $WEIGHTF
+	sed -n '/.*,.*,.*/p' $MATF > $TXTF
+	sed -i 1d $TXTF
+	sed -i 's/,/ /g' $TXTF
 
-louvain $BINF -l -1 -q id_qual -w $WEIGHTF > $TREEF
+	convert-louvain -i $TXTF -o $BINF -w $WEIGHTF
 
-hierarchy-louvain $TREEF
+	rm -f $TXTF
+fi
+
+louvain $BINF -l -1 -q id_qual -w $WEIGHTF > $TREEF 2> $QF
