@@ -314,7 +314,7 @@ function rewire!(mat::SparseMatrixCSC{Float64, Int64}, niter=100)
 		ri = randperm(n_entries)
 		wi = 2
 		#println("outer: ", countwiring)
-		while wi < n_entries
+		while wi < n_entries && countwiring < niter
 			i1 = rowind[ri[wi-1]]
 			i2 = rowind[ri[wi]]
 			j1 = colind[ri[wi-1]]
@@ -343,6 +343,28 @@ function rewire(pubmat::PubMat, niter=100)
 	matcp = deepcopy(pubmat)
 	rewire!(matcp.mat, niter)
 	return matcp
+end
+
+"""
+"""
+function rewire_community(pm::PubMat, members::Array{Int,1},
+													niter::Int=100)
+	nonmembers = setdiff(collect(1:size(pm.mat, 2)), members)
+	cpm = deepcopy(pm)
+	m_nm = cpm.mat[:,nonmembers]
+	m_cm = cpm.mat[:,members]
+	rewire!(m_cm, niter)
+	m = hcat(m_nm, m_cm)
+	a = Array{String, 1}(undef, length(pm.authorIDs))
+	for i in keys(pm.authorIDs)
+		a[pm.authorIDs[i]] = i
+	end
+	a = a[vcat(nonmembers, members)]
+	aIDs = Dict{String, Int64}()
+	for i in 1:length(a)
+		aIDs[a[i]] = i
+	end
+	return PubMat(m, aIDs, pm.paperIDs) 
 end
 
 #=
@@ -459,3 +481,58 @@ function selectpapers(pm::PubMat, nauthors=-Inf)
 								updateIDs(pm.paperIDs, j))
 end
 
+"""
+    read_louvain_tree(file)
+
+Read the results of louvain community detection from `file`.
+"""
+function read_louvain_tree(file::String)
+	f = open(file)
+	lines = readlines(f)
+	close(f)
+	top = Dict()
+	level = 0
+	levsymb = :a
+	prevlevsymb = :a
+	for l in lines
+		n, c = split(l, " ")
+		node = parse(Int, n)
+		community = parse(Int, c)
+		if node == 0 && community == 0
+			level += 1
+			levsymb = Symbol("lev$(level)")
+			prevlevsymb = Symbol("lev$(level-1)")
+			top[levsymb] = Dict{Int, Array{Int,1}}()
+		else
+			if !haskey(top[levsymb], community)
+				top[levsymb][community] = Int64[]
+			end
+			if level == 1
+				push!(top[levsymb][community], node)
+			else 
+				a = top[levsymb][community]
+				top[levsymb][community] = vcat(a, top[prevlevsymb][node])
+			end
+		end
+	end
+	return top
+end
+
+"""
+    combine_sparsematrices(m1, m2)
+
+Combine the two matrices given as argument.
+"""
+function combine_sparsematrices(m1::SparseMatrixCSC{Float64,Int64},
+																m2::SparseMatrixCSC{Float64,Int64})
+	r1, c1 = size(m1)
+	r2, c2 = size(m2)
+	ri1, ci1, vi1 = findnz(m1)
+	ri2, ci2, vi2 = findnz(m2)
+	ri2 .+= r1
+	ci2 .+= c1
+	r = vcat(ri1, ri2)
+	c = vcat(ci1, ci2)
+	v = vcat(vi1, vi2)
+	return sparse(r, c, v, r1+r2, c1+c2)
+end
