@@ -153,7 +153,7 @@ function eCCDF(x::Array{Int, 1})
 	y = vcat(1, y[1:(end-1)])
 	return xs, y
 end
-function eCCDF2(x::Array{Number, 1})
+function eCCDF2(x::Array{Float64, 1})
 	xs = sort(x)
 	y = collect(length(xs):-1:1) ./ length(xs)
 	#y = vcat(1, y[1:(end-1)])
