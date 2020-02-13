@@ -4,6 +4,8 @@
 
 ## set up packages
 
+import Base.size # to extend for returning the size of the matrix component
+
 using SparseArrays
 using Random, CSV, DataFrames
 using LightGraphs, MetaGraphs
@@ -348,11 +350,14 @@ end
 """
 """
 function rewire_community(pm::PubMat, members::Array{Int,1},
-													niter::Int=100)
+													piter::Float64=0.1)
 	nonmembers = setdiff(collect(1:size(pm.mat, 2)), members)
 	cpm = deepcopy(pm)
 	m_nm = cpm.mat[:,nonmembers]
 	m_cm = cpm.mat[:,members]
+	r, c, v = findnz(m_cm)
+	niter = Int(round(sum(v .> 0.0) * piter))
+	niter == 0 && return pm
 	rewire!(m_cm, niter)
 	m = hcat(m_nm, m_cm)
 	a = Array{String, 1}(undef, length(pm.authorIDs))
@@ -366,6 +371,38 @@ function rewire_community(pm::PubMat, members::Array{Int,1},
 	end
 	return PubMat(m, aIDs, pm.paperIDs) 
 end
+
+"""
+"""
+function rewire_communities(pubmat::PubMat,
+														communities::Dict{Int, Array{Int,1}},
+														prewire::Float64, file="comm_rewire")
+	pm = deepcopy(pubmat)
+	for i in keys(communities)
+		members = communities[i]
+		#println("i: ", i, ", community size: ", length(members))
+		length(members) < 2 && continue
+		pm = rewire_community(pm, members, prewire)
+	end
+	filename = string(file, "-", prewire)
+	write_scimat(string(filename, "-pubmat.mat"), pm)
+	res = Dict()
+	pm = selectauthors(pm, 3)
+	res[:puma] = pm
+	rcm = collaborationmatrix(pm)
+	res[:coma] = rcm
+	fn = string(filename, "-colmat.mat")
+	write_scimat(fn, rcm)
+	rcg = collaborationgraph(rcm)
+	res[:coga] = rcg
+	run(`./comm_detection.sh $(fn)`)
+	f = open(string(filename, "-colmat.Q"))
+	Q = readlines(f)
+	close(f)
+	Q = parse(Float64, Q[1])
+	return Q, res
+end
+
 
 #=
 """
@@ -535,4 +572,206 @@ function combine_sparsematrices(m1::SparseMatrixCSC{Float64,Int64},
 	c = vcat(ci1, ci2)
 	v = vcat(vi1, vi2)
 	return sparse(r, c, v, r1+r2, c1+c2)
+end
+
+"""
+    size(m)
+
+Return the size of the matrix component of a `ScienceMat` object.
+"""
+function size(m::ScienceMat)
+	return size(m.mat)
+end
+
+"""
+    degreedegreecor(pm)
+
+Calculate the join degree distribution of a bipartite network.
+"""
+function degreedegreecor(pm::PubMat)
+	da = Int.(papernumbers(pm))
+	dp = Int.(authornumbers(pm))
+	p, A, val = findnz(pm.mat)
+	ddc = spzeros(Int, Int(maximum(dp)), Int(maximum(da)))
+	for i in 1:length(val)
+		ddc[dp[p[i]], da[A[i]]] += 1
+	end
+	return ddc
+end
+
+function fillnodes(distr::Array{Int,1})
+	n = sum(distr)
+	degrees = Array{Int, 1}(undef, n)
+	stubs = Array{Int, 1}(undef, n)
+	i = 1
+	for j in 1:length(distr)
+		for d in 1:distr[j]
+			degrees[i] = j
+			stubs[i] = j
+			i += 1
+		end
+	end
+	i = randperm(n)
+	return degrees[i], stubs[i]
+end
+
+"""
+    generaterndbipartite(bjd)
+
+Generate a random bipartite graph on the basis of the bivariable joint
+degree distribution. It follows [this
+paper](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5972839/)
+"""
+function generaterndbipartite(bjd::SparseMatrixCSC{Int64, Int64})
+	pd = Int.(sum(bjd, dims=2) ./ (1:size(bjd, 1)))
+	pd = reshape(pd, size(pd, 1))
+	Ad = Int.(sum(bjd, dims=1)' ./ (1:size(bjd, 2)))
+	Ad = reshape(Ad, size(Ad, 1))
+	np = sum(pd)
+	nA = sum(Ad)
+	ps_d, ps_s = fillnodes(pd)
+	As_d, As_s = fillnodes(Ad)
+	pin, Ain, nedges = findnz(bjd)
+	m = spzeros(length(ps_d), length(As_d))
+	#println("O1: ", length(nedges))
+	counter = 0
+	while length(nedges) > 0 && counter < 100
+		#println("I1: ", length(nedges), " p: ", pin, " A: ", Ain, " e: ",
+					 #nedges)
+		i = randperm(length(pin))
+		pin = pin[i]
+		Ain = Ain[i]
+		nedges = nedges[i]
+		for i in 1:length(pin)
+			p = findfirst((k) -> (ps_d[k] == pin[i] && ps_s[k] > 0), 1:np)
+			A = findfirst((k) -> (As_d[k] == Ain[i] && As_s[k] > 0), 1:nA)
+			ps_s[p] -= 1
+			As_s[A] -= 1
+			nedges[i] -= 1
+			m[p,A] += 1.0
+		end
+		i = nedges .> 0
+		pin = pin[i]
+		Ain = Ain[i]
+		nedges = nedges[i]
+		#println("I2: ", length(nedges), " p: ", pin, " A: ", Ain, " e: ",
+					 #nedges)
+		counter += 1
+	end
+	#println("O2: ", length(nedges))
+	#return ps_s, ps_d, As_s, As_d, m
+	return m
+end
+
+"""
+    simplifybipartite(m)
+
+Simplify a randomly generated bipartite graph represented by `m`.
+Simplification means to resolve multiply edges between nodes. The
+algorithm follows [this
+paper](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5972839/)
+"""
+function simplifybipartite!(m::SparseMatrixCSC{Float64, Int64})
+	p, A = size(m)
+	ps = collect(1:p)
+	As = collect(1:A)
+	n_medges = sum(values(m) .> 1)
+	n_medges == 0 && return nothing
+	udegrees = Int.(sum(m, dims=1))
+	udegrees = reshape(udegrees, size(udegrees, 2))
+	ldegrees = Int.(sum(m, dims=2))
+	ldegrees = reshape(ldegrees, size(ldegrees, 1))
+	rind, cind, vals = findnz(m)
+	i_medges = findall((y) -> y > 1, vals)
+	shuffle!(i_medges)
+	for i in i_medges
+		u = cind[i]
+		l = rind[i]
+		ld = ldegrees[l]
+		lds = findall((k) -> ld == k, ldegrees)
+		lds = lds[lds .!= l]
+		breakout = false
+		if length(lds) > 0
+			shuffle!(lds)
+			for v in lds
+				ws = m[v, :]
+				ws = As[ws .> 0.0]
+				shuffle!(ws)
+				for w in ws
+					if m[l,w] == 0.0 && m[v,u] == 0.0
+						m[l,u] -= 1.0
+						m[v,w] -= 1.0
+						m[l,w] = 1.0
+						m[v,u] = 1.0
+						breakout = true
+						break
+					end
+				end
+				breakout && break
+			end
+		end
+		breakout && continue
+		ud = udegrees[u]
+		uds = findall((k) -> ud == k, udegrees)
+		uds = uds[uds .!= u]
+		breakout = false
+		if length(uds) > 0
+			shuffle!(uds)
+			for w in uds
+				vs = m[:, w]
+				vs = ps[vs .> 0.0]
+				shuffle!(vs)
+				for v in vs
+					if m[l,w] == 0.0 && m[v,u] == 0.0
+						m[l,u] -= 1.0
+						m[v,w] -= 1.0
+						m[l,w] = 1.0
+						m[v,u] = 1.0
+						breakout = true
+						break
+					end
+				end
+				breakout && break
+			end
+		end
+		breakout && continue
+		ws = m[:,u]
+		ws = ps[ws .<= 0.0]
+		shuffle!(ws)
+		wps = m[l,:]
+		wps = As[wps .<= 0.0]
+		shuffle!(wps)
+		for w in ws, wp in wps
+			ups = m[w,:]
+			ups = As[ups .> 0.0]
+			shuffle!(ups)
+			vps = m[:,wp]
+			vps = ps[vps .> 0.0]
+			shuffle!(vps)
+			for up in ups, vp in vps
+				if m[vp,up] <= 0.0 
+					m[l,u] -= 1.0
+					m[w,up] -= 1.0
+					m[vp,wp] -= 1.0
+					m[w,u] = 1.0
+					m[l,wp] = 1.0
+					m[vp,up] = 1.0
+					breakout = true
+					break
+				end
+			end
+			breakout && break
+		end
+		breakout && continue
+		println("simplification is unsuccessful")
+	end
+	return nothing
+end
+
+function checkdegreedegree(bjd::SparseMatrixCSC{Int64, Int64})
+	pd = Int.(sum(bjd, dims=2) ./ (1:size(bjd, 1)))
+	pd = reshape(pd, size(pd, 1))
+	Ad = Int.(sum(bjd, dims=1)' ./ (1:size(bjd, 2)))
+	Ad = reshape(Ad, size(Ad, 1))
+	return pd, Ad
 end
