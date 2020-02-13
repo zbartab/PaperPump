@@ -129,6 +129,77 @@ tight_layout()
 
 The two real networks differ substantially from their randomised counterparts. The real networks are less dense than the randomised ones, their degree distributions indicate. On the other hand, the connections between nodes (authors) are much stronger than in randomised networks. In randomised networks no link with weight higher than 0.2 occurs, oppositely to real networks, where weights of around 1 is rather common.
 
+The correlation between degree of nodes (authors) and the number of papers an author wrote for all nodes and for strongly connected nodes.
+
+
+```julia
+d = degree(MTMT[:coga])
+ids = getauthorIDs(MTMT[:coga])
+inds = getauthorindex(ids, MTMT[:puma])
+np = papernumbers(MTMT[:puma])
+np = np[inds]
+c_off = 0.5
+MTMT[:strongs] = subnet(MTMT[:coga], c_off)
+a = getauthorIDs(MTMT[:strongs])
+istMTMT = getauthorindex(a, MTMT[:coma])
+figure()
+semilogy(d, np, ".", label="all nodes", alpha=0.5)
+semilogy(d[istMTMT], np[istMTMT], ".", label="strong nodes", alpha=0.5)
+legend()
+xlabel("degrees")
+ylabel("number of papers")
+title("MTMT")
+tight_layout()
+```
+
+Strongly connected nodes tend to have lower degrees.
+
+
+```julia
+r = 0:100:400
+t = fit(Histogram, d, r)
+ts = fit(Histogram, d[istMTMT], r)
+figure()
+x = (r[1:(end-1)] .+ r[2:end]) ./ 2.0
+bar(x, ts.:weights ./ t.:weights)
+title("MTMT")
+xlabel("degree")
+ylabel("proportion of strong nodes")
+tight_layout()
+```
+
+
+The correlation between strength of nodes (authors) and the number of papers an author wrote for all nodes and for strongly connected nodes.
+
+
+```julia
+d = strength(MTMT[:coma])
+figure()
+semilogy(d, np, ".", label="all nodes", alpha=0.5)
+semilogy(d[istMTMT], np[istMTMT], ".", label="strong nodes", alpha=0.5)
+legend()
+xlabel("strength")
+ylabel("number of papers")
+title("MTMT")
+tight_layout()
+```
+
+Strongly connected nodes tend to have higher strength.
+
+```julia
+r = 0:1:7
+t = fit(Histogram, d, r)
+ts = fit(Histogram, d[istMTMT], r)
+figure()
+x = (r[1:(end-1)] .+ r[2:end]) ./ 2.0
+bar(x, ts.:weights ./ t.:weights)
+title("MTMT")
+xlabel("strength")
+ylabel("proportion of strong nodes")
+tight_layout()
+```
+
+
 ## Modularity
 
 We calculate local clustering coefficients for the real networks and their randomised counterparts. According to [Barabási's book](http://networksciencebook.com/chapter/9#hierarchical), the relation between local clustering coefficients and the nodes' degrees should be linear on a log-log plot, i.e. local clustering coefficients should decrease with degrees.
@@ -306,9 +377,10 @@ Plotting the communities.
 
 ```julia
 H = read_louvain_tree("MTMT/MTMTcolmat.tree")
-for i in keys(H[:lev1])
+for i in keys(H[:lev2])
 	fn = string("MTMT-comm-", i, "-graph.pdf")
-	graphplot(MTMT[:coga][H[:lev1][i]]; filename=fn)
+	g = MTMT[:coga][H[:lev2][i]]
+	nv(g) > 1 && graphplot(g, spring_layout(g, C=10)...; filename=fn)
 end
 ```
 
@@ -333,6 +405,7 @@ sd_wpapers = Float64[]
 for i in keys(H[:lev1])
 	members = H[:lev1][i]
 	g = MTMT[:coga][members]
+	nv(g) <= 1 && continue
 	d = describecartels(g)
 	push!(p_strongnodes, d["cartel_nodes"]/d["no_nodes"])
 	push!(p_strongedges, d["no_strongedges"]/d["no_edges"])
@@ -373,29 +446,73 @@ end
 
 
 ```julia
-pm = deepcopy(MTMT[:puma])
-for i in keys(H[:lev1])
-#for i in collect(keys(H[:lev1]))[1:10]
-	members = H[:lev1][i]
-	println("i: ", i, ", community size: ", length(members))
-	length(members) <= 2 && continue
-	global pm = rewire_community(pm, members, 10)
+p_rewire = [0.0, 0.01, 0.05, 0.1, 0.25]
+Qs = []
+mats = []
+for p in p_rewire
+	Q, rw = rewire_communities(MTMT[:puma], H[:lev2], p, "MTMT-comm-rewire")
+	push!(Qs, Q)
+	push!(mats, rw)
 end
-write_scimat("community_rewired-pubmat.mat", pm)
-pm = selectauthors(pm, 3)
-rcm = collaborationmatrix(pm)
-write_scimat("community_rewired-colmat.mat", rcm)
-rcg = collaborationgraph(rcm)
-run(`./comm_detection.sh community_rewired-colmat.mat`)
 ```
+
+```julia
+figure()
+for i in 1:length(p_rewire)
+	W = Weights(mats[i][:coga])
+	semilogy(eCCDF2(W)..., "-", label="p_rw = $(p_rewire[i])")
+end
+legend()
+xlabel("weights")
+ylabel("eCCDF")
+tight_layout()
+```
+
+```julia
+figure()
+for i in 1:length(p_rewire)
+	W = degree(mats[i][:coga])
+	loglog(eCCDF2(W[W .> 0])..., "-", label="p_rw = $(p_rewire[i])")
+end
+legend()
+xlabel("degrees")
+ylabel("eCCDF")
+tight_layout()
+```
+
+```julia
+figure()
+for i in 1:length(p_rewire)
+	W = strength(mats[i][:coma])
+	semilogy(eCCDF2(W)..., "-", label="p_rw = $(p_rewire[i])")
+end
+legend()
+xlabel("strength")
+ylabel("eCCDF")
+tight_layout()
+```
+
+```julia
+figure()
+plot(p_rewire, Qs, ".-")
+ylim(-0.05, 1.05)
+xlabel("proportion rewired")
+ylabel("modularity, Q")
+tight_layout()
+```
+
+
 
 ```julia
 rW = Weights(rcg)
 rd = degree(rcg)
+rW2 = Weights(rcg2)
+rd2 = degree(rcg2)
 figure()
 semilogy(eCCDF2(wMTMT)..., "-", label="real")
 semilogy(eCCDF2(rwMTMT)..., "-", label="rand")
-semilogy(eCCDF2(rW)..., "-", label="rand commun.")
+semilogy(eCCDF2(rW)..., "-", label="rand commun. 0.1")
+semilogy(eCCDF2(rW2)..., "-", label="rand commun. 0.05")
 legend()
 ylabel("ECCDF")
 xlabel("weight")
@@ -405,6 +522,7 @@ figure()
 semilogy(eCCDF2(dMTMT)..., "-", label="real")
 semilogy(eCCDF2(rdMTMT)..., "-", label="rand")
 semilogy(eCCDF2(rd)..., "-", label="rand commun.")
+semilogy(eCCDF2(rd2)..., "-", label="rand commun. 0.05")
 legend()
 ylabel("ECCDF")
 xlabel("degree")
