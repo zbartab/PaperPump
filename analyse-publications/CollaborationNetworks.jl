@@ -20,7 +20,7 @@ using LightGraphs, MetaGraphs
 abstract type ScienceMat end
 
 mutable struct PubMat <: ScienceMat
-	mat::SparseMatrixCSC{Float64,Int64}
+	mat::SparseMatrixCSC{Int64,Int64}
 	authorIDs::Dict{String,Int64}
 	paperIDs::Dict{String,Int64}
 end
@@ -246,7 +246,11 @@ function write_scimat(file::String, mat::ScienceMat)
 		print(f, "#### colmat,")
 	end
 	println(f, smat[1], ",", smat[2], ",", nnz(mat.mat))
-	write_spmatrix(f, mat.mat)
+	#write_spmatrix(f, mat.mat)
+	rowis, colis, vals = findnz(mat.mat)
+	for i in 1:length(rowis)
+		println(f, rowis[i], ",", colis[i], ",", vals[i])
+	end
 	println(f, "#### authorIDs,", length(mat.authorIDs))
 	write_IDs(f, mat.authorIDs)
 	if typeof(mat) == PubMat
@@ -281,7 +285,6 @@ function read_scimat(file::String)
 		cis[jj] = parse(Int, ci)
 		vis[jj] = parse(Float64, vi)
 	end
-	mat = sparse(ris, cis, vis, nrow, ncol)
 	i += nrec+1
 	id_type, ne = split(lines[i], ",")
 	nrec = parse(Int, ne)
@@ -293,8 +296,10 @@ function read_scimat(file::String)
 		authorIDs[id] = ni
 	end
 	if occursin(r"colmat$", matrix_type)
+		mat = sparse(ris, cis, vis, nrow, ncol)
 		return ColMat(mat, authorIDs)
 	else
+		mat = sparse(ris, cis, Int.(vis), nrow, ncol)
 		i += nrec+1
 		id_type, ne = split(lines[i], ",")
 		nrec = parse(Int, ne)
@@ -329,7 +334,7 @@ end
 Randomly rewire in-place the bipartite graph represented by the `mat`
 adjacency matrix, `niter` times.
 """
-function rewire!(mat::SparseMatrixCSC{Float64, Int64}, niter=100)
+function rewire!(mat::SparseMatrixCSC{Int64, Int64}, niter=100)
 	countwiring = 0
 	while countwiring < niter
 		rowind, colind, vals = findnz(mat)
@@ -441,36 +446,6 @@ function rewire_communities(pubmat::PubMat,
 end
 
 
-#=
-"""
-    samplepapers(npapers, pm)
-
-Sample `npapers` papers randomly from publication matrix `pm`. It
-removes authors with zero papers from the resulting matrix.
-"""
-function samplepapers(pm::PubMat, npapers::Int)
-	spm =  size(pm)
-	npapers > spm[1] && (npapers = spm[1])
-	npapers = sample(1:spm[1], npapers, replace=false)
-	np = papernumbers(pm[npapers,:])
-	return pm[npapers, np .> 0]
-end
-
-"""
-    sampleauthors(nauthors, pm)
-
-Sample `nauthors` authors randomly from publication matrix `pm`. It
-removes papers with zero authors from the resulting matrix.
-"""
-function sampleauthors(nauthors::Int, pm::SparseMatrixCSC{Float64,Int64})
-	spm =  size(pm)
-	nauthors > spm[2] && (nauthors = spm[2])
-	nauthors = sample(1:spm[2], nauthors, replace=false)
-	na = authornumbers(pm[:, nauthors])
-	return pm[na .> 0, nauthors]
-end
-=#
-
 """
     papernumbers(pm)
 
@@ -485,6 +460,11 @@ function papernumbers(mat::SparseMatrixCSC{Float64,Int64})
 	no_papers = reshape(no_papers, size(no_papers, 2))
 	return no_papers
 end
+function papernumbers(mat::SparseMatrixCSC{Int64,Int64})
+	no_papers = sum(mat, dims=1)
+	no_papers = reshape(no_papers, size(no_papers, 2))
+	return no_papers
+end
 
 """
     authornumbers(pm)
@@ -495,7 +475,7 @@ matrix `pm` has.
 function authornumbers(pm::PubMat)
 	return authornumbers(pm.mat)
 end
-function authornumbers(mat::SparseMatrixCSC{Float64,Int64})
+function authornumbers(mat::SparseMatrixCSC{Int64,Int64})
 	no_authors = sum(mat, dims=2)
 	no_authors = reshape(no_authors, size(no_authors, 1))
 	return no_authors
@@ -597,8 +577,8 @@ end
 
 Combine the two matrices given as argument.
 """
-function combine_sparsematrices(m1::SparseMatrixCSC{Float64,Int64},
-																m2::SparseMatrixCSC{Float64,Int64})
+function combine_sparsematrices(m1::SparseMatrixCSC{Int64,Int64},
+																m2::SparseMatrixCSC{Int64,Int64})
 	r1, c1 = size(m1)
 	r2, c2 = size(m2)
 	ri1, ci1, vi1 = findnz(m1)
@@ -720,7 +700,7 @@ Simplification means to resolve multiply edges between nodes. The
 algorithm follows [this
 paper](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5972839/)
 """
-function simplifybipartite!(m::SparseMatrixCSC{Float64, Int64})
+function simplifybipartite!(m::SparseMatrixCSC{Int64, Int64})
 	p, A = size(m)
 	ps = collect(1:p)
 	As = collect(1:A)

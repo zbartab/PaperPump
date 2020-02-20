@@ -118,10 +118,11 @@ papers weighted by the inverse of the author numbers.
 function weightedpapers(pm::PubMat)
 	na = authornumbers(pm)
 	row, col, val = findnz(pm.mat)
+	v = Array{Float64,1}(undef, length(row))
 	for i in 1:length(row)
-		val[i] /= na[row[i]]
+		v[i] = val[i] / na[row[i]]
 	end
-	mb = sparse(row, col, val, size(pm.mat)...)
+	mb = sparse(row, col, v, size(pm.mat)...)
 	return papernumbers(mb)
 end
 

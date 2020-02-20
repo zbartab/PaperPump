@@ -89,7 +89,7 @@ function generate_publicationmatrix(k_rand, maxpapers=100_000)
 	if p < maximum(k_rand)
 		p = Int(maximum(k_rand))
 	end
-	pubnet = spzeros(p, A)
+	pubnet = spzeros(Int, p, A)
 	for i in 1:A
 		papers = sample(1:p, Int(k_rand[i]), replace=false)
 		for j in papers
@@ -109,7 +109,7 @@ function generate_publicationmatrix(k_rand, maxpapers=100_000)
 	end
 	return PubMat(pubnet, auIDs, paIDs)
 end
-function generate_publicationmatrix(mat::SparseMatrixCSC{Float64,Int64})
+function generate_publicationmatrix(mat::SparseMatrixCSC{Int64,Int64})
 	p, A = size(mat)
 	auIDs = Dict{String,Int64}()
 	for i in 1:A
@@ -155,7 +155,7 @@ function grow_publicationmatrix(k::Array{Int64,1}, p_new::Float64,
 																alfa::Float64)
 	maxpapers = sum(k)
 	A = length(k)
-	pm = spzeros(maxpapers, A+3)
+	pm = spzeros(Int, maxpapers, A+3)
 	papers = zeros(Int, maxpapers)
 	pk = zeros(Float64, maxpapers)
 	# set the initial authors' node
@@ -324,7 +324,7 @@ function rndpubnet(k,pratio,commsizes)
 	k0 = sample(k, cs, replace=false)
 	p = Int(round(cs*pratio))
 	pm = generate_publicationmatrix(k0, p)
-	for cs in commsizes
+	for cs in commsizes[2:end]
 		k0 = sample(k, cs, replace=false)
 		p = Int(round(cs*pratio))
 		pm0 = generate_publicationmatrix(k0, p)
