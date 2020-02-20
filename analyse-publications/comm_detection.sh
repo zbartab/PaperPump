@@ -28,9 +28,9 @@ if [ ! -f "$BINF" ]; then
 	sed -i 1d $TXTF
 	sed -i 's/,/ /g' $TXTF
 
-	convert-louvain -i $TXTF -o $BINF -w $WEIGHTF
+	~/bin/convert-louvain -i $TXTF -o $BINF -w $WEIGHTF
 
 	rm -f $TXTF
 fi
 
-louvain $BINF -l -1 -q id_qual -w $WEIGHTF > $TREEF 2> $QF
+~/bin/louvain $BINF -l -1 -q id_qual -w $WEIGHTF > $TREEF 2> $QF
