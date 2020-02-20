@@ -65,69 +65,147 @@ include("simulations/RandomPublicationNetworks.jl")
 We first load real networks.
 
 ```julia
-MTMT = Dict()
-MTMT[:puma] = read_scimat("MTMT/MTMTpubmat.mat")
-MTMT[:coma] = read_scimat("MTMT/MTMTcolmat.mat")
-MTMT[:coga] = collaborationgraph(MTMT[:coma])
-rMTMT = Dict()
-rMTMT[:puma] =
-read_scimat("MTMT/MTMTpubmat-rewired-1.mat")
-rMTMT[:coma] =
-read_scimat("MTMT/MTMTcolmat-rewired-1.mat")
-rMTMT[:coga] = collaborationgraph(rMTMT[:coma])
-dblp = Dict()
-dblp[:puma] = read_scimat("dblp/dblppubmat.mat")
-dblp[:coma] = read_scimat("dblp/dblpcolmat.mat")
-dblp[:coga] = collaborationgraph(dblp[:coma])
-rdblp = Dict()
-rdblp[:puma] =
-read_scimat("dblp/dblppubmat-rewired-1.mat")
-rdblp[:coma] =
-read_scimat("dblp/dblpcolmat-rewired-1.mat")
-rdblp[:coga] = collaborationgraph(rdblp[:coma])
+MTMT = processpubnet("MTMT/MTMTpubmat.mat")
+rMTMT = processpubnet("MTMT/MTMTpubmat-rewired-1.mat")
+
+
 ```
 
-We calculate some measures for the networks.
+We plot some measures of the real and the randomly rewired networks.
 
 ```julia
-cMTMT = describecartels(MTMT[:coga], 0.4)
-wMTMT = Weights(MTMT[:coga])
-dMTMT = degree(MTMT[:coga])
-rwMTMT = Weights(rMTMT[:coga])
-rdMTMT = degree(rMTMT[:coga])
-cdblp = describecartels(dblp[:coga], 0.4)
-wdblp = Weights(dblp[:coga])
-ddblp = degree(dblp[:coga])
-rwdblp = Weights(rdblp[:coga])
-rddblp = degree(rdblp[:coga])
-```
-
-
-The networks' structure.
-
-```julia
-close("all")
-figure(figsize=(8,4))
-subplot(1,2,1)
-semilogy(eCCDF(wdblp)..., ".-", label="dblp")
-semilogy(eCCDF(rwdblp)..., ".-", label="dblp randomised")
-semilogy(eCCDF(wMTMT)..., ".-", label="MTMT")
-semilogy(eCCDF(rwMTMT)..., ".-", label="MTMT randomised")
-xlabel("weights")
-ylabel("CCDF")
+figure()
+subplot(2,2,1)
+loglog(eCCDF2(MTMT[:nauthors])..., ".-", label="real")
+loglog(eCCDF2(rMTMT[:nauthors])..., ".-", label="rand.")
+loglog(eCCDF2(genMTMT[:nauthors])..., ".-", label="gen.")
+loglog(eCCDF2(rwgenMTMT[:nauthors])..., ".-", label="rwgen.")
 legend()
-subplot(1,2,2)
-loglog(eCCDF(ddblp[ddblp .> 0])..., ".-", label="dblp")
-loglog(eCCDF(rddblp[rddblp .> 0])..., ".-", label="dblp randomised")
-loglog(eCCDF(dMTMT[dMTMT .> 0])..., ".-", label="MTMT")
-loglog(eCCDF(rdMTMT[rdMTMT .> 0])..., ".-", label="MTMT randomised")
-xlabel("degrees")
-ylabel("CCDF")
+title("MTMT")
+ylabel("ECCDF")
+xlabel("number of authors per paper")
+tight_layout()
+subplot(2,2,2)
+loglog(eCCDF2(MTMT[:npapers])..., ".-", label="real")
+loglog(eCCDF2(rMTMT[:npapers])..., ".-", label="rand.")
+loglog(eCCDF2(genMTMT[:npapers])..., ".-", label="gen.")
+loglog(eCCDF2(rwgenMTMT[:npapers])..., ".-", label="rwgen.")
 legend()
+title("MTMT")
+ylabel("ECCDF")
+xlabel("number of papers per authors")
+tight_layout()
+subplot(2,2,3)
+loglog(eCCDF2(MTMT[:wpapers])..., ".-", label="real")
+loglog(eCCDF2(rMTMT[:wpapers])..., ".-", label="rand.")
+loglog(eCCDF2(genMTMT[:wpapers])..., ".-", label="gen.")
+loglog(eCCDF2(rwgenMTMT[:wpapers])..., ".-", label="rwgen.")
+legend()
+title("MTMT")
+ylabel("ECCDF")
+xlabel("weighted number of papers per authors")
 tight_layout()
 ```
 
-The two real networks differ substantially from their randomised counterparts. The real networks are less dense than the randomised ones, their degree distributions indicate. On the other hand, the connections between nodes (authors) are much stronger than in randomised networks. In randomised networks no link with weight higher than 0.2 occurs, oppositely to real networks, where weights of around 1 is rather common.
+The two networks do not differ in terms of individual productivity, or author numbers.
+
+```julia
+figure()
+subplot(2,2,1)
+loglog(eCCDF2(MTMT[:degree])..., ".-", label="real")
+loglog(eCCDF2(rMTMT[:degree])..., ".-", label="rand.")
+loglog(eCCDF2(genMTMT[:degree])..., ".-", label="gen.")
+loglog(eCCDF2(rwgenMTMT[:degree])..., ".-", label="rwgen.")
+legend()
+title("MTMT")
+ylabel("ECCDF")
+xlabel("degree")
+tight_layout()
+subplot(2,2,2)
+loglog(eCCDF2(MTMT[:strength])..., ".-", label="real")
+loglog(eCCDF2(rMTMT[:strength])..., ".-", label="rand.")
+loglog(eCCDF2(genMTMT[:strength])..., ".-", label="gen.")
+loglog(eCCDF2(rwgenMTMT[:strength])..., ".-", label="rwgen.")
+legend()
+title("MTMT")
+ylabel("ECCDF")
+xlabel("strength")
+tight_layout()
+subplot(2,2,3)
+loglog(eCCDF2(MTMT[:weights])..., ".-", label="real")
+loglog(eCCDF2(rMTMT[:weights])..., ".-", label="rand.")
+loglog(eCCDF2(genMTMT[:weights])..., ".-", label="gen.")
+loglog(eCCDF2(rwgenMTMT[:weights])..., ".-", label="rwgen.")
+legend()
+title("MTMT")
+ylabel("ECCDF")
+xlabel("weight")
+tight_layout()
+subplot(2,2,4)
+l = map(length, values(MTMT[:hierarchy][:lev2]))
+loglog(eCCDF2(l)..., ".-", label="real")
+l = map(length, values(rMTMT[:hierarchy][:lev2]))
+loglog(eCCDF2(l)..., ".-", label="rand.")
+l = map(length, values(genMTMT[:hierarchy][:lev2]))
+loglog(eCCDF2(l)..., ".-", label="gen.")
+l = map(length, values(rwgenMTMT[:hierarchy][:lev2]))
+loglog(eCCDF2(l)..., ".-", label="rwgen.")
+legend()
+title("MTMT")
+ylabel("ECCDF")
+xlabel("community size")
+tight_layout()
+```
+
+
+The two real networks differ substantially from their randomised counterparts. The real networks are less dense than the randomised ones, as their degree distributions indicate. On the other hand, the connections between nodes (authors) are much stronger than in randomised networks. In randomised networks no link with weight higher than 0.2 occurs, oppositely to real networks, where weights of around 1 is rather common.
+
+
+```julia
+dcreal = degreesdegrees(MTMT[:puma])
+h2dreal = fit(Histogram, dcreal)
+dcrand = degreesdegrees(rMTMT[:puma])
+h2drand = fit(Histogram, dcrand)
+figure(figsize=(8,4))
+subplot(1,2,1)
+x = collect(h2dreal.edges[1])
+x = (x[1:(end-1)] + x[2:end])/2
+y = collect(h2dreal.edges[2])
+y = (y[1:(end-1)] + y[2:end])/2
+pcolormesh(log10.(h2dreal.weights .+ 1))
+title("real")
+xlabel("number of papers")
+ylabel("number of authors")
+tight_layout()
+subplot(1,2,2)
+pcolormesh(log10.(h2drand.weights .+ 1))
+title("rand.")
+xlabel("number of papers")
+ylabel("number of authors")
+tight_layout()
+```
+
+
+# Generate random networks
+
+
+```julia
+l = map(length, values(MTMT[:hierarchy][:lev1]))
+s = size(MTMT[:puma])
+pr = s[1]/s[2]
+k = authornumbers(MTMT[:puma])
+r = rndpubnet(k, pr, l)
+write_scimat("rMTMTpubmat.mat", r)
+rcm = collaborationmatrix(r)
+write_scimat("rMTMTcolmat.mat", rcm)
+genMTMT = processpubnet("rMTMTpubmat.mat")
+rgpm = rewire(genMTMT[:puma], 5.0)
+write_scimat("rwgMTMTpubmat.mat", rgpm)
+rgcm = collaborationmatrix(rgpm)
+write_scimat("rwgMTMTcolmat.mat", rgcm)
+rwgenMTMT = processpubnet("rwgMTMTpubmat.mat")
+```
+
 
 The correlation between degree of nodes (authors) and the number of papers an author wrote for all nodes and for strongly connected nodes.
 
@@ -502,17 +580,26 @@ tight_layout()
 ```
 
 
+```julia
+MTMT[:bjd] = degreedegreecor(MTMT[:puma])
+MTMT[:gpuma] = generaterndbipartite(MTMT[:bjd])
+while sum(MTMT[:gpuma] .> 1) > 0
+	simplifybipartite!(MTMT[:gpuma])
+end
+MTMT[:gpuma] = generate_publicationmatrix(MTMT[:gpuma])
+g_MTMT3 = selectauthors(MTMT[:gpuma], 3)
+MTMT[:gcoma] = collaborationmatrix(g_MTMT3)
+MTMT[:gcoga] = collaborationgraph(MTMT[:gcoma])
+```
+
 
 ```julia
-rW = Weights(rcg)
-rd = degree(rcg)
-rW2 = Weights(rcg2)
-rd2 = degree(rcg2)
+rW = Weights(MTMT[:gcoga])
+rd = degree(MTMT[:gcoga])
 figure()
 semilogy(eCCDF2(wMTMT)..., "-", label="real")
 semilogy(eCCDF2(rwMTMT)..., "-", label="rand")
 semilogy(eCCDF2(rW)..., "-", label="rand commun. 0.1")
-semilogy(eCCDF2(rW2)..., "-", label="rand commun. 0.05")
 legend()
 ylabel("ECCDF")
 xlabel("weight")
@@ -522,13 +609,17 @@ figure()
 semilogy(eCCDF2(dMTMT)..., "-", label="real")
 semilogy(eCCDF2(rdMTMT)..., "-", label="rand")
 semilogy(eCCDF2(rd)..., "-", label="rand commun.")
-semilogy(eCCDF2(rd2)..., "-", label="rand commun. 0.05")
 legend()
 ylabel("ECCDF")
 xlabel("degree")
 title("MTMT")
 tight_layout()
 ```
+
+```julia
+
+```
+
 
 
 
