@@ -316,3 +316,20 @@ function showpubmat(pubmat, cutoff=0.4)
 	hist(Weights(coga), 0:0.025:1)
 	return nothing
 end
+
+"""
+"""
+function rndpubnet(k,pratio,commsizes)
+	cs = commsizes[1]
+	k0 = sample(k, cs, replace=false)
+	p = Int(round(cs*pratio))
+	pm = generate_publicationmatrix(k0, p)
+	for cs in commsizes
+		k0 = sample(k, cs, replace=false)
+		p = Int(round(cs*pratio))
+		pm0 = generate_publicationmatrix(k0, p)
+		m = combine_sparsematrices(pm.mat, pm0.mat)
+		pm = generate_publicationmatrix(m)
+	end
+	return pm
+end
