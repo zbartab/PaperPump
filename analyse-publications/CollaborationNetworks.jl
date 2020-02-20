@@ -10,6 +10,10 @@ using SparseArrays
 using Random, CSV, DataFrames
 using LightGraphs, MetaGraphs
 
+#include("StatCollaborationNetworks.jl")
+#include("PlotCollaborationNetworks.jl")
+#include("simulations/RandomPublicationNetworks.jl")
+
 ## The data structures
 
 
@@ -36,6 +40,23 @@ other authors) from a publication matrix (showing which paper
 (co)authored by which authors).
 """
 function collaborationmatrix(pubmat::PubMat)
+	m = pubmat.mat
+	A = size(m, 2)
+	colmat = spzeros(A,A)
+	for i in 1:(A-1)
+		mi = m[:,i]
+		for j in (i+1):A
+			mj = m[:,j]
+			icapj = sum(mi .* mj)
+			icapj == 0.0 && continue
+			icupj = sum(mi) + sum(mj) - icapj
+			wij = icapj/icupj
+			colmat[i,j] = wij
+		end
+	end
+	return ColMat(colmat, pubmat.authorIDs)
+end
+function collaborationmatrix2(pubmat::PubMat)
 	A = size(pubmat.mat, 2)
 	colmat = spzeros(A,A)
 	for i in 1:(A-1)
@@ -341,13 +362,25 @@ end
 
 Randomly rewire a copy of `mat` `niter` times.
 """
-function rewire(pubmat::PubMat, niter=100)
+function rewire(pubmat::PubMat, niter::Int=100)
 	matcp = deepcopy(pubmat)
+	rewire!(matcp.mat, niter)
+	return matcp
+end
+function rewire(pubmat::PubMat, piter::Float64=0.1)
+	matcp = deepcopy(pubmat)
+	nedges = nnz(matcp.mat)
+	niter = Int(round(nedges * piter))
+	niter == 0 && return pm
 	rewire!(matcp.mat, niter)
 	return matcp
 end
 
 """
+    rewire_community(pm, members, piter)
+
+Randomly rewire the edges between members of a subgroup of publication
+matrix `pm`. Only `piter` portion of the edges rewired.
 """
 function rewire_community(pm::PubMat, members::Array{Int,1},
 													piter::Float64=0.1)
@@ -373,6 +406,10 @@ function rewire_community(pm::PubMat, members::Array{Int,1},
 end
 
 """
+    rewire_communities(pm, communities, prewire, file)
+
+Randomly rewire the communities of publication matrix `pm`. Only
+`prewire` portion of edges are rewired.
 """
 function rewire_communities(pubmat::PubMat,
 														communities::Dict{Int, Array{Int,1}},
@@ -598,6 +635,18 @@ function degreedegreecor(pm::PubMat)
 	end
 	return ddc
 end
+function degreesdegrees(pm::PubMat)
+	da = Int.(papernumbers(pm))
+	dp = Int.(authornumbers(pm))
+	p, A, val = findnz(pm.mat)
+	dhp = Int[]
+	dhA = Int[]
+	for i in 1:length(val)
+		push!(dhp, dp[p[i]])
+		push!(dhA, da[A[i]])
+	end
+	return dhp, dhA
+end
 
 function fillnodes(distr::Array{Int,1})
 	n = sum(distr)
@@ -635,7 +684,7 @@ function generaterndbipartite(bjd::SparseMatrixCSC{Int64, Int64})
 	m = spzeros(length(ps_d), length(As_d))
 	#println("O1: ", length(nedges))
 	counter = 0
-	while length(nedges) > 0 && counter < 100
+	while length(nedges) > 0 #&& counter < 100
 		#println("I1: ", length(nedges), " p: ", pin, " A: ", Ain, " e: ",
 					 #nedges)
 		i = randperm(length(pin))
@@ -774,4 +823,59 @@ function checkdegreedegree(bjd::SparseMatrixCSC{Int64, Int64})
 	Ad = Int.(sum(bjd, dims=1)' ./ (1:size(bjd, 2)))
 	Ad = reshape(Ad, size(Ad, 1))
 	return pd, Ad
+end
+
+"""
+    read_louvain_Q(file)
+
+Return network modularity Q read from `file`. If `file` cannot be read
+return `false` and print an error meassesge.
+"""
+function read_louvain_Q(file)
+	if isfile(file)
+		f = open(file)
+		Q = readlines(f)
+		close(f)
+		Q = parse(Float64, Q[1])
+		return Q
+	else
+		println("ERROR: $(file) cannot be read!")
+		return false
+	end
+end
+
+"""
+    processpubnet(file)
+
+Load the publication network specified by `file` and calculate several
+network measures for it.
+"""
+function processpubnet(file)
+	file2 = replace(file, "pubmat" => "colmat")
+	puma = read_scimat(file)
+	coma = read_scimat(file2)
+	coga = collaborationgraph(coma)
+	pubnet = Dict()
+	pubnet[:puma] = puma
+	pubnet[:coma] = coma
+	pubnet[:coga] = coga
+	pubnet[:nauthors] = authornumbers(pubnet[:puma])
+	pubnet[:npapers] = papernumbers(pubnet[:puma])
+	pubnet[:wpapers] = weightedpapers(pubnet[:puma])
+	pubnet[:strength] = strength(pubnet[:coma])
+	pubnet[:weights] = Weights(pubnet[:coga])
+	pubnet[:degree] = degree(pubnet[:coga])
+	treefile = replace(file2, r"\.mat$" => ".tree")
+	Qfile = replace(file2, r"\.mat$" => ".Q")
+	if isfile(treefile)
+		H = read_louvain_tree(treefile)
+		Q = read_louvain_Q(Qfile)
+	else
+		run(`./comm_detection.sh $(file2)`)
+		H = read_louvain_tree(treefile)
+		Q = read_louvain_Q(Qfile)
+	end
+	pubnet[:Q] = Q
+	pubnet[:hierarchy] = H
+	return pubnet
 end
