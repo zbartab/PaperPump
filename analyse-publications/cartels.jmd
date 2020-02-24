@@ -65,8 +65,8 @@ include("RandomPublicationNetworks.jl")
 We first load real networks.
 
 ```julia
-MTMT = processpubnet("MTMT/MTMTpubmat.mat")
-rMTMT = processpubnet("MTMT/MTMTpubmat-rewired-1.mat")
+MTMT = PubNet("MTMT/MTMTpubmat.mat")
+rMTMT = PubNet("MTMT/MTMTpubmat-rewired-1.mat")
 
 
 ```
@@ -76,30 +76,30 @@ We plot some measures of the real and the randomly rewired networks.
 ```julia
 figure()
 subplot(2,2,1)
-loglog(eCCDF2(MTMT[:nauthors])..., ".-", label="real")
-loglog(eCCDF2(rMTMT[:nauthors])..., ".-", label="rand.")
-loglog(eCCDF2(genMTMT[:nauthors])..., ".-", label="gen.")
-loglog(eCCDF2(rwgenMTMT[:nauthors])..., ".-", label="rwgen.")
+loglog(eCCDF2(MTMT.nauthors)..., label="real", ds="steps")
+loglog(eCCDF2(rMTMT.nauthors)..., label="rand.", ds="steps")
+#loglog(eCCDF2(genMTMT.nauthors)..., label="gen.", ds="steps")
+#loglog(eCCDF2(rwgenMTMT.nauthors)..., label="rwgen.", ds="steps")
 legend()
 title("MTMT")
 ylabel("ECCDF")
 xlabel("number of authors per paper")
 tight_layout()
 subplot(2,2,2)
-loglog(eCCDF2(MTMT[:npapers])..., ".-", label="real")
-loglog(eCCDF2(rMTMT[:npapers])..., ".-", label="rand.")
-loglog(eCCDF2(genMTMT[:npapers])..., ".-", label="gen.")
-loglog(eCCDF2(rwgenMTMT[:npapers])..., ".-", label="rwgen.")
+loglog(eCCDF2(MTMT.npapers)..., label="real", ds="steps")
+loglog(eCCDF2(rMTMT.npapers)..., label="rand.", ds="steps")
+#loglog(eCCDF2(genMTMT.npapers)..., label="gen.", ds="steps")
+#loglog(eCCDF2(rwgenMTMT.npapers)..., label="rwgen.", ds="steps")
 legend()
 title("MTMT")
 ylabel("ECCDF")
 xlabel("number of papers per authors")
 tight_layout()
 subplot(2,2,3)
-loglog(eCCDF2(MTMT[:wpapers])..., ".-", label="real")
-loglog(eCCDF2(rMTMT[:wpapers])..., ".-", label="rand.")
-loglog(eCCDF2(genMTMT[:wpapers])..., ".-", label="gen.")
-loglog(eCCDF2(rwgenMTMT[:wpapers])..., ".-", label="rwgen.")
+loglog(eCCDF2(MTMT.wpapers)..., label="real", ds="steps")
+loglog(eCCDF2(rMTMT.wpapers)..., label="rand.", ds="steps")
+#loglog(eCCDF2(genMTMT.wpapers)..., label="gen.", ds="steps")
+#loglog(eCCDF2(rwgenMTMT.wpapers)..., label="rwgen.", ds="steps")
 legend()
 title("MTMT")
 ylabel("ECCDF")
@@ -182,9 +182,9 @@ The two real networks differ substantially from their randomised counterparts. T
 
 
 ```julia
-dcreal = degreesdegrees(MTMT[:puma])
+dcreal = degreesdegrees(MTMT.puma)
 h2dreal = fit(Histogram, dcreal)
-dcrand = degreesdegrees(rMTMT[:puma])
+dcrand = degreesdegrees(rMTMT.puma)
 h2drand = fit(Histogram, dcrand)
 figure(figsize=(8,4))
 subplot(1,2,1)
@@ -192,13 +192,13 @@ x = collect(h2dreal.edges[1])
 x = (x[1:(end-1)] + x[2:end])/2
 y = collect(h2dreal.edges[2])
 y = (y[1:(end-1)] + y[2:end])/2
-pcolormesh(log10.(h2dreal.weights .+ 1))
+pcolormesh(log10.(h2dreal.weights .+ 1), vmin=0, vmax=5)
 title("real")
 xlabel("number of papers")
 ylabel("number of authors")
 tight_layout()
 subplot(1,2,2)
-pcolormesh(log10.(h2drand.weights .+ 1))
+pcolormesh(log10.(h2drand.weights .+ 1), vmin=0, vmax=5)
 title("rand.")
 xlabel("number of papers")
 ylabel("number of authors")
@@ -209,8 +209,7 @@ tight_layout()
 # Generate random networks
 
 ```julia
-sub_cn = subnet(MTMT[:coga], 0.4)
-carts = cartel_sizes(sub_cn)
+carts = map(length, MTMT.cartels)
 rnets = Dict()
 rnetscart = Dict()
 for i in 1:10
@@ -219,32 +218,30 @@ for i in 1:10
 	k = saturatedexpectedpapers(Int(sum(cs)), 500) # number of papers
 	rpm = rndpubnet(k, 6.0, Int.(cs), nothing)
 	rpm = rewire(rpm, 0.1)
-	write_scimat("rpubmat.mat", rpm)
-	rpm = selectauthors(rpm, 3)
-	rcm = collaborationmatrix(rpm)
-	write_scimat("rcolmat.mat", rcm)
-	rpubnet = processpubnet("rpubmat.mat")
+	rpm3 = selectauthors(rpm, 3)
+	rcm = collaborationmatrix(rpm3)
+	rpubnet = PubNet(rpm, rcm, 0.4)
 	rnets[i] = rpubnet
 	rpm = rndpubnet(k, 6.0, Int.(cs), carts, 0.4)
 	rpm = rewire(rpm, 0.1)
-	write_scimat("rpubmat.mat", rpm)
-	rpm = selectauthors(rpm, 3)
-	rcm = collaborationmatrix(rpm)
-	write_scimat("rcolmat.mat", rcm)
-	rpubnet = processpubnet("rpubmat.mat")
+	rpm3 = selectauthors(rpm, 3)
+	rcm = collaborationmatrix(rpm3)
+	rpubnet = PubNet(rpm, rcm, 0.4)
 	rnetscart[i] = rpubnet
-	graphplot(rpubnet[:coga])
-	is_connected(rpubnet[:coga])
+	graphplot(rpubnet.coga)
+	is_connected(rpubnet.coga)
 end
 figure()
 for k in keys(rnets)
-	loglog(eCCDF2(rnets[k][:degree])..., "-", alpha=0.25, color="blue")
+	loglog(eCCDF2(rnets[k].degrees)..., "-", alpha=0.25, color="blue", ds="steps")
 end
 for k in keys(rnetscart)
-	loglog(eCCDF2(rnetscart[k][:degree])..., "-", alpha=0.25, color="green")
+	loglog(eCCDF2(rnetscart[k].degrees)..., "-", alpha=0.25, color="green",
+		ds="steps")
 end
-loglog(eCCDF2(MTMT[:degree])..., "-", color="red", label="real")
-loglog(eCCDF2(rMTMT[:degree])..., "-", color="orange", label="real rewired")
+loglog(eCCDF2(MTMT.degrees)..., "-", color="red", label="real", ds="steps")
+loglog(eCCDF2(rMTMT.degrees)..., "-", color="orange", label="real rewired",
+	ds="steps")
 legend()
 title("MTMT")
 xlabel("degree")
@@ -252,13 +249,16 @@ ylabel("eCCDF")
 tight_layout()
 figure()
 for k in keys(rnets)
-	semilogy(eCCDF2(rnets[k][:strength])..., "-", alpha=0.25, color="blue")
+	semilogy(eCCDF2(rnets[k].strengthes)..., "-", alpha=0.25, color="blue",
+		ds="steps")
 end
 for k in keys(rnetscart)
-	semilogy(eCCDF2(rnetscart[k][:strength])..., "-", alpha=0.25, color="green")
+	semilogy(eCCDF2(rnetscart[k].strengthes)..., "-", alpha=0.25, color="green",
+		ds="steps")
 end
-semilogy(eCCDF2(MTMT[:strength])..., "-", color="red", label="real")
-semilogy(eCCDF2(rMTMT[:strength])..., "-", color="orange", label="real rewired")
+semilogy(eCCDF2(MTMT.strengthes)..., "-", color="red", label="real", ds="steps")
+semilogy(eCCDF2(rMTMT.strengthes)..., "-", color="orange",
+	label="real rewired", ds="steps")
 legend()
 title("MTMT")
 xlabel("strength")
@@ -266,13 +266,16 @@ ylabel("eCCDF")
 tight_layout()
 figure()
 for k in keys(rnets)
-	semilogy(eCCDF2(rnets[k][:weights])..., "-", alpha=0.25, color="blue")
+	semilogy(eCCDF2(rnets[k].weights)..., "-", alpha=0.25, color="blue",
+		ds="steps")
 end
 for k in keys(rnetscart)
-	semilogy(eCCDF2(rnetscart[k][:weights])..., "-", alpha=0.25, color="green")
+	semilogy(eCCDF2(rnetscart[k].weights)..., "-", alpha=0.25, color="green",
+		ds="steps")
 end
-semilogy(eCCDF2(MTMT[:weights])..., "-", color="red", label="real")
-semilogy(eCCDF2(rMTMT[:weights])..., "-", color="orange", label="real rewired")
+semilogy(eCCDF2(MTMT.weights)..., "-", color="red", label="real", ds="steps")
+semilogy(eCCDF2(rMTMT.weights)..., "-", color="orange", label="real rewired",
+	ds="steps")
 legend()
 title("MTMT")
 xlabel("weight")
@@ -280,13 +283,15 @@ ylabel("eCCDF")
 tight_layout()
 figure()
 for k in keys(rnets)
-	semilogy(eCCDF2(rnets[k][:clustcoef])..., "-", alpha=0.25, color="blue")
+	semilogy(eCCDF2(rnets[k].clustcoefs)..., "-", alpha=0.25, color="blue",
+		ds="steps")
 end
 for k in keys(rnetscart)
-	semilogy(eCCDF2(rnetscart[k][:clustcoef])..., "-", alpha=0.25, color="green")
+	semilogy(eCCDF2(rnetscart[k].clustcoefs)..., "-", alpha=0.25, color="green", ds="steps")
 end
-semilogy(eCCDF2(MTMT[:clustcoef])..., "-", color="red", label="real")
-semilogy(eCCDF2(rMTMT[:clustcoef])..., "-", color="orange", label="real rewired")
+semilogy(eCCDF2(MTMT.clustcoefs)..., "-", color="red", label="real", ds="steps")
+semilogy(eCCDF2(rMTMT.clustcoefs)..., "-", color="orange", label="real
+	rewired", ds="steps")
 legend()
 title("MTMT")
 xlabel("local clustering coefficient")
@@ -594,8 +599,8 @@ Calculating statistics for communities.
 
 
 ```julia
-npapers = papernumbers(MTMT[:puma])
-wpapers = weightedpapers(MTMT[:puma])
+npapers = papernumbers(MTMT.puma)
+wpapers = weightedpapers(MTMT.puma)
 key = Int[]
 p_strongnodes = Float64[]
 p_strongedges = Float64[]
@@ -609,9 +614,9 @@ m_npapers = Float64[]
 sd_npapers = Float64[]
 m_wpapers = Float64[]
 sd_wpapers = Float64[]
-for i in keys(MTMT[:hierarchy][:lev1])
-	members = MTMT[:hierarchy][:lev1][i]
-	g = MTMT[:coga][members]
+for i in keys(MTMT.hierarchy[:lev1])
+	members = MTMT.hierarchy[:lev1][i]
+	g = MTMT.coga[members]
 	nv(g) <= 1 && continue
 	push!(key, i)
 	d = describecartels(g)
