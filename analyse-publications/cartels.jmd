@@ -111,37 +111,43 @@ The two networks do not differ in terms of individual productivity, or author nu
 
 ```julia
 figure()
-subplot(2,2,1)
+#subplot(2,2,1)
 loglog(eCCDF2(MTMT[:degree])..., ".-", label="real")
 loglog(eCCDF2(rMTMT[:degree])..., ".-", label="rand.")
 loglog(eCCDF2(genMTMT[:degree])..., ".-", label="gen.")
 loglog(eCCDF2(rwgenMTMT[:degree])..., ".-", label="rwgen.")
+loglog(eCCDF2(rsgenMTMT[:degree])..., ".-", label="rsgen.")
 legend()
 title("MTMT")
 ylabel("ECCDF")
 xlabel("degree")
 tight_layout()
-subplot(2,2,2)
-loglog(eCCDF2(MTMT[:strength])..., ".-", label="real")
-loglog(eCCDF2(rMTMT[:strength])..., ".-", label="rand.")
-loglog(eCCDF2(genMTMT[:strength])..., ".-", label="gen.")
-loglog(eCCDF2(rwgenMTMT[:strength])..., ".-", label="rwgen.")
+figure()
+#subplot(2,2,2)
+semilogy(eCCDF2(MTMT[:strength])..., ".-", label="real")
+semilogy(eCCDF2(rMTMT[:strength])..., ".-", label="rand.")
+semilogy(eCCDF2(genMTMT[:strength])..., ".-", label="gen.")
+semilogy(eCCDF2(rwgenMTMT[:strength])..., ".-", label="rwgen.")
+semilogy(eCCDF2(rsgenMTMT[:strength])..., ".-", label="rsgen.")
 legend()
 title("MTMT")
 ylabel("ECCDF")
 xlabel("strength")
 tight_layout()
-subplot(2,2,3)
-loglog(eCCDF2(MTMT[:weights])..., ".-", label="real")
-loglog(eCCDF2(rMTMT[:weights])..., ".-", label="rand.")
-loglog(eCCDF2(genMTMT[:weights])..., ".-", label="gen.")
-loglog(eCCDF2(rwgenMTMT[:weights])..., ".-", label="rwgen.")
+figure()
+#subplot(2,2,3)
+semilogy(eCCDF2(MTMT[:weights])..., ".-", label="real")
+semilogy(eCCDF2(rMTMT[:weights])..., ".-", label="rand.")
+semilogy(eCCDF2(genMTMT[:weights])..., ".-", label="gen.")
+semilogy(eCCDF2(rwgenMTMT[:weights])..., ".-", label="rwgen.")
+semilogy(eCCDF2(rsgenMTMT[:weights])..., ".-", label="rsgen.")
 legend()
 title("MTMT")
 ylabel("ECCDF")
 xlabel("weight")
 tight_layout()
-subplot(2,2,4)
+figure()
+#subplot(2,2,4)
 l = map(length, values(MTMT[:hierarchy][:lev2]))
 loglog(eCCDF2(l)..., ".-", label="real")
 l = map(length, values(rMTMT[:hierarchy][:lev2]))
@@ -150,10 +156,24 @@ l = map(length, values(genMTMT[:hierarchy][:lev2]))
 loglog(eCCDF2(l)..., ".-", label="gen.")
 l = map(length, values(rwgenMTMT[:hierarchy][:lev2]))
 loglog(eCCDF2(l)..., ".-", label="rwgen.")
+l = map(length, values(rsgenMTMT[:hierarchy][:lev2]))
+loglog(eCCDF2(l)..., ".-", label="rsgen.")
 legend()
 title("MTMT")
 ylabel("ECCDF")
 xlabel("community size")
+tight_layout()
+figure()
+#subplot(2,2,3)
+loglog(eCCDF2(MTMT[:wpapers])..., ".-", label="real")
+loglog(eCCDF2(rMTMT[:wpapers])..., ".-", label="rand.")
+loglog(eCCDF2(genMTMT[:wpapers])..., ".-", label="gen.")
+loglog(eCCDF2(rwgenMTMT[:wpapers])..., ".-", label="rwgen.")
+loglog(eCCDF2(rsgenMTMT[:wpapers])..., ".-", label="rsgen.")
+legend()
+title("MTMT")
+ylabel("ECCDF")
+xlabel("number of papers")
 tight_layout()
 ```
 
@@ -187,6 +207,100 @@ tight_layout()
 
 
 # Generate random networks
+
+```julia
+sub_cn = subnet(MTMT[:coga], 0.4)
+carts = cartel_sizes(sub_cn)
+rnets = Dict()
+rnetscart = Dict()
+for i in 1:10
+	cs = expectedpapers(20, 80, 2.5, 10) # community sizes
+	#cs = [200]
+	k = saturatedexpectedpapers(Int(sum(cs)), 500) # number of papers
+	rpm = rndpubnet(k, 6.0, Int.(cs), nothing)
+	rpm = rewire(rpm, 0.1)
+	write_scimat("rpubmat.mat", rpm)
+	rpm = selectauthors(rpm, 3)
+	rcm = collaborationmatrix(rpm)
+	write_scimat("rcolmat.mat", rcm)
+	rpubnet = processpubnet("rpubmat.mat")
+	rnets[i] = rpubnet
+	rpm = rndpubnet(k, 6.0, Int.(cs), carts, 0.4)
+	rpm = rewire(rpm, 0.1)
+	write_scimat("rpubmat.mat", rpm)
+	rpm = selectauthors(rpm, 3)
+	rcm = collaborationmatrix(rpm)
+	write_scimat("rcolmat.mat", rcm)
+	rpubnet = processpubnet("rpubmat.mat")
+	rnetscart[i] = rpubnet
+	graphplot(rpubnet[:coga])
+	is_connected(rpubnet[:coga])
+end
+figure()
+for k in keys(rnets)
+	loglog(eCCDF2(rnets[k][:degree])..., "-", alpha=0.25, color="blue")
+end
+for k in keys(rnetscart)
+	loglog(eCCDF2(rnetscart[k][:degree])..., "-", alpha=0.25, color="green")
+end
+loglog(eCCDF2(MTMT[:degree])..., "-", color="red", label="real")
+loglog(eCCDF2(rMTMT[:degree])..., "-", color="orange", label="real rewired")
+legend()
+title("MTMT")
+xlabel("degree")
+ylabel("eCCDF")
+tight_layout()
+figure()
+for k in keys(rnets)
+	semilogy(eCCDF2(rnets[k][:strength])..., "-", alpha=0.25, color="blue")
+end
+for k in keys(rnetscart)
+	semilogy(eCCDF2(rnetscart[k][:strength])..., "-", alpha=0.25, color="green")
+end
+semilogy(eCCDF2(MTMT[:strength])..., "-", color="red", label="real")
+semilogy(eCCDF2(rMTMT[:strength])..., "-", color="orange", label="real rewired")
+legend()
+title("MTMT")
+xlabel("strength")
+ylabel("eCCDF")
+tight_layout()
+figure()
+for k in keys(rnets)
+	semilogy(eCCDF2(rnets[k][:weights])..., "-", alpha=0.25, color="blue")
+end
+for k in keys(rnetscart)
+	semilogy(eCCDF2(rnetscart[k][:weights])..., "-", alpha=0.25, color="green")
+end
+semilogy(eCCDF2(MTMT[:weights])..., "-", color="red", label="real")
+semilogy(eCCDF2(rMTMT[:weights])..., "-", color="orange", label="real rewired")
+legend()
+title("MTMT")
+xlabel("weight")
+ylabel("eCCDF")
+tight_layout()
+```
+
+
+
+```julia
+r = rndpubmat(MTMT[:puma], getauthorIDs(MTMT[:coga]), MTMT[:hierarchy][:lev1])
+write_scimat("genMTMTpubmat.mat", r)
+r = selectauthors(r, 3)
+rcm = collaborationmatrix(r)
+write_scimat("genMTMTcolmat.mat", rcm)
+genMTMT = processpubnet("genMTMTpubmat.mat")
+rgpm = rewire(genMTMT[:puma], 0.05)
+write_scimat("rwgMTMTpubmat.mat", rgpm)
+rgcm = collaborationmatrix(rgpm)
+write_scimat("rwgMTMTcolmat.mat", rgcm)
+rwgenMTMT = processpubnet("rwgMTMTpubmat.mat")
+rgpm = reshuffle(genMTMT[:puma], 1000)
+write_scimat("rsgMTMTpubmat.mat", rgpm)
+rgcm = collaborationmatrix(rgpm)
+write_scimat("rsgMTMTcolmat.mat", rgcm)
+rsgenMTMT = processpubnet("rsgMTMTpubmat.mat")
+
+```
 
 
 ```julia
@@ -468,6 +582,7 @@ Calculating statistics for communities.
 ```julia
 npapers = papernumbers(MTMT[:puma])
 wpapers = weightedpapers(MTMT[:puma])
+key = Int[]
 p_strongnodes = Float64[]
 p_strongedges = Float64[]
 nnodes = Float64[]
@@ -480,10 +595,11 @@ m_npapers = Float64[]
 sd_npapers = Float64[]
 m_wpapers = Float64[]
 sd_wpapers = Float64[]
-for i in keys(H[:lev1])
-	members = H[:lev1][i]
+for i in keys(MTMT[:hierarchy][:lev1])
+	members = MTMT[:hierarchy][:lev1][i]
 	g = MTMT[:coga][members]
 	nv(g) <= 1 && continue
+	push!(key, i)
 	d = describecartels(g)
 	push!(p_strongnodes, d["cartel_nodes"]/d["no_nodes"])
 	push!(p_strongedges, d["no_strongedges"]/d["no_edges"])
@@ -502,7 +618,7 @@ for i in keys(H[:lev1])
 	push!(m_wpapers, mean(wp))
 	push!(sd_wpapers, std(wp))
 end
-c_df = DataFrame(nnodes = nnodes, nedges = nedges, p_strnodes =
+c_df = DataFrame(key = key, nnodes = nnodes, nedges = nedges, p_strnodes =
 	p_strongnodes, p_stredges = p_strongedges, mWeights = mWeights, sdWeights =
 	sdWeights, mdegrees = mdegrees, sddegrees = sddegrees, m_npapers = m_npapers,
 	sd_npapers = sd_npapers, m_wpapers = m_wpapers, sd_wpapers = sd_wpapers)
