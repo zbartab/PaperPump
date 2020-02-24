@@ -1,7 +1,7 @@
 ---
 title: Publication patterns in Evolution and Ecology
 author: Zoltán Barta; Tibor Magura
-date: !__DATA__
+date: !__DATE__
 ---
 
 ---
@@ -276,6 +276,20 @@ semilogy(eCCDF2(rMTMT[:weights])..., "-", color="orange", label="real rewired")
 legend()
 title("MTMT")
 xlabel("weight")
+ylabel("eCCDF")
+tight_layout()
+figure()
+for k in keys(rnets)
+	semilogy(eCCDF2(rnets[k][:clustcoef])..., "-", alpha=0.25, color="blue")
+end
+for k in keys(rnetscart)
+	semilogy(eCCDF2(rnetscart[k][:clustcoef])..., "-", alpha=0.25, color="green")
+end
+semilogy(eCCDF2(MTMT[:clustcoef])..., "-", color="red", label="real")
+semilogy(eCCDF2(rMTMT[:clustcoef])..., "-", color="orange", label="real rewired")
+legend()
+title("MTMT")
+xlabel("local clustering coefficient")
 ylabel("eCCDF")
 tight_layout()
 ```
