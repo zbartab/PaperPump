@@ -22,15 +22,12 @@ WEIGHTF=`echo $MATF|sed 's/\.mat$/.weights/'`
 TREEF=`echo $MATF|sed 's/\.mat$/.tree/'`
 QF=`echo $MATF|sed 's/\.mat$/.Q/'`
 
-if [ ! -f "$BINF" ]; then
+sed -n '/.*,.*,.*/p' $MATF > $TXTF
+sed -i 1d $TXTF
+sed -i 's/,/ /g' $TXTF
 
-	sed -n '/.*,.*,.*/p' $MATF > $TXTF
-	sed -i 1d $TXTF
-	sed -i 's/,/ /g' $TXTF
+~/bin/convert-louvain -i $TXTF -o $BINF -w $WEIGHTF
 
-	~/bin/convert-louvain -i $TXTF -o $BINF -w $WEIGHTF
-
-	rm -f $TXTF
-fi
+rm -f $TXTF
 
 ~/bin/louvain $BINF -l -1 -q id_qual -w $WEIGHTF > $TREEF 2> $QF
