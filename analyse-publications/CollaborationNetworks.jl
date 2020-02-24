@@ -496,6 +496,18 @@ function updateIDs(IDs::Dict{String,Int64}, index::BitArray{1})
 	end
 	return newIDs
 end
+function updateIDs(IDs::Dict{String,Int64}, index::Array{Int64,1})
+	id_s = Array{String,1}(undef, length(IDs))
+	for k in keys(IDs)
+		id_s[IDs[k]] = k
+	end
+	id_s = id_s[index]
+	newIDs = Dict{String,Int64}()
+	for i in 1:length(id_s)
+		newIDs[id_s[i]] = i
+	end
+	return newIDs
+end
 
 """
     selectauthors(pm, npapers)
@@ -513,6 +525,15 @@ function selectauthors(pm::PubMat, npapers=-Inf)
 	pmred = pmred[j, :]
 	return PubMat(pmred,
 								updateIDs(pm.authorIDs, i),
+								updateIDs(pm.paperIDs, j))
+end
+function selectauthors(pm::PubMat, authors::Array{Int,1})
+	pmred = pm.mat[:, authors]
+	na = authornumbers(pmred)
+	j = na .> 0
+	pmred = pmred[j, :]
+	return PubMat(pmred,
+								updateIDs(pm.authorIDs, authors),
 								updateIDs(pm.paperIDs, j))
 end
 
@@ -661,12 +682,9 @@ function generaterndbipartite(bjd::SparseMatrixCSC{Int64, Int64})
 	ps_d, ps_s = fillnodes(pd)
 	As_d, As_s = fillnodes(Ad)
 	pin, Ain, nedges = findnz(bjd)
-	m = spzeros(length(ps_d), length(As_d))
-	#println("O1: ", length(nedges))
+	m = spzeros(Int, length(ps_d), length(As_d))
 	counter = 0
 	while length(nedges) > 0 #&& counter < 100
-		#println("I1: ", length(nedges), " p: ", pin, " A: ", Ain, " e: ",
-					 #nedges)
 		i = randperm(length(pin))
 		pin = pin[i]
 		Ain = Ain[i]
@@ -677,18 +695,19 @@ function generaterndbipartite(bjd::SparseMatrixCSC{Int64, Int64})
 			ps_s[p] -= 1
 			As_s[A] -= 1
 			nedges[i] -= 1
-			m[p,A] += 1.0
+			m[p,A] += 1
 		end
 		i = nedges .> 0
 		pin = pin[i]
 		Ain = Ain[i]
 		nedges = nedges[i]
-		#println("I2: ", length(nedges), " p: ", pin, " A: ", Ain, " e: ",
-					 #nedges)
 		counter += 1
 	end
-	#println("O2: ", length(nedges))
-	#return ps_s, ps_d, As_s, As_d, m
+	counter = 0
+	while sum(m .> 1) > 0 && counter < 25
+		simplifybipartite!(m)
+		counter += 1
+	end
 	return m
 end
 
@@ -704,7 +723,7 @@ function simplifybipartite!(m::SparseMatrixCSC{Int64, Int64})
 	p, A = size(m)
 	ps = collect(1:p)
 	As = collect(1:A)
-	n_medges = sum(values(m) .> 1)
+	n_medges = sum(m .> 1)
 	n_medges == 0 && return nothing
 	udegrees = Int.(sum(m, dims=1))
 	udegrees = reshape(udegrees, size(udegrees, 2))
@@ -716,6 +735,8 @@ function simplifybipartite!(m::SparseMatrixCSC{Int64, Int64})
 	for i in i_medges
 		u = cind[i]
 		l = rind[i]
+		m[l,u] == 0 && continue
+		#println("################ m[l,u] = ", m[l,u])
 		ld = ldegrees[l]
 		lds = findall((k) -> ld == k, ldegrees)
 		lds = lds[lds .!= l]
@@ -728,10 +749,14 @@ function simplifybipartite!(m::SparseMatrixCSC{Int64, Int64})
 				shuffle!(ws)
 				for w in ws
 					if m[l,w] == 0.0 && m[v,u] == 0.0
-						m[l,u] -= 1.0
-						m[v,w] -= 1.0
-						m[l,w] = 1.0
-						m[v,u] = 1.0
+						m[l,u] -= 1
+						m[v,w] -= 1
+						m[l,w] = 1
+						m[v,u] = 1
+						if sum(m .< 0) > 0
+							println("m[l,u] = ", m[l,u], ", m[v,w] = ", m[v,w])
+							error("first")
+						end
 						breakout = true
 						break
 					end
@@ -752,10 +777,14 @@ function simplifybipartite!(m::SparseMatrixCSC{Int64, Int64})
 				shuffle!(vs)
 				for v in vs
 					if m[l,w] == 0.0 && m[v,u] == 0.0
-						m[l,u] -= 1.0
-						m[v,w] -= 1.0
-						m[l,w] = 1.0
-						m[v,u] = 1.0
+						m[l,u] -= 1
+						m[v,w] -= 1
+						m[l,w] = 1
+						m[v,u] = 1
+						if sum(m .< 0) > 0
+							println("m[l,u] = ", m[l,u], ", m[v,w] = ", m[v,w])
+							error("second")
+						end
 						breakout = true
 						break
 					end
@@ -778,13 +807,18 @@ function simplifybipartite!(m::SparseMatrixCSC{Int64, Int64})
 			vps = ps[vps .> 0.0]
 			shuffle!(vps)
 			for up in ups, vp in vps
-				if m[vp,up] <= 0.0 
-					m[l,u] -= 1.0
-					m[w,up] -= 1.0
-					m[vp,wp] -= 1.0
-					m[w,u] = 1.0
-					m[l,wp] = 1.0
-					m[vp,up] = 1.0
+				if m[vp,up] <= 0 
+					m[l,u] -= 1
+					m[w,up] -= 1
+					m[vp,wp] -= 1
+					m[w,u] = 1
+					m[l,wp] = 1
+					m[vp,up] = 1
+						if sum(m .< 0) > 0
+							println("m[l,u] = ", m[l,u], ", m[w,up] = ", m[w,up],
+											", m[vp,wp] = ", m[vp, wp])
+							error("third")
+						end
 					breakout = true
 					break
 				end
@@ -847,10 +881,10 @@ function processpubnet(file)
 	pubnet[:degree] = degree(pubnet[:coga])
 	treefile = replace(file2, r"\.mat$" => ".tree")
 	Qfile = replace(file2, r"\.mat$" => ".Q")
-	if isfile(treefile)
+	if isfile(treefile) && mtime(treefile) > mtime(file2)
 		H = read_louvain_tree(treefile)
 		Q = read_louvain_Q(Qfile)
-	else
+	else 
 		run(`./comm_detection.sh $(file2)`)
 		H = read_louvain_tree(treefile)
 		Q = read_louvain_Q(Qfile)
@@ -858,4 +892,33 @@ function processpubnet(file)
 	pubnet[:Q] = Q
 	pubnet[:hierarchy] = H
 	return pubnet
+end
+
+"""
+    reshuffle(pm, nauthors)
+
+Take a publication matrix `pm` and shuffle the publication records of
+`nauthors` to randomise the matrix.
+"""
+function reshuffle(pm::SparseMatrixCSC{Int,Int}, nauthors::Int)
+	p, A = size(pm)
+	As = collect(1:A)
+	np = papernumbers(pm)
+	nps = reverse(sort(np))
+	nps = nps[nauthors]
+	rA = As[np .>= nps]
+	println(length(rA))
+	#rA = sample(As, nauthors, replace=false)
+	for a in rA
+		pm[:,a] = shuffle(pm[:,a])
+	end
+	np = authornumbers(pm)
+	pm = pm[np .> 0,:]
+	dropzeros!(pm)
+	return pm
+end
+function reshuffle(pm::PubMat, nauthors::Int)
+	mat = copy(pm.mat)
+	mat = reshuffle(mat, nauthors)
+	return PubMat(mat, pm.authorIDs, pm.paperIDs)
 end
