@@ -1,7 +1,7 @@
 
 # Functions used to simulate publication networks and cartels
 
-using StatsBase
+using StatsBase, Distributions
 
 """
     expectedpapers(A, p, gamma, k_sat)
@@ -172,7 +172,7 @@ function grow_publicationmatrix(k::Array{Int64,1}, p_new::Float64,
 			if rand() < p_new
 				# start new paper
 				npapers += 1
-				pm[npapers, j] = 1.0
+				pm[npapers, j] = 1
 				papers[npapers] = 1
 			else
 				# join existing paper
@@ -181,14 +181,14 @@ function grow_publicationmatrix(k::Array{Int64,1}, p_new::Float64,
 				while true
 					ii += 1
 					i = papertojoin(pk)
-					(pm[i,j] == 0.0 || ii > npapers) && break
+					(pm[i,j] == 0 || ii > npapers) && break
 				end
 				if ii > npapers
 					npapers += 1
-					pm[npapers, j] = 1.0
+					pm[npapers, j] = 1
 					papers[npapers] = 1
 				else
-					pm[i,j] = 1.0
+					pm[i,j] = 1
 					papers[i] += 1
 				end
 			end
@@ -312,14 +312,21 @@ function showpubmat(pubmat, cutoff=0.4)
 	for k in keys(d)
 		println(k, ": ", d[k])
 	end
-	graphplot(coga)
+	graphplot(coga, spring_layout(coga, C=10)...)
 	hist(Weights(coga), 0:0.025:1)
 	return nothing
 end
 
 """
+    rndpubnet(k, pratio, commsizes)
+
+Create a random publication matrix in which the authors' paper
+distribution is sampled from `k`, the number of papers is around
+`pratio` times the author numbers. The generated network builds up from
+communities whose size is given by `commsizes`.
 """
-function rndpubnet(k,pratio,commsizes)
+function rndpubnet(k,pratio,commsizes, cartsizes=nothing, p_carts=0.2)
+	sampledist = Beta(3,1)
 	cs = commsizes[1]
 	k0 = sample(k, cs, replace=false)
 	p = Int(round(cs*pratio))
@@ -328,8 +335,68 @@ function rndpubnet(k,pratio,commsizes)
 		k0 = sample(k, cs, replace=false)
 		p = Int(round(cs*pratio))
 		pm0 = generate_publicationmatrix(k0, p)
+		if !isnothing(cartsizes)
+			minc = minimum(cartsizes)
+			local c
+			na = size(pm0.mat, 2)
+			if minc <= na
+				membersadded = 0
+				while membersadded < na * p_carts
+					while true
+						c = sample(cartsizes, 1)
+						c = c[1]
+						c <= na && break
+					end
+					cart = sample(1:na, c, replace=false)
+					addcartel!(pm0, cart, rand(sampledist))
+					membersadded += c
+				end
+			end
+		end
 		m = combine_sparsematrices(pm.mat, pm0.mat)
 		pm = generate_publicationmatrix(m)
 	end
 	return pm
+end
+
+"""
+    rndpubmat(ideal, auIDs, communities)
+
+Generate a random publication network with similar characteristics as
+`ideal`. The net is generated separatelly for all communities listed in
+`communities`. `auIDs` is used to identify authors.
+"""
+function rndpubmat(ideal::PubMat, auIDs::Array{String,1},
+									 communities::Dict{Int,Array{Int,1}})
+	commIDs = keys(communities)
+	#println("# communities: ", length(commIDs))
+	first = true
+	local m::SparseMatrixCSC{Int,Int}
+	for cid in commIDs
+		c = communities[cid]
+		mid = auIDs[c]
+		#println("# members: ", length(c), " in communities ", cid)
+		#length(c) < 2 && continue
+		s = selectauthors(ideal, getauthorindex(mid, ideal))
+		d = degreedegreecor(s)
+		r = generaterndbipartite(d)
+		if sum(r .< 0) > 0
+			println("# members: ", length(c), " in communities ", cid,
+							" ##########")
+			error("Negative values!")
+		end
+		if first
+			m = copy(r)
+			first = false
+		else
+			m = combine_sparsematrices(m, r)
+		end
+	end
+	counter = 0
+	while sum(m .> 1) > 0 && counter < 10
+		simplifybipartite!(m)
+		counter += 1
+	end
+	counter == 10 && error("Simplification of generated publication matrix failed!")
+	return generate_publicationmatrix(m)
 end
