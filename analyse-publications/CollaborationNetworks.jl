@@ -30,7 +30,62 @@ mutable struct ColMat <: ScienceMat
 	authorIDs::Dict{String,Int64}
 end
 
+mutable struct PubNet
+	puma::PubMat
+	coma::ColMat
+	coga::MetaGraph{Int64, Float64}
+	nauthors::Array{Int,1}
+	npapers::Array{Int,1}
+	wpapers::Array{Float64,1}
+	strengthes::Array{Float64,1}
+	weights::Array{Float64,1}
+	degrees::Array{Int,1}
+	clustcoefs::Array{Float64,1}
+	Q::Float64
+	hierarchy::Dict{Any,Any}
+	cutoff::Float64
+	cartels::Array{Array{String,1},1}
+	function PubNet(puma::PubMat, coma::ColMat, cutoff::Float64=0.4)
+		coga = collaborationgraph(coma)
+		nauthors = authornumbers(puma)
+		npapers = papernumbers(puma)
+		wpapers = weightedpapers(puma)
+		strengthes = strength(coma)
+		weights = Weights(coga)
+		degrees = degree(coga)
+		clustcoefs = local_clustering_coefficient(coga)
+		file2 = "tmp.mat"
+		write_scimat(file2, coma)
+		treefile = replace(file2, r"\.mat$" => ".tree")
+		Qfile = replace(file2, r"\.mat$" => ".Q")
+		if isfile(treefile) && mtime(treefile) > mtime(file2)
+			H = read_louvain_tree(treefile)
+			Q = read_louvain_Q(Qfile)
+		else
+			run(`./comm_detection.sh $(file2)`)
+			H = read_louvain_tree(treefile)
+			Q = read_louvain_Q(Qfile)
+		end
+		carts = cartels(coga, cutoff)
+		return new(puma, coma, coga, nauthors, npapers, wpapers, strengthes,
+							 weights, degrees, clustcoefs, Q, H, cutoff,
+							carts)
+	end
+end
+
 ## The functions
+
+"""
+    PubNet(file, cutoff)
+
+Outer constructor for `PubNet` reading data from files.
+"""
+function PubNet(file::String, cutoff::Float64=0.4)
+	file2 = replace(file, "pubmat" => "colmat")
+	puma = read_scimat(file)
+	coma = read_scimat(file2)
+	return PubNet(puma, coma, cutoff)
+end
 
 """
     collaborationmatrix(pubmat)
