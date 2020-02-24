@@ -286,6 +286,13 @@ function selectauthors(pm::PubMat, npapers=-Inf)
 								updateIDs(pm.authorIDs, i),
 								updateIDs(pm.paperIDs, j))
 end
+
+"""
+    selectauthors(pm, authors)
+
+Return the part of publication matrix `pm` which belongs to the authors
+in `authors`.
+"""
 function selectauthors(pm::PubMat, authors::Array{Int,1})
 	pmred = pm.mat[:, authors]
 	na = authornumbers(pmred)
@@ -420,6 +427,7 @@ function processpubnet(file)
 	pubnet[:strength] = strength(pubnet[:coma])
 	pubnet[:weights] = Weights(pubnet[:coga])
 	pubnet[:degree] = degree(pubnet[:coga])
+	pubnet[:clustcoef] = local_clustering_coefficient(pubnet[:coga])
 	treefile = replace(file2, r"\.mat$" => ".tree")
 	Qfile = replace(file2, r"\.mat$" => ".Q")
 	if isfile(treefile) && mtime(treefile) > mtime(file2)
