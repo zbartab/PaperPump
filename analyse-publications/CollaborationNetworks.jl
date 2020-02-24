@@ -16,6 +16,8 @@ using LightGraphs, MetaGraphs
 
 ## The data structures
 
+const HierarchyType = Dict{Symbol, Dict{Int64, Array{Int64, 1}}}
+const HierarchyIDType = Dict{Symbol, Dict{Int64, Array{String, 1}}}
 
 abstract type ScienceMat end
 
@@ -42,7 +44,7 @@ mutable struct PubNet
 	degrees::Array{Int,1}
 	clustcoefs::Array{Float64,1}
 	Q::Float64
-	hierarchy::Dict{Any,Any}
+	hierarchy::HierarchyIDType
 	cutoff::Float64
 	cartels::Array{Array{String,1},1}
 	function PubNet(puma::PubMat, coma::ColMat, cutoff::Float64=0.4)
@@ -66,6 +68,7 @@ mutable struct PubNet
 			H = read_louvain_tree(treefile)
 			Q = read_louvain_Q(Qfile)
 		end
+		H = converthierarchy(coga, H)
 		carts = cartels(coga, cutoff)
 		return new(puma, coma, coga, nauthors, npapers, wpapers, strengthes,
 							 weights, degrees, clustcoefs, Q, H, cutoff,
@@ -391,7 +394,8 @@ function read_louvain_tree(file::String)
 	f = open(file)
 	lines = readlines(f)
 	close(f)
-	top = Dict()
+	#top = Dict{Symbol, Dict{Int64, Array{Int64,1}}}()
+	top = HierarchyType()
 	level = 0
 	levsymb = :a
 	prevlevsymb = :a
@@ -417,6 +421,25 @@ function read_louvain_tree(file::String)
 		end
 	end
 	return top
+end
+
+"""
+    converthierarchy(coga, hierarchy)
+
+Convert the community hierarchy found for `coga` from Int index based
+respresentation to the String based ID representation.
+"""
+function converthierarchy(coga::MetaGraph{Int64, Float64},
+													hierarchy::HierarchyType)
+	auIDs = getauthorIDs(coga)
+	H = HierarchyIDType()
+	for l in keys(hierarchy)
+		H[l] = Dict{Int64, Array{String, 1}}()
+		for i in keys(hierarchy[l])
+			H[l][i] = auIDs[hierarchy[l][i]]
+		end
+	end
+	return H
 end
 
 """
