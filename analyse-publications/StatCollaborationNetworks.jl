@@ -244,6 +244,18 @@ function describecartels(colnet, cutoff=0.4)
 end
 
 """
+"""
+function cartels(colgraph::MetaGraph{Int64, Float64}, cutoff::Float64)
+	cartsn = subnet(colgraph, cutoff)
+	ca = connected_components(cartsn)
+	caIDs = Array{String, 1}[]
+	for c in ca
+		push!(caIDs, getauthorIDs(colgraph, c))
+	end
+	return caIDs
+end
+
+"""
     papernumbers(pm)
 
 Returns an array with the number of papers each author in publication
@@ -306,3 +318,21 @@ function degreesdegrees(pm::PubMat)
 	return dhp, dhA
 end
 
+"""
+    groupproductivity(pm, group)
+
+Return the per capita group productivity of `group` members in publication
+matrix `pm`. Group productivity is the total number of papers the
+authors in group wrote.
+"""
+function groupproductivity(pm::PubMat, group::Array{Int,1})
+	gpm = selectauthors(pm, group)
+	np = size(gpm)
+	np = np[1]
+	return np / length(group)
+end
+function groupproductivity(pm::PubMat, group::Array{String,1})
+	inds = getauthorindex(pm, group)
+	gp = groupproductivity(pm, inds)
+	return gp
+end

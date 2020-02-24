@@ -112,7 +112,7 @@ Return a subnet of `colnet`.
 The subnet is formed by those vertices which is connected by edges with
 weights greater than `cutoff`.
 """
-function subnet(colnet, cutoff)
+function subnet(colnet::MetaGraph{Int64, Float64}, cutoff::Float64)
 	heavyW = filter_edges(colnet, (g, e) ->
 												LightGraphs.weights(g)[src(e), dst(e)] > cutoff)
 	return colnet[heavyW]
@@ -131,14 +131,19 @@ function getauthorIDs(colnet::MetaGraph{Int64, Float64})
 	end
 	return ids
 end
+function getauthorIDs(colnet::MetaGraph{Int64, Float64},
+											group::Array{Int,1})
+	ids = getauthorIDs(colnet)
+	return ids[group]
+end
 
 """
-    getauthorindex(ids, coma)
+    getauthorindex(coma, ids)
 
 Return the indices in collaboration matrix `coma` of authors listed in
 `ids`.
 """
-function getauthorindex(ids::Array{String,1}, coma::ScienceMat)
+function getauthorindex(coma::ScienceMat, ids::Array{String,1})
 	indices = Int[]
 	for id in ids
 		push!(indices, coma.authorIDs[id])

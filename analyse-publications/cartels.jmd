@@ -341,13 +341,13 @@ The correlation between degree of nodes (authors) and the number of papers an au
 ```julia
 d = degree(MTMT[:coga])
 ids = getauthorIDs(MTMT[:coga])
-inds = getauthorindex(ids, MTMT[:puma])
+inds = getauthorindex(MTMT[:puma], ids)
 np = papernumbers(MTMT[:puma])
 np = np[inds]
 c_off = 0.5
 MTMT[:strongs] = subnet(MTMT[:coga], c_off)
 a = getauthorIDs(MTMT[:strongs])
-istMTMT = getauthorindex(a, MTMT[:coma])
+istMTMT = getauthorindex(MTMT[:coma], a)
 figure()
 semilogy(d, np, ".", label="all nodes", alpha=0.5)
 semilogy(d[istMTMT], np[istMTMT], ".", label="strong nodes", alpha=0.5)
@@ -426,9 +426,9 @@ c_off = 0.7
 MTMT[:strongs] = subnet(MTMT[:coga], c_off)
 dblp[:strongs] = subnet(dblp[:coga], c_off)
 a = getauthorIDs(MTMT[:strongs])
-istMTMT = getauthorindex(a, MTMT[:coma])
+istMTMT = getauthorindex(MTMT[:coma], a)
 a = getauthorIDs(dblp[:strongs])
-istdblp = getauthorindex(a, dblp[:coma])
+istdblp = getauthorindex(dblp[:coma], a)
 ```
 
 
@@ -763,8 +763,8 @@ MTMT[:strongs] = subnet(MTMT[:coga], c_off)
 a = papernumbers(MTMT[:puma])
 id_cm = getauthorIDs(MTMT[:strongs])
 id_all = getauthorIDs(MTMT[:coga])
-in_cm = getauthorindex(id_cm, MTMT[:puma])
-in_all = getauthorindex(id_all, MTMT[:puma])
+in_cm = getauthorindex(MTMT[:puma], id_cm)
+in_all = getauthorindex(MTMT[:puma], id_all)
 in_nm = setdiff(in_all, in_cm)
 figure()
 for i in 1:20
@@ -787,8 +787,8 @@ dblp[:strongs] = subnet(dblp[:coga], c_off)
 a = papernumbers(dblp[:puma])
 id_cm = getauthorIDs(dblp[:strongs])
 id_all = getauthorIDs(dblp[:coga])
-in_cm = getauthorindex(id_cm, dblp[:puma])
-in_all = getauthorindex(id_all, dblp[:puma])
+in_cm = getauthorindex(dblp[:puma], id_cm)
+in_all = getauthorindex(dblp[:puma], id_all)
 in_nm = setdiff(in_all, in_cm)
 figure()
 for i in 1:20
@@ -809,8 +809,8 @@ c_off = 0.4
 wp = weightedpapers(MTMT[:puma])
 id_cm = getauthorIDs(MTMT[:strongs])
 id_all = getauthorIDs(MTMT[:coga])
-in_cm = getauthorindex(id_cm, MTMT[:puma])
-in_all = getauthorindex(id_all, MTMT[:puma])
+in_cm = getauthorindex(MTMT[:puma], id_cm)
+in_all = getauthorindex(MTMT[:puma], id_all)
 in_nm = setdiff(in_all, in_cm)
 figure()
 for i in 1:20
@@ -831,8 +831,8 @@ c_off = 0.4
 wp = weightedpapers(dblp[:puma])
 id_cm = getauthorIDs(dblp[:strongs])
 id_all = getauthorIDs(dblp[:coga])
-in_cm = getauthorindex(id_cm, dblp[:puma])
-in_all = getauthorindex(id_all, dblp[:puma])
+in_cm = getauthorindex(dblp[:puma], id_cm)
+in_all = getauthorindex(dblp[:puma], id_all)
 in_nm = setdiff(in_all, in_cm)
 figure()
 for i in 1:20

@@ -355,7 +355,7 @@ function rndpubmat(ideal::PubMat, auIDs::Array{String,1},
 	for cid in commIDs
 		c = communities[cid]
 		mid = auIDs[c]
-		s = selectauthors(ideal, getauthorindex(mid, ideal))
+		s = selectauthors(ideal, getauthorindex(ideal, mid))
 		d = degreedegreecor(s)
 		r = generaterndbipartite(d)
 		if sum(r .< 0) > 0
