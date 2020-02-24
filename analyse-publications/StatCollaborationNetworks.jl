@@ -168,103 +168,6 @@ function eCCDF2(x::Array{Float64, 1})
 end
 
 """
-    generate_rndnet(k, p, cartel, pc)
-
-Generate two random publication networks. One is a fully random network,
-based on the distribution of papers published by the authors, `k`, and the
-number of possible papers, `p`. The other network is the same as the
-previous one except that authors listed in `cartel` form a cartel, i.e.
-they invite each others to be coauthors with probability `pc`.
-"""
-function generate_rndnet(k, p, cartel::Array{Int64,1}, pc;
-												 filename="proba", doplot=true, papercutoff=0)
-	pnnc = Dict()
-	pnwc = Dict()
-	pnnc[:puma] = generate_publicationmatrix(k, p)
-	papercutoff > 0 && (pnnc[:puma] = selectauthors(pnnc[:puma], papercutoff))
-	pnnc[:coma] = collaborationmatrix(pnnc[:puma])
-	pnnc[:coga] = collaborationgraph(pnnc[:coma])
-	pnwc[:puma] = deepcopy(pnnc[:puma])
-	addcartel!(pnwc[:puma], cartel, pc)
-	papercutoff > 0 && (pnwc[:puma] = selectauthors(pnwc[:puma], papercutoff))
-	pnwc[:coma] = collaborationmatrix(pnwc[:puma])
-	pnwc[:coga] = collaborationgraph(pnwc[:coma])
-	lx, ly = spring_layout(pnwc[:coga], C=20)
-	if doplot
-		graphplot(pnnc[:coga], lx, ly, filename=filename)
-		graphplot(pnwc[:coga], lx, ly, filename=string(filename, "-cartel"))
-	end
-	return (pnnc, pnwc)
-end
-function generate_rndnet(k, p, cartel::Array{Array{Int64,1},1}, pc;
-												 filename="proba", doplot=true, papercutoff=0)
-	pnnc = Dict()
-	pnwc = Dict()
-	pnnc[:puma] = generate_publicationmatrix(k, p)
-	papercutoff > 0 && (pnnc[:puma] = selectauthors(pnnc[:puma], papercutoff))
-	pnnc[:coma] = collaborationmatrix(pnnc[:puma])
-	pnnc[:coga] = collaborationgraph(pnnc[:coma])
-	pnwc[:puma] = deepcopy(pnnc[:puma])
-	for c in cartel
-		addcartel!(pnwc[:puma], c, pc)
-	end
-	papercutoff > 0 && (pnwc[:puma] = selectauthors(pnwc[:puma], papercutoff))
-	pnwc[:coma] = collaborationmatrix(pnwc[:puma])
-	pnwc[:coga] = collaborationgraph(pnwc[:coma])
-	lx, ly = spring_layout(pnwc[:coga], C=20)
-	if doplot
-		graphplot(pnnc[:coga], lx, ly, filename=filename)
-		graphplot(pnwc[:coga], lx, ly, filename=string(filename, "-cartel"))
-	end
-	return (pnnc, pnwc)
-end
-
-"""
-    generate_cartels(nauthors, cartel_sizes)
-
-Generate an array of arrays containing members of cartels randomly drawn
-from `nauthors` number of authors. The sizes of the generated cartels
-are given by `cartel_sizes`, a `Dict`.
-"""
-function generate_cartels(nauthors, cartel_sizes)
-	cartels = Array{Int64,1}[]
-	nmembers = 0
-	for k in keys(cartel_sizes)
-		nmembers += k*cartel_sizes[k]
-	end
-	members = sample(1:nauthors, nmembers, replace=false)
-	i = 1
-	for k in keys(cartel_sizes)
-		for s in 1:cartel_sizes[k]
-			j = i + k
-			push!(cartels, members[i:(j-1)])
-			i = j
-		end
-	end
-	return cartels
-end
-
-"""
-    prop_cartels(nmembers, sample_cartel)
-
-Make a cartel size distribution based on the distribution given in
-`sample_cartel`. The generated cartel size distribution containse no
-more than `nmembers` members.
-"""
-function prop_cartels(nmembers, sample_cartel)
-	css = Int[]
-	for k in keys(sample_cartel)
-		for i in 1:sample_cartel[k]
-			push!(css, k)
-		end
-	end
-	shuffle!(css)
-	cs = cumsum(css)
-	css = css[cs .<= nmembers]
-	return histogram(css)
-end
-
-"""
     pubnetstats(pn)
 
 Calculate several statistics for the authors of publication net `pn`.
@@ -278,16 +181,128 @@ function pubnetstats(pn)
 	return pubstats
 end
 
-"""
-    rewire(pn, nrand)
 
-Randomly rewire, `nrand` times, the publication network `pn` (a
-collection of publication and collaboration matrices and a collaboration
-graph).
 """
-function rewire(pn::Dict{Any,Any}, nrand::Int=1000)
-	rpm = rewire(pn[:puma], nrand)
-	rcm = collaborationmatrix(rpm)
-	rcg = collaborationgraph(rcm)
-	return Dict(:puma => rpm, :coma => rcm, :coga => rcg)
+    Weights(colnet)
+
+Return the weights of the edges in `colnet`, a weighted MetaGraph.
+"""
+function Weights(colnet)
+	map(ed -> LightGraphs.weights(colnet)[src(ed), dst(ed)],
+			edges(colnet))
 end
+
+"""
+		strength(colmat)
+
+Calculate the strength of each node in `colmat`. Strength of node i is
+the sum of weights of edges connected to node i.
+"""
+function strength(colmat::ColMat)
+	m = colmat.mat
+	n = size(m, 1)
+	s = Array{Float64,1}(undef, n)
+	for i in 1:n
+		s[i] = sum(m[i,:]) + sum(m[:,i])
+	end
+	return s
+end
+
+"""
+    cartel_sizes(colnet)
+
+Return an array of the sizes of the connected components of `colnet`.
+"""
+function cartel_sizes(colnet)
+	ca = connected_components(colnet)
+	map(length, ca)
+end
+
+"""
+    describecartels(colnet, cutoff)
+
+Gives basic information about the cartels in `colnet` deliniated by
+strong links defined by `cutoff`.
+
+Returns a Dict with the following fields:
+- `no_nodes`: the number of nodes in the collaboration network,
+- `cartel_nodes`,: the number of nodes concerned in cartels,
+- `no_edges`: number of edges in `colnet`,
+- `no_strongedges`: the number of strong edges (i.e. edges with weight >
+`cutoff`),
+- `cartel_sizes`: frequency histogram of cartel sizes.
+"""
+function describecartels(colnet, cutoff=0.4)
+	W = Weights(colnet)
+	sub_cn = subnet(colnet, cutoff)
+	carts = cartel_sizes(sub_cn)
+	histcarts = histogram(carts)
+	no_v = nv(colnet)
+	Dict("no_nodes" => no_v, "cartel_nodes" => nv(sub_cn),
+			 "no_edges" => length(W), "no_strongedges" => sum(W .> cutoff),
+			 "cartel_sizes" => histcarts)
+end
+
+"""
+    papernumbers(pm)
+
+Returns an array with the number of papers each author in publication
+matrix `pm` authored.
+"""
+function papernumbers(pm::PubMat)
+	return papernumbers(pm.mat)
+end
+function papernumbers(mat::SparseMatrixCSC{Float64,Int64})
+	no_papers = sum(mat, dims=1)
+	no_papers = reshape(no_papers, size(no_papers, 2))
+	return no_papers
+end
+function papernumbers(mat::SparseMatrixCSC{Int64,Int64})
+	no_papers = sum(mat, dims=1)
+	no_papers = reshape(no_papers, size(no_papers, 2))
+	return no_papers
+end
+
+"""
+    authornumbers(pm)
+
+Returns an array with the number of authors each paper in publication
+matrix `pm` has.
+"""
+function authornumbers(pm::PubMat)
+	return authornumbers(pm.mat)
+end
+function authornumbers(mat::SparseMatrixCSC{Int64,Int64})
+	no_authors = sum(mat, dims=2)
+	no_authors = reshape(no_authors, size(no_authors, 1))
+	return no_authors
+end
+
+"""
+    degreedegreecor(pm)
+
+Calculate the join degree distribution of a bipartite network.
+"""
+function degreedegreecor(pm::PubMat)
+	da = Int.(papernumbers(pm))
+	dp = Int.(authornumbers(pm))
+	p, A, val = findnz(pm.mat)
+	ddc = spzeros(Int, Int(maximum(dp)), Int(maximum(da)))
+	for i in 1:length(val)
+		ddc[dp[p[i]], da[A[i]]] += 1
+	end
+	return ddc
+end
+function degreesdegrees(pm::PubMat)
+	da = Int.(papernumbers(pm))
+	dp = Int.(authornumbers(pm))
+	p, A, val = findnz(pm.mat)
+	dhp = Int[]
+	dhA = Int[]
+	for i in 1:length(val)
+		push!(dhp, dp[p[i]])
+		push!(dhA, da[A[i]])
+	end
+	return dhp, dhA
+end
+

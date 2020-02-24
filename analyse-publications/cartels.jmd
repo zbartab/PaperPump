@@ -53,7 +53,7 @@ using LightGraphs, MetaGraphs, GraphPlot
 include("CollaborationNetworks.jl")
 include("PlotCollaborationNetworks.jl")
 include("StatCollaborationNetworks.jl")
-include("simulations/RandomPublicationNetworks.jl")
+include("RandomPublicationNetworks.jl")
 #include("ProcessMTMTrecords.jl")
 #include("ProcessDBLPrecords.jl")
 ```

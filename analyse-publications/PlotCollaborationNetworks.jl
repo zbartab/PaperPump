@@ -129,3 +129,22 @@ function plotcartelseffects(psnc, pswc, measure; f=donothing, mytitle="")
 	title(mytitle)
 	tight_layout()
 end
+
+"""
+    showpubmat(pubmat)
+
+Visualise the collaboration graph created from the publication matrix
+`pubmat`.
+"""
+function showpubmat(pubmat, cutoff=0.4)
+	coma = collaborationmatrix(pubmat)
+	coga = collaborationgraph(coma)
+	d = describecartels(coga, cutoff)
+	for k in keys(d)
+		println(k, ": ", d[k])
+	end
+	graphplot(coga, spring_layout(coga, C=10)...)
+	hist(Weights(coga), 0:0.025:1)
+	return nothing
+end
+

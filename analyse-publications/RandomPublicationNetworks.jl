@@ -295,25 +295,6 @@ function addcartel!(pubmat::PubMat, cartel::Array{Int,1}, collprob=1.0)
 			pubmat.mat[jj,c] = 1
 		end
 	end
-	#pubmat.mat[i, cartel] .= 1
-	return nothing
-end
-
-"""
-    showpubmat(pubmat)
-
-Visualise the collaboration graph created from the publication matrix
-`pubmat`.
-"""
-function showpubmat(pubmat, cutoff=0.4)
-	coma = collaborationmatrix(pubmat)
-	coga = collaborationgraph(coma)
-	d = describecartels(coga, cutoff)
-	for k in keys(d)
-		println(k, ": ", d[k])
-	end
-	graphplot(coga, spring_layout(coga, C=10)...)
-	hist(Weights(coga), 0:0.025:1)
 	return nothing
 end
 
@@ -369,14 +350,11 @@ Generate a random publication network with similar characteristics as
 function rndpubmat(ideal::PubMat, auIDs::Array{String,1},
 									 communities::Dict{Int,Array{Int,1}})
 	commIDs = keys(communities)
-	#println("# communities: ", length(commIDs))
 	first = true
 	local m::SparseMatrixCSC{Int,Int}
 	for cid in commIDs
 		c = communities[cid]
 		mid = auIDs[c]
-		#println("# members: ", length(c), " in communities ", cid)
-		#length(c) < 2 && continue
 		s = selectauthors(ideal, getauthorindex(mid, ideal))
 		d = degreedegreecor(s)
 		r = generaterndbipartite(d)
@@ -400,3 +378,425 @@ function rndpubmat(ideal::PubMat, auIDs::Array{String,1},
 	counter == 10 && error("Simplification of generated publication matrix failed!")
 	return generate_publicationmatrix(m)
 end
+
+
+"""
+    rewire!(mat, niter)
+
+Randomly rewire in-place the bipartite graph represented by the `mat`
+adjacency matrix, `niter` times.
+"""
+function rewire!(mat::SparseMatrixCSC{Int64, Int64}, niter=100)
+	countwiring = 0
+	while countwiring < niter
+		rowind, colind, vals = findnz(mat)
+		n_entries = length(rowind)
+		ri = randperm(n_entries)
+		wi = 2
+		while wi < n_entries && countwiring < niter
+			i1 = rowind[ri[wi-1]]
+			i2 = rowind[ri[wi]]
+			j1 = colind[ri[wi-1]]
+			j2 = colind[ri[wi]]
+			if mat[i1, j2] == 0 && mat[i2, j1] == 0
+				mat[i1, j1] = 0
+				mat[i2, j2] = 0
+				mat[i1, j2] = 1
+				mat[i2, j1] = 1
+				countwiring += 1
+			end
+			wi += 2
+		end
+		dropzeros!(mat)
+	end
+	return countwiring
+end
+
+"""
+    rewire(mat, niter)
+
+Randomly rewire a copy of `mat` `niter` times.
+"""
+function rewire(pubmat::PubMat, niter::Int=100)
+	matcp = deepcopy(pubmat)
+	rewire!(matcp.mat, niter)
+	return matcp
+end
+function rewire(pubmat::PubMat, piter::Float64=0.1)
+	matcp = deepcopy(pubmat)
+	nedges = nnz(matcp.mat)
+	niter = Int(round(nedges * piter))
+	niter == 0 && return pm
+	rewire!(matcp.mat, niter)
+	return matcp
+end
+
+"""
+    rewire_community(pm, members, piter)
+
+Randomly rewire the edges between members of a subgroup of publication
+matrix `pm`. Only `piter` portion of the edges rewired.
+"""
+function rewire_community(pm::PubMat, members::Array{Int,1},
+													piter::Float64=0.1)
+	nonmembers = setdiff(collect(1:size(pm.mat, 2)), members)
+	cpm = deepcopy(pm)
+	m_nm = cpm.mat[:,nonmembers]
+	m_cm = cpm.mat[:,members]
+	r, c, v = findnz(m_cm)
+	niter = Int(round(sum(v .> 0.0) * piter))
+	niter == 0 && return pm
+	rewire!(m_cm, niter)
+	m = hcat(m_nm, m_cm)
+	a = Array{String, 1}(undef, length(pm.authorIDs))
+	for i in keys(pm.authorIDs)
+		a[pm.authorIDs[i]] = i
+	end
+	a = a[vcat(nonmembers, members)]
+	aIDs = Dict{String, Int64}()
+	for i in 1:length(a)
+		aIDs[a[i]] = i
+	end
+	return PubMat(m, aIDs, pm.paperIDs) 
+end
+
+"""
+    rewire_communities(pm, communities, prewire, file)
+
+Randomly rewire the communities of publication matrix `pm`. Only
+`prewire` portion of edges are rewired.
+"""
+function rewire_communities(pubmat::PubMat,
+														communities::Dict{Int, Array{Int,1}},
+														prewire::Float64, file="comm_rewire")
+	pm = deepcopy(pubmat)
+	for i in keys(communities)
+		members = communities[i]
+		length(members) < 2 && continue
+		pm = rewire_community(pm, members, prewire)
+	end
+	filename = string(file, "-", prewire)
+	write_scimat(string(filename, "-pubmat.mat"), pm)
+	res = Dict()
+	pm = selectauthors(pm, 3)
+	res[:puma] = pm
+	rcm = collaborationmatrix(pm)
+	res[:coma] = rcm
+	fn = string(filename, "-colmat.mat")
+	write_scimat(fn, rcm)
+	rcg = collaborationgraph(rcm)
+	res[:coga] = rcg
+	run(`./comm_detection.sh $(fn)`)
+	f = open(string(filename, "-colmat.Q"))
+	Q = readlines(f)
+	close(f)
+	Q = parse(Float64, Q[1])
+	return Q, res
+end
+
+"""
+    generaterndbipartite(bjd)
+
+Generate a random bipartite graph on the basis of the bivariable joint
+degree distribution. It follows [this
+paper](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5972839/)
+"""
+function generaterndbipartite(bjd::SparseMatrixCSC{Int64, Int64})
+	pd = Int.(sum(bjd, dims=2) ./ (1:size(bjd, 1)))
+	pd = reshape(pd, size(pd, 1))
+	Ad = Int.(sum(bjd, dims=1)' ./ (1:size(bjd, 2)))
+	Ad = reshape(Ad, size(Ad, 1))
+	np = sum(pd)
+	nA = sum(Ad)
+	ps_d, ps_s = fillnodes(pd)
+	As_d, As_s = fillnodes(Ad)
+	pin, Ain, nedges = findnz(bjd)
+	m = spzeros(Int, length(ps_d), length(As_d))
+	counter = 0
+	while length(nedges) > 0 #&& counter < 100
+		i = randperm(length(pin))
+		pin = pin[i]
+		Ain = Ain[i]
+		nedges = nedges[i]
+		for i in 1:length(pin)
+			p = findfirst((k) -> (ps_d[k] == pin[i] && ps_s[k] > 0), 1:np)
+			A = findfirst((k) -> (As_d[k] == Ain[i] && As_s[k] > 0), 1:nA)
+			ps_s[p] -= 1
+			As_s[A] -= 1
+			nedges[i] -= 1
+			m[p,A] += 1
+		end
+		i = nedges .> 0
+		pin = pin[i]
+		Ain = Ain[i]
+		nedges = nedges[i]
+		counter += 1
+	end
+	counter = 0
+	while sum(m .> 1) > 0 && counter < 25
+		simplifybipartite!(m)
+		counter += 1
+	end
+	return m
+end
+function fillnodes(distr::Array{Int,1})
+	n = sum(distr)
+	degrees = Array{Int, 1}(undef, n)
+	stubs = Array{Int, 1}(undef, n)
+	i = 1
+	for j in 1:length(distr)
+		for d in 1:distr[j]
+			degrees[i] = j
+			stubs[i] = j
+			i += 1
+		end
+	end
+	i = randperm(n)
+	return degrees[i], stubs[i]
+end
+
+
+"""
+    simplifybipartite!(m)
+
+Simplify a randomly generated bipartite graph represented by `m`.
+Simplification means to resolve multiply edges between nodes. The
+algorithm follows [this
+paper](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5972839/)
+"""
+function simplifybipartite!(m::SparseMatrixCSC{Int64, Int64})
+	p, A = size(m)
+	ps = collect(1:p)
+	As = collect(1:A)
+	n_medges = sum(m .> 1)
+	n_medges == 0 && return nothing
+	udegrees = Int.(sum(m, dims=1))
+	udegrees = reshape(udegrees, size(udegrees, 2))
+	ldegrees = Int.(sum(m, dims=2))
+	ldegrees = reshape(ldegrees, size(ldegrees, 1))
+	rind, cind, vals = findnz(m)
+	i_medges = findall((y) -> y > 1, vals)
+	shuffle!(i_medges)
+	for i in i_medges
+		u = cind[i]
+		l = rind[i]
+		m[l,u] == 0 && continue
+		ld = ldegrees[l]
+		lds = findall((k) -> ld == k, ldegrees)
+		lds = lds[lds .!= l]
+		breakout = false
+		if length(lds) > 0
+			shuffle!(lds)
+			for v in lds
+				ws = m[v, :]
+				ws = As[ws .> 0.0]
+				shuffle!(ws)
+				for w in ws
+					if m[l,w] == 0.0 && m[v,u] == 0.0
+						m[l,u] -= 1
+						m[v,w] -= 1
+						m[l,w] = 1
+						m[v,u] = 1
+						if sum(m .< 0) > 0
+							println("m[l,u] = ", m[l,u], ", m[v,w] = ", m[v,w])
+							error("first")
+						end
+						breakout = true
+						break
+					end
+				end
+				breakout && break
+			end
+		end
+		breakout && continue
+		ud = udegrees[u]
+		uds = findall((k) -> ud == k, udegrees)
+		uds = uds[uds .!= u]
+		breakout = false
+		if length(uds) > 0
+			shuffle!(uds)
+			for w in uds
+				vs = m[:, w]
+				vs = ps[vs .> 0.0]
+				shuffle!(vs)
+				for v in vs
+					if m[l,w] == 0.0 && m[v,u] == 0.0
+						m[l,u] -= 1
+						m[v,w] -= 1
+						m[l,w] = 1
+						m[v,u] = 1
+						if sum(m .< 0) > 0
+							println("m[l,u] = ", m[l,u], ", m[v,w] = ", m[v,w])
+							error("second")
+						end
+						breakout = true
+						break
+					end
+				end
+				breakout && break
+			end
+		end
+		breakout && continue
+		ws = m[:,u]
+		ws = ps[ws .<= 0.0]
+		shuffle!(ws)
+		wps = m[l,:]
+		wps = As[wps .<= 0.0]
+		shuffle!(wps)
+		for w in ws, wp in wps
+			ups = m[w,:]
+			ups = As[ups .> 0.0]
+			shuffle!(ups)
+			vps = m[:,wp]
+			vps = ps[vps .> 0.0]
+			shuffle!(vps)
+			for up in ups, vp in vps
+				if m[vp,up] <= 0 
+					m[l,u] -= 1
+					m[w,up] -= 1
+					m[vp,wp] -= 1
+					m[w,u] = 1
+					m[l,wp] = 1
+					m[vp,up] = 1
+						if sum(m .< 0) > 0
+							println("m[l,u] = ", m[l,u], ", m[w,up] = ", m[w,up],
+											", m[vp,wp] = ", m[vp, wp])
+							error("third")
+						end
+					breakout = true
+					break
+				end
+			end
+			breakout && break
+		end
+		breakout && continue
+		println("simplification is unsuccessful")
+	end
+	return nothing
+end
+
+"""
+    reshuffle(pm, nauthors)
+
+Take a publication matrix `pm` and shuffle the publication records of
+`nauthors` to randomise the matrix.
+"""
+function reshuffle(pm::SparseMatrixCSC{Int,Int}, nauthors::Int)
+	p, A = size(pm)
+	As = collect(1:A)
+	np = papernumbers(pm)
+	nps = reverse(sort(np))
+	nps = nps[nauthors]
+	rA = As[np .>= nps]
+	println(length(rA))
+	for a in rA
+		pm[:,a] = shuffle(pm[:,a])
+	end
+	np = authornumbers(pm)
+	pm = pm[np .> 0,:]
+	dropzeros!(pm)
+	return pm
+end
+function reshuffle(pm::PubMat, nauthors::Int)
+	mat = copy(pm.mat)
+	mat = reshuffle(mat, nauthors)
+	return PubMat(mat, pm.authorIDs, pm.paperIDs)
+end
+
+"""
+    generate_rndnet(k, p, cartel, pc)
+
+Generate two random publication networks. One is a fully random network,
+based on the distribution of papers published by the authors, `k`, and the
+number of possible papers, `p`. The other network is the same as the
+previous one except that authors listed in `cartel` form a cartel, i.e.
+they invite each others to be coauthors with probability `pc`.
+"""
+function generate_rndnet(k, p, cartel::Array{Int64,1}, pc;
+												 filename="proba", doplot=true, papercutoff=0)
+	pnnc = Dict()
+	pnwc = Dict()
+	pnnc[:puma] = generate_publicationmatrix(k, p)
+	papercutoff > 0 && (pnnc[:puma] = selectauthors(pnnc[:puma], papercutoff))
+	pnnc[:coma] = collaborationmatrix(pnnc[:puma])
+	pnnc[:coga] = collaborationgraph(pnnc[:coma])
+	pnwc[:puma] = deepcopy(pnnc[:puma])
+	addcartel!(pnwc[:puma], cartel, pc)
+	papercutoff > 0 && (pnwc[:puma] = selectauthors(pnwc[:puma], papercutoff))
+	pnwc[:coma] = collaborationmatrix(pnwc[:puma])
+	pnwc[:coga] = collaborationgraph(pnwc[:coma])
+	lx, ly = spring_layout(pnwc[:coga], C=20)
+	if doplot
+		graphplot(pnnc[:coga], lx, ly, filename=filename)
+		graphplot(pnwc[:coga], lx, ly, filename=string(filename, "-cartel"))
+	end
+	return (pnnc, pnwc)
+end
+function generate_rndnet(k, p, cartel::Array{Array{Int64,1},1}, pc;
+												 filename="proba", doplot=true, papercutoff=0)
+	pnnc = Dict()
+	pnwc = Dict()
+	pnnc[:puma] = generate_publicationmatrix(k, p)
+	papercutoff > 0 && (pnnc[:puma] = selectauthors(pnnc[:puma], papercutoff))
+	pnnc[:coma] = collaborationmatrix(pnnc[:puma])
+	pnnc[:coga] = collaborationgraph(pnnc[:coma])
+	pnwc[:puma] = deepcopy(pnnc[:puma])
+	for c in cartel
+		addcartel!(pnwc[:puma], c, pc)
+	end
+	papercutoff > 0 && (pnwc[:puma] = selectauthors(pnwc[:puma], papercutoff))
+	pnwc[:coma] = collaborationmatrix(pnwc[:puma])
+	pnwc[:coga] = collaborationgraph(pnwc[:coma])
+	lx, ly = spring_layout(pnwc[:coga], C=20)
+	if doplot
+		graphplot(pnnc[:coga], lx, ly, filename=filename)
+		graphplot(pnwc[:coga], lx, ly, filename=string(filename, "-cartel"))
+	end
+	return (pnnc, pnwc)
+end
+
+"""
+    generate_cartels(nauthors, cartel_sizes)
+
+Generate an array of arrays containing members of cartels randomly drawn
+from `nauthors` number of authors. The sizes of the generated cartels
+are given by `cartel_sizes`, a `Dict`.
+"""
+function generate_cartels(nauthors, cartel_sizes)
+	cartels = Array{Int64,1}[]
+	nmembers = 0
+	for k in keys(cartel_sizes)
+		nmembers += k*cartel_sizes[k]
+	end
+	members = sample(1:nauthors, nmembers, replace=false)
+	i = 1
+	for k in keys(cartel_sizes)
+		for s in 1:cartel_sizes[k]
+			j = i + k
+			push!(cartels, members[i:(j-1)])
+			i = j
+		end
+	end
+	return cartels
+end
+
+"""
+    prop_cartels(nmembers, sample_cartel)
+
+Make a cartel size distribution based on the distribution given in
+`sample_cartel`. The generated cartel size distribution containse no
+more than `nmembers` members.
+"""
+function prop_cartels(nmembers, sample_cartel)
+	css = Int[]
+	for k in keys(sample_cartel)
+		for i in 1:sample_cartel[k]
+			push!(css, k)
+		end
+	end
+	shuffle!(css)
+	cs = cumsum(css)
+	css = css[cs .<= nmembers]
+	return histogram(css)
+end
+
