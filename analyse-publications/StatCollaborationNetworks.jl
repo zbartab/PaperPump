@@ -250,7 +250,7 @@ function cartels(colgraph::MetaGraph{Int64, Float64}, cutoff::Float64)
 	ca = connected_components(cartsn)
 	caIDs = Array{String, 1}[]
 	for c in ca
-		push!(caIDs, getauthorIDs(colgraph, c))
+		push!(caIDs, getauthorIDs(cartsn, c))
 	end
 	return caIDs
 end
@@ -335,4 +335,33 @@ function groupproductivity(pm::PubMat, group::Array{String,1})
 	inds = getauthorindex(pm, group)
 	gp = groupproductivity(pm, inds)
 	return gp
+end
+
+"""
+"""
+function groupsproductivity(pn::PubNet,
+														groups::Array{Array{String,1}, 1})
+	m_npapers = Float64[]
+	m_wpapers = Float64[]
+	m_gpapers = Float64[]
+	for g in groups
+		membersi = getauthorindex(pn.puma, g)
+		push!(m_npapers, mean(pn.npapers[membersi]))
+		push!(m_wpapers, mean(pn.wpapers[membersi]))
+		push!(m_gpapers, groupproductivity(pn.puma, membersi))
+	end
+	return (m_npapers, m_wpapers, m_gpapers)
+end
+function groupsproductivity(pn::PubNet,
+														groups::Dict{Int64, Array{String,1}})
+	m_npapers = Float64[]
+	m_wpapers = Float64[]
+	m_gpapers = Float64[]
+	for k in keys(groups)
+		membersi = getauthorindex(pn.puma, groups[k])
+		push!(m_npapers, mean(pn.npapers[membersi]))
+		push!(m_wpapers, mean(pn.wpapers[membersi]))
+		push!(m_gpapers, groupproductivity(pn.puma, membersi))
+	end
+	return (m_npapers, m_wpapers, m_gpapers)
 end
