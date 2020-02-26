@@ -365,3 +365,40 @@ function groupsproductivity(pn::PubNet,
 	end
 	return (m_npapers, m_wpapers, m_gpapers)
 end
+
+"""
+    compareproductivity(pn, groups)
+
+Compare the productivity of groups to randomly chosen authors not in
+groups.
+"""
+function compareproductivity(pn::PubNet,
+														 groups::Array{Array{String,1},1}, nrep=10)
+	members = collect(Iterators.flatten(groups))
+	nonmembers = setdiff(collect(keys(pn.puma.authorIDs)), members)
+	gs = Float64[]
+	ns = Float64[]
+	ws = Float64[]
+	for c in pn.cartels
+		n_c = length(c)
+		mi = getauthorindex(pn.puma, c)
+		gc = groupproductivity(pn.puma, c)
+		nc = mean(pn.npapers[mi])
+		wc = mean(pn.wpapers[mi])
+		gnc = nnc = wnc = 0
+		for i in 1:nrep
+			nonc = sample(nonmembers, n_c, replace=false)
+			mi = getauthorindex(pn.puma, nonc)
+			gnc += groupproductivity(pn.puma, nonc)
+			nnc += mean(pn.npapers[mi])
+			wnc += mean(pn.wpapers[mi])
+		end
+		gnc /= nrep
+		nnc /= nrep
+		wnc /= nrep
+		push!(gs, gc/gnc)
+		push!(ns, nc/nnc)
+		push!(ws, wc/wnc)
+	end
+	return gs, ns, ws
+end
