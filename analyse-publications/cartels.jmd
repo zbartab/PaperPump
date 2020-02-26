@@ -210,12 +210,15 @@ tight_layout()
 
 ```julia
 carts = map(length, MTMT.cartels)
+commsizes = map(length, values(MTMT.hierarchy[:lev1]))
 rnets = Dict()
 rnetscart = Dict()
 for i in 1:10
-	cs = expectedpapers(20, 80, 2.5, 10) # community sizes
+	#cs = expectedpapers(100, 80, 2.5, 10) # community sizes
+	cs = sample(commsizes, 500, replace=false)
 	#cs = [200]
-	k = saturatedexpectedpapers(Int(sum(cs)), 500) # number of papers
+	#k = saturatedexpectedpapers(Int(sum(cs)), 1000) # number of papers
+	k = sample(MTMT.npapers, Int(sum(cs)), replace=false)
 	rpm = rndpubnet(k, 6.0, Int.(cs), nothing)
 	rpm = rewire(rpm, 0.1)
 	rpm3 = selectauthors(rpm, 3)
@@ -228,8 +231,8 @@ for i in 1:10
 	rcm = collaborationmatrix(rpm3)
 	rpubnet = PubNet(rpm, rcm, 0.4)
 	rnetscart[i] = rpubnet
-	graphplot(rpubnet.coga)
-	is_connected(rpubnet.coga)
+	#graphplot(rpubnet.coga)
+	#is_connected(rpubnet.coga)
 end
 figure()
 for k in keys(rnets)
