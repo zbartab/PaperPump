@@ -402,3 +402,48 @@ function compareproductivity(pn::PubNet,
 	end
 	return gs, ns, ws
 end
+
+"""
+    coherence(pn, group)
+
+Calculate the coherence of group `group` in publication network `pn`.
+Coherence calculation follows Wachs & Kertész 2019 SciRep 9:10818.
+"""
+function coherence(pn::PubNet, group::Array{String,1})
+	gi = getauthorindex(pn.coma, group)
+	gsize = length(gi)
+	W = Float64[]
+	for i in 1:(gsize-1)
+		for j in (i+1):gsize
+			has_edge(pn.coga, gi[i], gi[j]) && push!(W,
+																							 get_prop(pn.coga, gi[i], gi[j],
+																												:weight))
+		end
+	end
+	am = mean(W)
+	gm = geomean(W)
+	return gm/am
+end
+
+"""
+"""
+function exclusivity(pn::PubNet, group::Array{String, 1})
+	gi = getauthorindex(pn.coma, group)
+	gsize = length(gi)
+	Win = Float64[]
+	for i in 1:(gsize-1)
+		for j in (i+1):gsize
+			has_edge(pn.coga, gi[i], gi[j]) && push!(Win,
+																							 get_prop(pn.coga, gi[i], gi[j],
+																												:weight))
+		end
+	end
+	Wout = Float64[]
+	for i in gi
+		N = neighbors(pn.coga, i)
+		for j in N
+			!in(j, gi) && push!(Wout, get_prop(pn.coga, i, j, :weight))
+		end
+	end
+	return sum(Win)/(sum(Win)+sum(Wout))
+end
