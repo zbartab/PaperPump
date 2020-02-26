@@ -49,6 +49,7 @@ Here we load some packages and custom codes.
 ## load the libraries
 using StatsBase, Statistics, PyPlot, Compose, Cairo
 using LightGraphs, MetaGraphs, GraphPlot
+using HypothesisTests
 ## load local code
 include("CollaborationNetworks.jl")
 include("PlotCollaborationNetworks.jl")
@@ -214,11 +215,11 @@ commsizes = map(length, values(MTMT.hierarchy[:lev1]))
 rnets = Dict()
 rnetscart = Dict()
 for i in 1:10
-	#cs = expectedpapers(100, 80, 2.5, 10) # community sizes
-	cs = sample(commsizes, 500, replace=false)
+	cs = expectedpapers(20, 80, 2.5, 10) # community sizes
+	#cs = sample(commsizes, 500, replace=false)
 	#cs = [200]
-	#k = saturatedexpectedpapers(Int(sum(cs)), 1000) # number of papers
-	k = sample(MTMT.npapers, Int(sum(cs)), replace=false)
+	k = saturatedexpectedpapers(Int(sum(cs)), 1000) # number of papers
+	#k = sample(MTMT.npapers, Int(sum(cs)), replace=false)
 	rpm = rndpubnet(k, 6.0, Int.(cs), nothing)
 	rpm = rewire(rpm, 0.1)
 	rpm3 = selectauthors(rpm, 3)
@@ -307,7 +308,7 @@ tight_layout()
 Simulated network:
 
 ```julia
-cartprod = compareproductivity(rnetscart[10], rnetscart[10].cartels, 50)
+cartprod = compareproductivity(rnetscart[10], rnetscart[10].cartels, 10)
 cartprod = hcat(cartprod...)
 figure()
 for i in 1:size(cartprod, 1)
@@ -332,7 +333,7 @@ tight_layout()
 Real MTMT network:
 
 ```julia
-cartprod = compareproductivity(MTMT, MTMT.cartels, 50)
+cartprod = compareproductivity(MTMT, MTMT.cartels, 10)
 cartprod = hcat(cartprod...)
 figure()
 for i in 1:size(cartprod, 1)
