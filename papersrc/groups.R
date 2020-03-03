@@ -41,7 +41,8 @@ c.A <- c.B <- 3 # number of coauthors from outside
 network.A <- create.network("A", G.A, c.A)
 network.B <- create.network("B", G.B, c.B, TRUE)
 coords <- layout_(network.B, nicely())
-png(file="groups.png", width=700, height=400)
+#png(file="groups.png", width=700, height=400)
+pdf(file="paperfigs/groups.pdf", width=7, height=4)
 op <- par(mfcol=c(1,2))
 plot(network.A, layout=coords, main="group A",
 		 mark.groups=list(V(network.A)[nchar(names(V(network.A))) == 3]))
