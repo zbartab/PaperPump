@@ -68,8 +68,6 @@ We first load real networks.
 ```julia
 MTMT = PubNet("MTMT/MTMTpubmat.mat")
 rMTMT = PubNet("MTMT/MTMTpubmat-rewired-1.mat")
-
-
 ```
 
 We plot some measures of the real and the randomly rewired networks.
@@ -212,9 +210,10 @@ tight_layout()
 ```julia
 carts = map(length, MTMT.cartels)
 commsizes = map(length, values(MTMT.hierarchy[:lev1]))
+carts = collect(2:5)
 rnets = Dict()
 rnetscart = Dict()
-for i in 1:10
+for i in 1:1
 	cs = expectedpapers(20, 80, 2.5, 10) # community sizes
 	#cs = sample(commsizes, 500, replace=false)
 	#cs = [200]
@@ -308,7 +307,7 @@ tight_layout()
 Simulated network:
 
 ```julia
-cartprod = compareproductivity(rnetscart[10], rnetscart[10].cartels, 10)
+cartprod = groupsproductivity(rnetscart[1], rnetscart[1].cartels)
 cartprod = hcat(cartprod...)
 figure()
 for i in 1:size(cartprod, 1)
@@ -333,12 +332,35 @@ tight_layout()
 Real MTMT network:
 
 ```julia
-cartprod = compareproductivity(MTMT, MTMT.cartels, 10)
-cartprod = hcat(cartprod...)
-figure()
-for i in 1:size(cartprod, 1)
-	semilogy(1:3, cartprod[i,:], alpha=0.1)
+gcoherence = Float64[]
+gexclusivity = Float64[]
+gstrength = Float64[]
+for c in MTMT.cartels
+	push!(gcoherence, coherence(MTMT, c))
+	push!(gexclusivity, exclusivity(MTMT, c))
+	push!(gstrength, groupstrength(MTMT, c))
 end
+cprod = groupsproductivity(MTMT, MTMT.cartels)
+rcprod = relativeproductivity(MTMT, cprod)
+xmarks = ("group\n productivity", "number of\n papers", "weighted\n papers")
+figure()
+for i in 1:length(cprod.groupsize)
+	semilogy(xmarks,
+		[cprod.groupprod[i], cprod.npapers[i], cprod.wpapers[i]], alpha=0.1)
+end
+tight_layout()
+figure()
+for i in 1:length(cprod.groupsize)
+	semilogy(xmarks,
+		[rcprod.groupprod[i], rcprod.npapers[i], rcprod.wpapers[i]], alpha=0.1)
+end
+tight_layout()
+figure()
+semilogy(gexclusivity, rcprod.npapers .- rcprod.groupprod, ".", alpha=0.2)
+figure()
+boxplot(xmarks, (cprod.groupprod, cprod.npapers, cprod.wpapers))
+boxplot(map((x) -> log10.(x), [rcprod.groupprod, rcprod.npapers, rcprod.wpapers]))
+PyPlot.grid()
 figure()
 loglog(cartprod[:,1], cartprod[:,2], ".", alpha=0.2)
 loglog([0.1,10], [0.1,10], ":")

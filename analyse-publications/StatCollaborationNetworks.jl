@@ -318,6 +318,8 @@ function degreesdegrees(pm::PubMat)
 	return dhp, dhA
 end
 
+# Productivity
+
 """
     groupproductivity(pm, group)
 
@@ -334,74 +336,114 @@ end
 function groupproductivity(pm::PubMat, group::Array{String,1})
 	inds = getauthorindex(pm, group)
 	gp = groupproductivity(pm, inds)
+	#gp < 2 && length(inds) == 2 && error("$(gp), $(inds)")
 	return gp
 end
 
 """
+    groupsproductivity(pn, groups)
+
+Return group size, group productivity, mean number of papers and
+mean weighted papers of individuals in each group in `groups`.
 """
 function groupsproductivity(pn::PubNet,
 														groups::Array{Array{String,1}, 1})
+	gsize = Int[]
 	m_npapers = Float64[]
 	m_wpapers = Float64[]
 	m_gpapers = Float64[]
 	for g in groups
 		membersi = getauthorindex(pn.puma, g)
+		push!(gsize, length(membersi))
 		push!(m_npapers, mean(pn.npapers[membersi]))
 		push!(m_wpapers, mean(pn.wpapers[membersi]))
 		push!(m_gpapers, groupproductivity(pn.puma, membersi))
 	end
-	return (m_npapers, m_wpapers, m_gpapers)
+	return (groupsize=gsize, groupprod=m_gpapers, npapers=m_npapers,
+					wpapers=m_wpapers)
 end
 function groupsproductivity(pn::PubNet,
 														groups::Dict{Int64, Array{String,1}})
+	gsize = Int[]
 	m_npapers = Float64[]
 	m_wpapers = Float64[]
 	m_gpapers = Float64[]
 	for k in keys(groups)
 		membersi = getauthorindex(pn.puma, groups[k])
+		push!(gsize, length(membersi))
 		push!(m_npapers, mean(pn.npapers[membersi]))
 		push!(m_wpapers, mean(pn.wpapers[membersi]))
 		push!(m_gpapers, groupproductivity(pn.puma, membersi))
 	end
-	return (m_npapers, m_wpapers, m_gpapers)
+	return (groupsize=gsize, groupprod=m_gpapers, npapers=m_npapers,
+					wpapers=m_wpapers)
 end
 
 """
-    compareproductivity(pn, groups)
+    samplingproductivity(pn, groups, nrep)
+
+Calculate the productivity for random samples drawn from individuals not
+members of groups.
+"""
+function samplingproductivity(pm::PubMat, cm::ColMat, npapers::Array{Int,1},
+															wpapers::Array{Float64,},
+															groups::Array{Array{String,1},1}, nrep::Int=10)
+	members = collect(Iterators.flatten(groups))
+	nonmembers = setdiff(collect(keys(cm.authorIDs)), members)
+	groupsizes = histogram(map(length, groups))
+	gnull = Dict{Int, Array{Float64,1}}()
+	nnull = Dict{Int, Array{Float64,1}}()
+	wnull = Dict{Int, Array{Float64,1}}()
+	for s in keys(groupsizes)
+		gnull[s] = Float64[]
+		nnull[s] = Float64[]
+		wnull[s] = Float64[]
+		for i in 1:nrep
+			nonc = sample(nonmembers, s, replace=false)
+			#println(nonc)
+			mi = getauthorindex(pm, nonc)
+			#println(mi)
+			push!(gnull[s], groupproductivity(pm, nonc))
+			push!(nnull[s], mean(npapers[mi]))
+			push!(wnull[s], mean(wpapers[mi]))
+		end
+		gnull[s] = quantile(gnull[s], QUANTS)
+		nnull[s] = quantile(nnull[s], QUANTS)
+		wnull[s] = quantile(wnull[s], QUANTS)
+	end
+	return gnull, nnull, wnull
+end
+function samplingproductivity(pn::PubNet,
+														 groups::Array{Array{String,1},1}, nrep=10)
+	return samplingproductivity(pn.puma, pn.coma, pn.npapers, pn.wpapers,
+															groups, nrep)
+end
+
+"""
+    relativeproductivity(pn, groupprod)
 
 Compare the productivity of groups to randomly chosen authors not in
 groups.
 """
-function compareproductivity(pn::PubNet,
-														 groups::Array{Array{String,1},1}, nrep=10)
-	members = collect(Iterators.flatten(groups))
-	nonmembers = setdiff(collect(keys(pn.puma.authorIDs)), members)
+function relativeproductivity(pn::PubNet, groupprod, quantval=0.5)
+	q50 = QUANTS .== quantval
 	gs = Float64[]
 	ns = Float64[]
 	ws = Float64[]
-	for c in pn.cartels
-		n_c = length(c)
-		mi = getauthorindex(pn.puma, c)
-		gc = groupproductivity(pn.puma, c)
-		nc = mean(pn.npapers[mi])
-		wc = mean(pn.wpapers[mi])
-		gnc = nnc = wnc = 0
-		for i in 1:nrep
-			nonc = sample(nonmembers, n_c, replace=false)
-			mi = getauthorindex(pn.puma, nonc)
-			gnc += groupproductivity(pn.puma, nonc)
-			nnc += mean(pn.npapers[mi])
-			wnc += mean(pn.wpapers[mi])
-		end
-		gnc /= nrep
-		nnc /= nrep
-		wnc /= nrep
-		push!(gs, gc/gnc)
-		push!(ns, nc/nnc)
-		push!(ws, wc/wnc)
+	for i in 1:length(groupprod.groupsize)
+		c = groupprod.groupsize[i]
+		gnc = pn.prodsampleQ[:g][q50, Symbol(c)][1]
+		nnc = pn.prodsampleQ[:n][q50, Symbol(c)][1]
+		wnc = pn.prodsampleQ[:w][q50, Symbol(c)][1]
+		push!(gs, groupprod.groupprod[i]/gnc)
+		push!(ns, groupprod.npapers[i]/nnc)
+		push!(ws, groupprod.wpapers[i]/wnc)
 	end
-	return gs, ns, ws
+	return (groupsize=groupprod.groupsize, groupprod=gs, npapers=ns,
+					wpapers=ws)
 end
+
+# Local network measures of groups
 
 """
     coherence(pn, group)
@@ -426,6 +468,10 @@ function coherence(pn::PubNet, group::Array{String,1})
 end
 
 """
+    exclusivity(pn, group)
+
+Calculate the exclusivity of group `group` in publication network `pn`.
+Exclusivity calculation follows Wachs & Kertész 2019 SciRep 9:10818.
 """
 function exclusivity(pn::PubNet, group::Array{String, 1})
 	gi = getauthorindex(pn.coma, group)
@@ -446,4 +492,24 @@ function exclusivity(pn::PubNet, group::Array{String, 1})
 		end
 	end
 	return sum(Win)/(sum(Win)+sum(Wout))
+end
+
+"""
+    groupstrength(pn, group)
+
+Calculate the average strength of links within `group` in publication
+network `pn`.
+"""
+function groupstrength(pn::PubNet, group::Array{String, 1})
+	gi = getauthorindex(pn.coma, group)
+	gsize = length(gi)
+	Win = Float64[]
+	for i in 1:(gsize-1)
+		for j in (i+1):gsize
+			has_edge(pn.coga, gi[i], gi[j]) && push!(Win,
+																							 get_prop(pn.coga, gi[i], gi[j],
+																												:weight))
+		end
+	end
+	return sum(Win)/gsize
 end

@@ -18,6 +18,8 @@ using LightGraphs, MetaGraphs
 
 const HierarchyType = Dict{Symbol, Dict{Int64, Array{Int64, 1}}}
 const HierarchyIDType = Dict{Symbol, Dict{Int64, Array{String, 1}}}
+const QUANTS = [0.001, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9,
+								0.95, 0.975, 0.99, 0.999]
 
 abstract type ScienceMat end
 
@@ -47,7 +49,9 @@ mutable struct PubNet
 	hierarchy::HierarchyIDType
 	cutoff::Float64
 	cartels::Array{Array{String,1},1}
-	function PubNet(puma::PubMat, coma::ColMat, cutoff::Float64=0.4)
+	prodsampleQ::Dict{Symbol, DataFrame}
+	function PubNet(puma::PubMat, coma::ColMat, cutoff::Float64=0.4,
+									file2::String="")
 		coga = collaborationgraph(coma)
 		nauthors = authornumbers(puma)
 		npapers = papernumbers(puma)
@@ -56,8 +60,10 @@ mutable struct PubNet
 		weights = Weights(coga)
 		degrees = degree(coga)
 		clustcoefs = local_clustering_coefficient(coga)
-		file2 = "tmp.mat"
-		write_scimat(file2, coma)
+		if file2 == ""
+			file2 = "tmp.mat"
+			write_scimat(file2, coma)
+		end
 		treefile = replace(file2, r"\.mat$" => ".tree")
 		Qfile = replace(file2, r"\.mat$" => ".Q")
 		if isfile(treefile) && mtime(treefile) > mtime(file2)
@@ -70,9 +76,26 @@ mutable struct PubNet
 		end
 		H = converthierarchy(coga, H)
 		carts = cartels(coga, cutoff)
+		prodfile = replace(file2, r"\.mat$" => ".prod")
+		if isfile(prodfile) && mtime(prodfile) > mtime(file2)
+			prodres = CSV.read(prodfile)
+		else
+			g, n, w = samplingproductivity(puma, coma, npapers, wpapers, carts, 1000)
+			#println("length: ", length(g))
+			prodres = vcat(DataFrame(g), DataFrame(n), DataFrame(w))
+			#println(nrow(prodres))
+			prodres[!,:measure] = vcat(repeat(["group"], Int(nrow(prodres)/3)),
+																repeat(["npaper"], Int(nrow(prodres)/3)),
+																repeat(["wpaper"], Int(nrow(prodres)/3)))
+			CSV.write(prodfile, prodres)
+		end
+		prodsampleQ = Dict{Symbol, DataFrame}()
+		prodsampleQ[:g] = prodres[prodres.measure .== "group",1:(end-1)]
+		prodsampleQ[:n] = prodres[prodres.measure .== "npaper",1:(end-1)]
+		prodsampleQ[:w] = prodres[prodres.measure .== "wpaper",1:(end-1)]
 		return new(puma, coma, coga, nauthors, npapers, wpapers, strengthes,
 							 weights, degrees, clustcoefs, Q, H, cutoff,
-							carts)
+							carts, prodsampleQ)
 	end
 end
 
@@ -87,7 +110,7 @@ function PubNet(file::String, cutoff::Float64=0.4)
 	file2 = replace(file, "pubmat" => "colmat")
 	puma = read_scimat(file)
 	coma = read_scimat(file2)
-	return PubNet(puma, coma, cutoff)
+	return PubNet(puma, coma, cutoff, file2)
 end
 
 """
