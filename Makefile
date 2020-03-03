@@ -13,7 +13,8 @@ HTML=$(SRC:.md=.html)
 TEX=$(SRC:.md=.tex)
 DOCX=$(SRC:.md=.docx)
 
-PNGFIGS=$(DFIG)/*.png
+PDFFIGS=$(wildcard $(DFIG)/*.pdf)
+PNGFIGS=$(PDFFIGS:.pdf=.png)
 
 html: $(HTML)
 pdf: $(PDFS)
@@ -27,8 +28,7 @@ $(PDFS): $(SRC)
 	pandoc -o $@ $<
 
 #$(HTML): $(SRC) $(DFIG)/groups.png $(DFIG)/weighted_production.png 
-$(HTML): $(SRC) $(PNGFIGS)
-	t_sample_graphs_tex
+$(HTML): $(SRC) $(PNGFIGS) t_sample_graphs_tex
 	$(FPP) -DEXT=png $< | pandoc -c ~/lib/markdown/pandoc.css --mathml \
 		-N --standalone --toc --self-contained --filter pandoc-citeproc -o $@
 
