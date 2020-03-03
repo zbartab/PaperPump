@@ -1,0 +1,46 @@
+
+\input mysetup
+\input slides
+\input magyarul
+
+\pdfpagewidth 15cm
+\pdfpageheight 14cm
+
+\hsize 15cm
+\vsize 14cm
+\voffset -10.4mm
+\hoffset -10.4mm
+
+\def\PaperFigs{/home/apa/Projects/PaperPump/paperfigs}
+
+\def\author#1{\hbox{\eightrm A#1}}
+
+\tikzpicture[font=\eightrm]
+\node [matrix, fill=blue!10, anchor=north west] (pubmatrix) at (0,0)
+{
+&include "sample_graph.mat"
+};
+\draw [color=red!50!black, line width=1pt] (1.2, -0.65) rectangle (1.55,
+	-4.30);
+\draw [color=red!50!black, line width=1pt] (1.8, -2.0) rectangle (2.15,
+	-3.9);
+\node [anchor=west] at (6.5, -2.6) {%
+\noindent\vbox{\hsize=5cm
+$$
+p_{\author{2},\author{3}} = {|\author{2} \cap \author{3}| \over
+|\author{2} \cup \author{3}|} = {2 \over 5} = 0.4
+$$
+}
+};
+\node [matrix, fill=blue!10, anchor=south east] (colmatrix) at (12,-10)
+{
+&include "sample_graph-col.mat"
+};
+%\grid
+\draw [color=red!50!black, line width=1pt] (8.5, -6.9) rectangle (9.10,
+	-7.3);
+\node [anchor=south west, inner sep=0pt] (colgraph) at (0, -11)
+	{\includegraphics[width=6cm]{\PaperFigs/sample_graph.pdf}};
+\endtikzpicture
+
+\bye
