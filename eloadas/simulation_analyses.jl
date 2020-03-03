@@ -1,10 +1,12 @@
 
 # script to analyse the simulation
 
-include("../analyse-publications/CollaborationNetworks.jl")
-include("../analyse-publications/PlotCollaborationNetworks.jl")
-include("../analyse-publications/StatCollaborationNetworks.jl")
-include("../analyse-publications/simulations/RandomPublicationNetworks.jl")
+include("../analyse-publications/PaperPump.jl")
+
+#include("../analyse-publications/CollaborationNetworks.jl")
+#include("../analyse-publications/PlotCollaborationNetworks.jl")
+#include("../analyse-publications/StatCollaborationNetworks.jl")
+#include("../analyse-publications/simulations/RandomPublicationNetworks.jl")
 
 # Elso eset
 ## mindenki egyformán teljesít
