@@ -4,9 +4,9 @@
 library(igraph)
 
 create.network <- function(gr.name, gr.size, n.coauthors, gr.connected=FALSE) {
-	group <- paste(gr.name, LETTERS[1:gr.size], sep=".")
+	group <- paste(gr.name, LETTERS[1:gr.size], sep="")
 	coauthors <- sapply(group,
-											function(a) paste(a, letters[1:n.coauthors], sep="."))
+											function(a) paste(a, letters[1:n.coauthors], sep=""))
 	coauthors <- as.vector(coauthors)
 	edges <- data.frame(authors=rep(group, rep(n.coauthors, gr.size)),
 											coauthors=coauthors)
@@ -42,11 +42,11 @@ network.A <- create.network("A", G.A, c.A)
 network.B <- create.network("B", G.B, c.B, TRUE)
 coords <- layout_(network.B, nicely())
 #png(file="groups.png", width=700, height=400)
-pdf(file="paperfigs/groups.pdf", width=7, height=4)
+pdf(file="paperfigs/groups.pdf", width=10, height=6)
 op <- par(mfcol=c(1,2))
 plot(network.A, layout=coords, main="group A",
-		 mark.groups=list(V(network.A)[nchar(names(V(network.A))) == 3]))
+		 mark.groups=list(V(network.A)[nchar(names(V(network.A))) == 2]))
 plot(network.B, layout=coords, main="group B",
-		 mark.groups=list(V(network.B)[nchar(names(V(network.B))) == 3]))
+		 mark.groups=list(V(network.B)[nchar(names(V(network.B))) == 2]))
 par(op)
 dev.off()

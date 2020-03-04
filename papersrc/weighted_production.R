@@ -18,7 +18,7 @@ w.p.B <- function(co, a=3, G=4, b=0.2) {
 ## plots
 
 #png(file="weighted_production.png", width=700, height=600)
-pdf(file="paperfigs/weighted_production.pdf", width=7, height=6)
+pdf(file="paperfigs/weighted_production.pdf", width=10, height=8)
 op <- par(mfcol=c(1, 2))
 cc <- seq(0,10,0.01)
 plot(cc, weighted.pubs.A(cc), type="l", bty="l",

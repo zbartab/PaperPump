@@ -43,4 +43,28 @@ $$
 	{\includegraphics[width=6cm]{\PaperFigs/sample_graph.pdf}};
 \endtikzpicture
 
+\tikzpicture[font=\eightrm]
+\node [matrix, fill=blue!10, anchor=north west] (pubmatrix) at (0.5,0)
+{
+&include "sample_graph.mat"
+};
+\node [anchor=south west, inner sep=0pt] (colgraph) at (0, -11)
+	{\includegraphics[width=6cm]{\PaperFigs/sample_graph.pdf}};
+\node [matrix, fill=blue!10, anchor=north east] (pubmatrix) at (12,0)
+{
+&include "sample_graph_cartel.mat"
+};
+\draw [color=red!50!black, line width=1pt] (8.10, -1.1) rectangle (8.35,
+	-1.5);
+\draw [color=red!50!black, line width=1pt] (9.85, -1.1) rectangle (10.10,
+	-1.5);
+\draw [color=red!50!black, line width=1pt] (9.85, -3.9) rectangle (10.10,
+	-4.3);
+\draw [color=red!50!black, line width=1pt] (11.025, -3.9) rectangle
+	(11.275, -4.3);
+%\grid
+\node [anchor=south east, inner sep=0pt] (colgraph) at (12.5, -11)
+	{\includegraphics[width=6cm]{\PaperFigs/sample_graph_cartel.pdf}};
+\endtikzpicture
+
 \bye
