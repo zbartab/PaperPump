@@ -16,20 +16,19 @@ DOCX=$(SRC:.md=.docx)
 PDFFIGS=$(wildcard $(DFIG)/*.pdf)
 PNGFIGS=$(PDFFIGS:.pdf=.png)
 
-html: $(HTML)
 pdf: $(PDFS)
+html: $(HTML)
 docx: $(DOCX)
 
 $(DOCX): $(SRC) groups.png weighted_production.png
 	$(FPP) $< | pandoc -c ~/lib/markdown/pandoc.css --mathml -N --standalone \
 		--self-contained --filter pandoc-citeproc -o $@
 
-$(PDFS): $(SRC)
+$(PDFS): $(SRC) t_sample_graphs_tex t_simulation_analyses_tex
 	$(FPP) -D"FIGURE(a)"="" -DEXT=pdf $< | pandoc -N --standalone \
 		--self-contained --filter pandoc-citeproc -o $@ 
 
-#$(HTML): $(SRC) $(DFIG)/groups.png $(DFIG)/weighted_production.png 
-$(HTML): $(SRC) $(PNGFIGS) t_sample_graphs_tex
+$(HTML): $(SRC) $(PNGFIGS) t_sample_graphs_tex t_simulation_analyses_tex
 	$(FPP) -D"FIGURE(a)"="Figure a." -DEXT=png $< | pandoc \
 		-c ~/lib/markdown/pandoc.css --mathml -N --standalone --toc \
 		--self-contained --filter pandoc-citeproc -o $@
@@ -51,7 +50,18 @@ t_sample_graphs_julia: $(DSCR)/sample_publication_network.jl
 t_sample_graphs_tex: $(DSCR)/sample_publication_network.tex \
 	t_sample_graphs_julia
 	$(FPP) -I paperfigs/ $< > work/$(<F)
-	#cd work && xetex $(<F) && mv $(<F:.tex=.pdf) ../$(DFIG)
 	cd work && xetex $(<F)
 	pdftk work/$(<F:.tex=.pdf) burst output $(DFIG)/$(<F:.tex=-%02d.pdf)
 	touch $@
+
+t_simulation_analyses: $(DSCR)/simulation_analyses.jl
+	cd $(DSCR) && julia $(<F)
+	touch $@
+
+t_simulation_analyses_tex: $(DSCR)/simulation_analyses.tex \
+	t_simulation_analyses
+	$(FPP) -I paperfigs/ $< > work/$(<F)
+	cd work && xetex $(<F)
+	pdftk work/$(<F:.tex=.pdf) burst output $(DFIG)/$(<F:.tex=-%02d.pdf)
+	touch $@
+
