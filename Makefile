@@ -1,7 +1,7 @@
 
 # contains recipies to assemble to PaperPump paper
 
-SRC = PaperPump.md
+SRC = PaperPumpMS.md
 
 FPP = filepp -kc \& -mp !
 
@@ -19,6 +19,21 @@ PNGFIGS=$(PDFFIGS:.pdf=.png)
 pdf: $(PDFS)
 html: $(HTML)
 docx: $(DOCX)
+
+#cp -a $< ~/Dropbox/Draft/work/
+
+2cloud: $(SRC)
+	if [ $< -nt ~/Dropbox/Draft/work/$(<F) ]; then \
+		cp -a $< ~/Dropbox/Draft/work/ ; \
+	else \
+		echo Dropbox file is newer, do not copy!;\
+	fi
+
+patch:
+	diff -u $(SRC) ~/Dropbox/Draft/work/$(SRC) > \
+		work/$(SRC).patch || exit 0
+	patch < work/$(SRC).patch
+	touch $(SRC)
 
 $(DOCX): $(SRC) groups.png weighted_production.png
 	$(FPP) $< | pandoc -c ~/lib/markdown/pandoc.css --mathml -N --standalone \
