@@ -51,7 +51,7 @@ mutable struct PubNet
 	cartels::Array{Array{String,1},1}
 	prodsampleQ::Dict{Symbol, DataFrame}
 	function PubNet(puma::PubMat, coma::ColMat, cutoff::Float64=0.4,
-									file2::String="")
+									file2::String="", commdetcode="./comm_detection.sh")
 		coga = collaborationgraph(coma)
 		nauthors = authornumbers(puma)
 		npapers = papernumbers(puma)
@@ -70,7 +70,8 @@ mutable struct PubNet
 			H = read_louvain_tree(treefile)
 			Q = read_louvain_Q(Qfile)
 		else
-			run(`./comm_detection.sh $(file2)`)
+			#run(`./comm_detection.sh $(file2)`)
+			run(`$(commdetcode) $(file2)`)
 			H = read_louvain_tree(treefile)
 			Q = read_louvain_Q(Qfile)
 		end
