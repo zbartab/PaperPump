@@ -307,7 +307,7 @@ distribution is sampled from `k`, the number of papers is around
 communities whose size is given by `commsizes`.
 """
 function rndpubnet(k,pratio,commsizes, cartsizes=nothing, p_carts=0.2)
-	sampledist = Beta(3,1)
+	sampledist = Beta(15,1)
 	cs = commsizes[1]
 	k0 = sample(k, cs, replace=false)
 	p = Int(round(cs*pratio))
