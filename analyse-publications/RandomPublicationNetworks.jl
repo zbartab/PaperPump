@@ -299,45 +299,157 @@ function addcartel!(pubmat::PubMat, cartel::Array{Int,1}, collprob=1.0)
 end
 
 """
-    rndpubnet(k, pratio, commsizes)
+    formcartel(pm, cartel, collprob)
+
+Form a publication cartel by rewiring links so that for each link added
+between authors part of the cartel another link is removed to preserve the
+degrees distribution.
+"""
+function formcartel!(pubmat::PubMat, cartel::Array{Int,1}, collprob=1.0)
+	cartpub = pubmat.mat[:, cartel]
+	i = sum(cartpub, dims=2) .> 0
+	i = reshape(i, size(pubmat.mat, 1))
+	j = collect(1:size(pubmat.mat, 1))[i]
+	for jj in j, c in cartel
+		if pubmat.mat[jj,c] == 0 && rand() < collprob
+			pnzs = findall((k) -> k == 1, pubmat.mat[:,c])
+			pnzs = setdiff(pnzs, jj)
+			if length(pnzs) > 0
+				shuffle!(pnzs)
+				for pnz in pnzs
+					if pubmat.mat[pnz, c] == 1
+						breakout = false
+						cnzs = findall((c) -> c == 1, pubmat.mat[jj,:])
+						cnzs = setdiff(cnzs, cartel)
+						if length(cnzs) > 0
+							shuffle!(cnzs)
+							for cnz in cnzs
+								if pubmat.mat[pnz, cnz] == 0 && pubmat.mat[jj,cnz] == 1
+									pubmat.mat[jj,c] = 1
+									pubmat.mat[jj,cnz] = 0
+									pubmat.mat[pnz,cnz] = 1
+									pubmat.mat[pnz,c] = 0
+									breakout = true
+									break
+								end
+							end
+						end
+						breakout && break
+					end
+				end
+			end
+		end
+	end
+	return nothing
+end
+
+"""
+    rndpubnet(k, pratio, commsizes, cartsizes, p_carts)
 
 Create a random publication matrix in which the authors' paper
 distribution is sampled from `k`, the number of papers is around
 `pratio` times the author numbers. The generated network builds up from
 communities whose size is given by `commsizes`.
 """
-function rndpubnet(k,pratio,commsizes, cartsizes=nothing, p_carts=0.2)
-	sampledist = Beta(15,1)
+function rndpubnet(k, pratio, commsizes, p_rewire=0.01,
+									 cartsizes=nothing, p_carts=0.2)
 	cs = commsizes[1]
-	k0 = sample(k, cs, replace=false)
-	p = Int(round(cs*pratio))
-	pm = generate_publicationmatrix(k0, p)
-	for cs in commsizes[2:end]
+	local pm
+	first = true
+	for cs in commsizes
 		k0 = sample(k, cs, replace=false)
 		p = Int(round(cs*pratio))
 		pm0 = generate_publicationmatrix(k0, p)
-		if !isnothing(cartsizes)
-			minc = minimum(cartsizes)
-			local c
-			na = size(pm0.mat, 2)
-			if minc <= na
-				membersadded = 0
-				while membersadded < na * p_carts
-					while true
-						c = sample(cartsizes, 1)
-						c = c[1]
-						c <= na && break
-					end
-					cart = sample(1:na, c, replace=false)
-					addcartel!(pm0, cart, rand(sampledist))
-					membersadded += c
+		if first
+			pm = pm0
+			first = false
+		else
+			m = combine_sparsematrices(pm.mat, pm0.mat)
+			pm = generate_publicationmatrix(m)
+		end
+	end
+	pm = rewire(pm, p_rewire)
+	if !isnothing(cartsizes)
+		sampledist = Beta(15,1)
+		minc = minimum(cartsizes)
+		local c
+		na = size(pm0.mat, 2)
+		if minc <= na
+			membersadded = 0
+			while membersadded < na * p_carts
+				while true
+					c = sample(cartsizes, 1)
+					c = c[1]
+					c <= na && break
 				end
+				cart = sample(1:na, Int(c), replace=false)
+				addcartel!(pm0, cart, rand(sampledist))
+				membersadded += c
 			end
 		end
-		m = combine_sparsematrices(pm.mat, pm0.mat)
-		pm = generate_publicationmatrix(m)
+	else
+		return pm
 	end
-	return pm
+end
+function rndpubnet2(k, pratio, commsizes, cartsizes, p_carts=0.2)
+	sampledist = Beta(5,1)
+	minc = minimum(cartsizes)
+	first = true
+	local pm
+	local pmc
+	for cs in commsizes
+		k0 = sample(k, cs, replace=false)
+		p = Int(round(cs*pratio))
+		pm0 = generate_publicationmatrix(k0, p)
+		local c
+		na = size(pm0.mat, 2)
+		if minc <= na
+			membersadded = 0
+			while membersadded < na * p_carts
+				while true
+					c = sample(cartsizes, 1)
+					c = c[1]
+					c <= na && break
+				end
+				cart = sample(1:na, Int(c), replace=false)
+				pm0, pmc0 = pubmatpair(pm0, cart, rand(sampledist))
+				#pm0, pmc0 = pubmatpair(pm0, cart, 1.0)
+				membersadded += c
+			end
+		else
+			pmc0 = deepcopy(pm0)
+		end
+		if first
+			pm = pm0
+			pmc = pmc0
+			first = false
+		else
+			m = combine_sparsematrices(pm.mat, pm0.mat)
+			pm = generate_publicationmatrix(m)
+			m = combine_sparsematrices(pmc.mat, pmc0.mat)
+			pmc = generate_publicationmatrix(m)
+		end
+	end
+	r = Dict()
+	r[:pm] = pm
+	r[:pmc] = pmc
+	return r
+end
+
+"""
+    pubmatpair(pm, cart, probcart)
+
+Duplicate `pm` add `cart` cartel to the duplum and then add random link
+to `pm` to match the total link number to the publication matrix with
+cartel
+"""
+function pubmatpair(pm::PubMat, cart::Array{Int,}, probcart::Float64)
+	pmc = deepcopy(pm)
+	n = sum(pm.mat)
+	addcartel!(pmc, cart, probcart)
+	nc = sum(pmc.mat)
+	addrndlinks!(pm, nc-n)
+	return pm, pmc
 end
 
 """
@@ -800,3 +912,29 @@ function prop_cartels(nmembers, sample_cartel)
 	return histogram(css)
 end
 
+"""
+    addrndlink!(pm)
+
+Add a random link between a paper and an author in publication matrix
+`pm`.
+"""
+function addrndlink!(pm::PubMat)
+	p, A = size(pm)
+	ip = rand(1:p)
+	iA = rand(1:A)
+	while pm.mat[ip,iA] == 1
+		ip = rand(1:p)
+		iA = rand(1:A)
+	end
+	pm.mat[ip, iA] = 1
+	return nothing
+end
+
+"""
+"""
+function addrndlinks!(pm::PubMat, nlinks::Int)
+	for i in 1:nlinks
+		addrndlink!(pm)
+	end
+	return nothing
+end
