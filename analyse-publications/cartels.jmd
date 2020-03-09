@@ -212,28 +212,21 @@ tight_layout()
 commsizes = map(length, values(MTMT.hierarchy[:lev1]))
 #carts = collect(2:6)
 carts = expectedpapers(1000, 20, 2.5, 2)
+carts .+= 1
 rnets = Dict()
 rnetscart = Dict()
 for i in 1:10
-	cs = expectedpapers(20, 80, 2.5, 10) # community sizes
-	#cs = sample(commsizes, 500, replace=false)
-	#cs = [200]
-	k = saturatedexpectedpapers(Int(sum(cs)), 1000) # number of papers
-	#k = sample(MTMT.npapers, Int(sum(cs)), replace=false)
-	rpm = rndpubnet(k, 6.0, Int.(cs), nothing)
-	rpm = rewire(rpm, 0.1)
+	cs = expectedpapers(100, 500, 2.5, 10) # community sizes
+	k = saturatedexpectedpapers(Int(sum(cs)), 100) # number of papers
+	r = rndpubnet2(k, 100000.0, Int.(cs), carts, 0.05)
+	rpm = rewire(r[:pm], 0.05)
+	rpmc = rewire(r[:pmc], 0.05)
 	rpm3 = selectauthors(rpm, 3)
+	rpmc3 = selectauthors(rpmc, 3)
 	rcm = collaborationmatrix(rpm3)
-	rpubnet = PubNet(rpm, rcm, 0.4)
-	rnets[i] = rpubnet
-	rpm = rndpubnet(k, 6.0, Int.(cs), carts, 0.4)
-	rpm = rewire(rpm, 0.1)
-	rpm3 = selectauthors(rpm, 3)
-	rcm = collaborationmatrix(rpm3)
-	rpubnet = PubNet(rpm, rcm, 0.4)
-	rnetscart[i] = rpubnet
-	#graphplot(rpubnet.coga)
-	#is_connected(rpubnet.coga)
+	rcmc = collaborationmatrix(rpmc3)
+	rnets[i] = PubNet(rpm, rcm, 0.4)
+	rnetscart[i] = PubNet(rpmc, rcmc, 0.4)
 end
 figure()
 for k in keys(rnets)
@@ -270,11 +263,11 @@ ylabel("eCCDF")
 tight_layout()
 figure()
 for k in keys(rnets)
-	semilogy(eCCDF2(rnets[k].weights)..., "-", alpha=0.25, color="blue",
+	semilogy(eCCDF2(rnets[k].weights)..., ".-", alpha=0.25, color="blue",
 		ds="steps")
 end
 for k in keys(rnetscart)
-	semilogy(eCCDF2(rnetscart[k].weights)..., "-", alpha=0.25, color="green",
+	semilogy(eCCDF2(rnetscart[k].weights)..., ".-", alpha=0.25, color="green",
 		ds="steps")
 end
 semilogy(eCCDF2(MTMT.weights)..., "-", color="red", label="real", ds="steps")
