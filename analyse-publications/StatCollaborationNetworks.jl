@@ -513,3 +513,18 @@ function groupstrength(pn::PubNet, group::Array{String, 1})
 	end
 	return sum(Win)/gsize
 end
+
+"""
+    density(m)
+
+Return the density of links in a publication matrix.
+"""
+function density(m::SparseMatrixCSC{Int,Int})
+	return sum(m)/prod(size(m))
+end
+function density(pm::PubMat)
+	return density(pm.mat)
+end
+function density(pn::PubNet)
+	return density(pn.puma.mat)
+end
