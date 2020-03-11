@@ -1,5 +1,5 @@
 ---
-title: "Publication games: in the net of reciprocity"
+title: "Publication games: in the web of reciprocity"
 author: Z Barta
 date: !__DATE__
 ---
@@ -164,7 +164,10 @@ Given the significant benefit founding cartels provides, naturally arise the que
 
 ## Footprints of cartels
 
-We use the previous setup (see above) to simulate !pubnets with the following differences: Now we simulate many communities and many more authors. The community sizes, _c_~l~, are drawn from a saturated power-law distribution with γ = 2.5 and saturation point of 10 [@AlbertLaszloBarabasi16]. The primary productivity of authors follows a saturated power-law distribution with an exponential cutoff with parameters γ = 2.5, _k_~sat~ = 10 and _k_~cut~ = 450 [@AlbertLaszloBarabasi16]. The number of potential papers in community _l_, _p_~l~, is given as _p_~l~ = 6 _c_~l~. !TODO(move this section to a separate file, where the parameter values are obtained from the code actually running to do the simulation)
+We use the procedure outlined above to simulate !pubnets with the following differences: Now we simulate many communities and many more authors. The community sizes, _c_~l~, are drawn from a saturated power-law distribution with $\gamma$ = 2.5 and saturation point of 10 [@AlbertLaszloBarabasi16]. The primary productivity of authors follows a saturated power-law distribution with an exponential cutoff with parameters $\gamma$ = 2.5, _k_~sat~ = 10 and _k_~cut~ = 450 [@AlbertLaszloBarabasi16]. The number of potential papers in community _l_, _p_~l~, is given as _p_~l~ = 6 _c_~l~. After the combination of the simulated communities we apply a degree-preserving randomisation [@AlbertLaszloBarabasi16] to rewire 10% of the links between authors and papers and hence connecting the communities together. We refer these networks as "random" networks hereafter. After generating the random networks we forms cartels in each community. The size of these cartels follows a power-law distribution ($\gamma$ = 2.5) truncated at 20. We added one to these values to avoid cartels of size one. Around 0.1% of the authors in each community take part in the cartels.
 
+The formation of cartels increases 
+
+![!FIGURE(7) The effects of founding cartels. The panels show the distribution of link weihts, node strengthes and the number of authors per papers (from top to bottom). Orange lines show the empirical complementary cummulative distribution function for ten separate simulations (dashed lines) and the combination of these runs (solid lines). Green lines illustrate the same for publication networks where cartels added (for details see main text).](paperfigs/cartel_footprint-01.!EXT)
 
 # References
