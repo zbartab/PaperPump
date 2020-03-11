@@ -1,0 +1,45 @@
+
+\input mysetup
+\input slides
+\input magyarul
+
+\pdfpagewidth 8cm
+\pdfpageheight 16cm
+
+\hsize 7cm
+\vsize 15cm
+\voffset -20.4mm
+\hoffset -20.4mm
+
+\def\PaperFigs{/home/apa/Projects/PaperPump/paperfigs}
+
+\def\author#1{\hbox{\eightrm A#1}}
+
+\def\xpos{0.5\hsize}
+
+\tikzpicture
+\node at (\xpos,0) [anchor=north]
+	{\includegraphics[width=0.95\hsize]{\PaperFigs/cartel_footprint-weight.pdf}};
+\node at (\xpos,-7.5) [anchor=center]
+	{\includegraphics[width=0.95\hsize]{\PaperFigs/cartel_footprint-strength.pdf}};
+\node at (\xpos,-15) [anchor=south]
+	{\includegraphics[width=0.95\hsize]{\PaperFigs/cartel_footprint-nauthors.pdf}};
+\endtikzpicture
+
+%\tikzpicture
+%\node at (0,0) [anchor=north west]
+%	{\includegraphics[width=6.3cm]{\PaperFigs/cartel_footprint-degree.pdf}};
+%\node at (13,0) [anchor=north east]
+%	{\includegraphics[width=6.3cm]{\PaperFigs/cartel_footprint-weight.pdf}};
+%\node at (0,-7.5) [anchor=west]
+%	{\includegraphics[width=6.3cm]{\PaperFigs/cartel_footprint-strength.pdf}};
+%\node at (13,-7.5) [anchor=east]
+%	{\includegraphics[width=6.3cm]{\PaperFigs/cartel_footprint-npapers.pdf}};
+%\node at (0,-15) [anchor=south west]
+%	{\includegraphics[width=6.3cm]{\PaperFigs/cartel_footprint-nauthors.pdf}};
+%\node at (13,-15) [anchor=south east]
+%	{\includegraphics[width=6.3cm]{\PaperFigs/cartel_footprint-wpapers.pdf}};
+%\endtikzpicture
+
+
+\bye

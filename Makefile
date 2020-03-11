@@ -39,11 +39,13 @@ $(DOCX): $(SRC) groups.png weighted_production.png
 	$(FPP) $< | pandoc -c ~/lib/markdown/pandoc.css --mathml -N --standalone \
 		--self-contained --filter pandoc-citeproc -o $@
 
-$(PDFS): $(SRC) t_sample_graphs_tex t_simulation_analyses_tex
+$(PDFS): $(SRC) t_sample_graphs_tex t_simulation_analyses_tex \
+	t_cartel_footprint_tex
 	$(FPP) -D"FIGURE(a)"="" -DEXT=pdf $< | pandoc -N --standalone \
-		--self-contained --filter pandoc-citeproc -o $@ 
+		--pdf-engine=xelatex --self-contained --filter pandoc-citeproc -o $@ 
 
-$(HTML): $(SRC) $(PNGFIGS) t_sample_graphs_tex t_simulation_analyses_tex
+$(HTML): $(SRC) $(PNGFIGS) t_sample_graphs_tex t_simulation_analyses_tex \
+	t_cartel_footprint_tex
 	$(FPP) -D"FIGURE(a)"="Figure a." -DEXT=png $< | pandoc \
 		-c ~/lib/markdown/pandoc.css --mathml -N --standalone --toc \
 		--self-contained --filter pandoc-citeproc -o $@
@@ -75,6 +77,17 @@ t_simulation_analyses: $(DSCR)/simulation_analyses.jl
 
 t_simulation_analyses_tex: $(DSCR)/simulation_analyses.tex \
 	t_simulation_analyses
+	$(FPP) -I paperfigs/ $< > work/$(<F)
+	cd work && xetex $(<F)
+	pdftk work/$(<F:.tex=.pdf) burst output $(DFIG)/$(<F:.tex=-%02d.pdf)
+	touch $@
+
+t_cartel_footprint: $(DSCR)/cartel_footprint.jl
+	cd $(DSCR) && julia $(<F)
+	touch $@
+
+t_cartel_footprint_tex: $(DSCR)/cartel_footprint.tex \
+	t_cartel_footprint
 	$(FPP) -I paperfigs/ $< > work/$(<F)
 	cd work && xetex $(<F)
 	pdftk work/$(<F:.tex=.pdf) burst output $(DFIG)/$(<F:.tex=-%02d.pdf)
