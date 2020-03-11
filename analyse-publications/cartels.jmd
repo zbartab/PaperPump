@@ -68,6 +68,8 @@ We first load real networks.
 ```julia
 MTMT = PubNet("MTMT/MTMTpubmat.mat")
 rMTMT = PubNet("MTMT/MTMTpubmat-rewired-1.mat")
+dblp = PubNet("dblp/dblppubmat.mat")
+rdblp = PubNet("dblp/dblppubmat-rewired-1.mat")
 ```
 
 We plot some measures of the real and the randomly rewired networks.
@@ -208,27 +210,38 @@ tight_layout()
 # Generate random networks
 
 ```julia
-#carts = map(length, MTMT.cartels)
+carts = map(length, MTMT.cartels)
 commsizes = map(length, values(MTMT.hierarchy[:lev1]))
+k = MTMT.npapers
 #carts = collect(2:6)
-carts = expectedpapers(1000, 20, 2.5, 2)
-carts .+= 1
+#carts = expectedpapers(1000, 20, 2.5, 2)
+#carts .+= 1
+rnetsrw = Dict()
 rnets = Dict()
 rnetscart = Dict()
-for i in 1:10
-	cs = expectedpapers(100, 500, 2.5, 10) # community sizes
-	k = saturatedexpectedpapers(Int(sum(cs)), 100) # number of papers
-	r = rndpubnet2(k, 100000.0, Int.(cs), carts, 0.05)
-	rpm = rewire(r[:pm], 0.05)
-	rpmc = rewire(r[:pmc], 0.05)
+for i in 1:5
+	#cs = expectedpapers(100, 500, 2.5, 10) # community sizes
+	cs = sample(commsizes, 100, replace=false)
+	#k = saturatedexpectedpapers(Int(sum(cs)), 100) # number of papers
+	rpmrw, rpm, rpmc = rndpubnet(k, 6.0, Int.(cs), 0.1, carts, 0.001)
+	rpmrw3 = selectauthors(rpmrw, 3)
 	rpm3 = selectauthors(rpm, 3)
 	rpmc3 = selectauthors(rpmc, 3)
+	rcmrw = collaborationmatrix(rpmrw3)
 	rcm = collaborationmatrix(rpm3)
 	rcmc = collaborationmatrix(rpmc3)
-	rnets[i] = PubNet(rpm, rcm, 0.4)
-	rnetscart[i] = PubNet(rpmc, rcmc, 0.4)
+	rnetsrw[i] = PubNet(rpmrw, rcmrw, 0.5, "",
+		"../analyse-publications/comm_detection.sh")
+	rnets[i] = PubNet(rpm, rcm, 0.5, "",
+		"../analyse-publications/comm_detection.sh")
+	rnetscart[i] = PubNet(rpmc, rcmc, 0.5, "",
+		"../analyse-publications/comm_detection.sh")
 end
 figure()
+subplot(2,2,1)
+for k in keys(rnetsrw)
+	loglog(eCCDF2(rnetsrw[k].degrees)..., "-", alpha=0.25, color="orange", ds="steps")
+end
 for k in keys(rnets)
 	loglog(eCCDF2(rnets[k].degrees)..., "-", alpha=0.25, color="blue", ds="steps")
 end
@@ -244,7 +257,11 @@ title("MTMT")
 xlabel("degree")
 ylabel("eCCDF")
 tight_layout()
-figure()
+#figure()
+subplot(2,2,2)
+for k in keys(rnetsrw)
+	semilogy(eCCDF2(rnetsrw[k].strengthes)..., "-", alpha=0.25, color="orange", ds="steps")
+end
 for k in keys(rnets)
 	semilogy(eCCDF2(rnets[k].strengthes)..., "-", alpha=0.25, color="blue",
 		ds="steps")
@@ -261,13 +278,17 @@ title("MTMT")
 xlabel("strength")
 ylabel("eCCDF")
 tight_layout()
-figure()
+#figure()
+subplot(2,2,3)
+for k in keys(rnetsrw)
+	semilogy(eCCDF2(rnetsrw[k].weights)..., "-", alpha=0.25, color="orange", ds="steps")
+end
 for k in keys(rnets)
-	semilogy(eCCDF2(rnets[k].weights)..., ".-", alpha=0.25, color="blue",
+	semilogy(eCCDF2(rnets[k].weights)..., "-", alpha=0.25, color="blue",
 		ds="steps")
 end
 for k in keys(rnetscart)
-	semilogy(eCCDF2(rnetscart[k].weights)..., ".-", alpha=0.25, color="green",
+	semilogy(eCCDF2(rnetscart[k].weights)..., "-", alpha=0.25, color="green",
 		ds="steps")
 end
 semilogy(eCCDF2(MTMT.weights)..., "-", color="red", label="real", ds="steps")
@@ -278,7 +299,11 @@ title("MTMT")
 xlabel("weight")
 ylabel("eCCDF")
 tight_layout()
-figure()
+#figure()
+subplot(2,2,4)
+for k in keys(rnetsrw)
+	loglog(eCCDF2(rnetsrw[k].clustcoefs)..., "-", alpha=0.25, color="orange", ds="steps")
+end
 for k in keys(rnets)
 	semilogy(eCCDF2(rnets[k].clustcoefs)..., "-", alpha=0.25, color="blue",
 		ds="steps")
