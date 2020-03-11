@@ -50,7 +50,7 @@ mutable struct PubNet
 	cutoff::Float64
 	cartels::Array{Array{String,1},1}
 	prodsampleQ::Dict{Symbol, DataFrame}
-	function PubNet(puma::PubMat, coma::ColMat, cutoff::Float64=0.4,
+	function PubNet(puma::PubMat, coma::ColMat, cutoff::Float64=0.5,
 									file2::String="", commdetcode="./comm_detection.sh")
 		coga = collaborationgraph(coma)
 		nauthors = authornumbers(puma)
@@ -107,7 +107,7 @@ end
 
 Outer constructor for `PubNet` reading data from files.
 """
-function PubNet(file::String, cutoff::Float64=0.4)
+function PubNet(file::String, cutoff::Float64=0.5)
 	file2 = replace(file, "pubmat" => "colmat")
 	puma = read_scimat(file)
 	coma = read_scimat(file2)

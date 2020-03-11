@@ -232,7 +232,7 @@ Returns a Dict with the following fields:
 `cutoff`),
 - `cartel_sizes`: frequency histogram of cartel sizes.
 """
-function describecartels(colnet, cutoff=0.4)
+function describecartels(colnet, cutoff=0.5)
 	W = Weights(colnet)
 	sub_cn = subnet(colnet, cutoff)
 	carts = cartel_sizes(sub_cn)

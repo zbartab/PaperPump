@@ -56,7 +56,7 @@ end
 
 Produce a pdf plot of graph `g`
 """
-function graphplot(g, loc_x, loc_y; cutoff=0.4, backend=PDF, filename="proba",
+function graphplot(g, loc_x, loc_y; cutoff=0.5, backend=PDF, filename="proba",
 									 nodelabel=true, maxlinewidth=5, width=50cm, height=50cm)
 	backend == PDF && (filename *= ".pdf")
 	backend == PNG && (filename *= ".png")
@@ -136,7 +136,7 @@ end
 Visualise the collaboration graph created from the publication matrix
 `pubmat`.
 """
-function showpubmat(pubmat, cutoff=0.4)
+function showpubmat(pubmat, cutoff=0.5)
 	coma = collaborationmatrix(pubmat)
 	coga = collaborationgraph(coma)
 	d = describecartels(coga, cutoff)
