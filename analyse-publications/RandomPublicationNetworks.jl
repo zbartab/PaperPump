@@ -258,7 +258,7 @@ cartels.
 	- the power law distribution is flattened for k < k_sat
 - `scaling`: scales the total number of papers the authors produce.
 """
-function sim_collaborationnetwork(A, cutoff=0.4, gamma=2.5, k_sat=5,
+function sim_collaborationnetwork(A, cutoff=0.5, gamma=2.5, k_sat=5,
 																		maxpapers=100_000)
 	cn = rnd_collaborationnetwork(A, gamma, k_sat, maxpapers, 100000)
 	return describecartels(cn, cutoff)
@@ -270,7 +270,7 @@ end
 Run a series of simulation to collect data on cartels over `n_iter`
 random collaboration network.
 """
-function run_sims(A; n_iter=10, cutoff=0.4, gamma=2.5, k_sat=5,
+function run_sims(A; n_iter=10, cutoff=0.5, gamma=2.5, k_sat=5,
 									maxpapers=100_000)
 	res = Dict()
 	for i in 1:n_iter
@@ -285,16 +285,22 @@ end
 Create publication cartel in the publication matrix. A cartel is a set
 of authors who take part each others publications.
 """
-function addcartel!(pubmat::PubMat, cartel::Array{Int,1}, collprob=1.0)
-	cartpub = pubmat.mat[:, cartel]
+function addcartel!(pubmat::SparseMatrixCSC{Int64, Int64},
+										cartel::Array{Int,1}, collprob=1.0)
+	#println(typeof(pubmat))
+	cartpub = pubmat[:, cartel]
 	i = sum(cartpub, dims=2) .> 0
-	i = reshape(i, size(pubmat.mat, 1))
-	j = collect(1:size(pubmat.mat, 1))[i]
+	i = reshape(i, size(pubmat, 1))
+	j = collect(1:size(pubmat, 1))[i]
 	for jj in j, c in cartel
-		if pubmat.mat[jj,c] <= 0 && rand() < collprob
-			pubmat.mat[jj,c] = 1
+		if pubmat[jj,c] <= 0 && rand() < collprob
+			pubmat[jj,c] = 1
 		end
 	end
+	return nothing
+end
+function addcartel!(pubmat::PubMat, cartel::Array{Int,1}, collprob=1.0)
+	addcartel!(pubmat.mat, cartel, collprob)
 	return nothing
 end
 
@@ -353,13 +359,14 @@ communities whose size is given by `commsizes`.
 """
 function rndpubnet(k, pratio, commsizes, p_rewire=0.01,
 									 cartsizes=nothing, p_carts=0.2)
-	cs = commsizes[1]
 	local pm
 	first = true
+	csizes = []
 	for cs in commsizes
 		k0 = sample(k, cs, replace=false)
 		p = Int(round(cs*pratio))
 		pm0 = generate_publicationmatrix(k0, p)
+		push!(csizes, size(pm0))
 		if first
 			pm = pm0
 			first = false
@@ -368,27 +375,45 @@ function rndpubnet(k, pratio, commsizes, p_rewire=0.01,
 			pm = generate_publicationmatrix(m)
 		end
 	end
-	pm = rewire(pm, p_rewire)
+	#println(csizes)
+	pmrw = rewire(pm, p_rewire)
+	pm = deepcopy(pmrw)
 	if !isnothing(cartsizes)
-		sampledist = Beta(15,1)
+		pmc = deepcopy(pmrw)
+		sampledist = Beta(5,1)
 		minc = minimum(cartsizes)
-		local c
-		na = size(pm0.mat, 2)
-		if minc <= na
-			membersadded = 0
-			while membersadded < na * p_carts
-				while true
-					c = sample(cartsizes, 1)
-					c = c[1]
-					c <= na && break
+		sr = 1
+		sc = 1
+		for cs in csizes
+			mw = pm.mat[sr:(sr+cs[1]-1),sc:(sc+cs[2]-1)]
+			mwc = pmc.mat[sr:(sr+cs[1]-1),sc:(sc+cs[2]-1)]
+			#println(size(mwc))
+			local c
+			na = size(mwc, 2)
+			if minc <= na
+				membersadded = 0
+				while membersadded < na * p_carts
+					while true
+						c = sample(cartsizes, 1)
+						c = c[1]
+						c <= na && break
+					end
+					cart = sample(1:na, Int(c), replace=false)
+					#addcartel!(mwc, cart, rand(sampledist))
+					addcartel!(mwc, cart, rand(sampledist))
+					membersadded += c
 				end
-				cart = sample(1:na, Int(c), replace=false)
-				addcartel!(pm0, cart, rand(sampledist))
-				membersadded += c
 			end
+			addrndlinks!(mw, sum(mwc)-sum(mw))
+			#println(size(mw), ", ", size(mwc))
+			pm.mat[sr:(sr+cs[1]-1),sc:(sc+cs[2]-1)] = mw
+			pmc.mat[sr:(sr+cs[1])-1,sc:(sc+cs[2]-1)] = mwc
+			sr += cs[1]
+			sc += cs[2]
 		end
+		return pmrw, pm, pmc
 	else
-		return pm
+		return pmrw, pm, pm
 	end
 end
 function rndpubnet2(k, pratio, commsizes, cartsizes, p_carts=0.2)
@@ -538,7 +563,7 @@ function rewire(pubmat::PubMat, piter::Float64=0.1)
 	matcp = deepcopy(pubmat)
 	nedges = nnz(matcp.mat)
 	niter = Int(round(nedges * piter))
-	niter == 0 && return pm
+	niter == 0 && return pubmat
 	rewire!(matcp.mat, niter)
 	return matcp
 end
@@ -918,21 +943,31 @@ end
 Add a random link between a paper and an author in publication matrix
 `pm`.
 """
-function addrndlink!(pm::PubMat)
-	p, A = size(pm)
+function addrndlink!(mat::SparseMatrixCSC{Int64, Int64})
+	p, A = size(mat)
 	ip = rand(1:p)
 	iA = rand(1:A)
-	while pm.mat[ip,iA] == 1
+	while mat[ip,iA] == 1
 		ip = rand(1:p)
 		iA = rand(1:A)
 	end
-	pm.mat[ip, iA] = 1
+	mat[ip, iA] = 1
+	return nothing
+end
+function addrndlink!(pm::PubMat)
+	addrndlink!(pm.mat)
 	return nothing
 end
 
 """
 """
-function addrndlinks!(pm::PubMat, nlinks::Int)
+function addrndlinks!(pm, nlinks::Int)
+	if typeof(pm) == PubMat
+		nz = sum(pm.mat .== 0)
+	else
+		nz = sum(pm .== 0)
+	end
+	nlinks = minimum([nlinks, nz])
 	for i in 1:nlinks
 		addrndlink!(pm)
 	end
