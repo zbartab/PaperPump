@@ -170,4 +170,8 @@ The degree distributions of the !colgraphs are not affected by cartel formation.
 
 ![!FIGURE(7) The effects of founding cartels. The panels show the distribution of link weihts, node strengthes and the number of authors per papers (from top to bottom). Orange lines show the empirical complementary cummulative distribution function for ten separate simulations (dashed lines) and the combination of these runs (solid lines). Green lines illustrate the same for publication networks where cartels added (for details see main text).](paperfigs/cartel_footprint-01.!EXT)
 
+## Suspicious groups in real collaboration networks
+
+
+
 # References
