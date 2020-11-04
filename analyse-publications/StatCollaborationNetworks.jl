@@ -341,6 +341,65 @@ function groupproductivity(pm::PubMat, group::Array{String,1})
 end
 
 """
+    convertgpQ(pn, groups)
+
+Convert the productivity values of groups, given in `groups` to
+percentile values generated from random groups.
+"""
+function convertgpQ(pn::PubNet, groups::Array{Array{String,1} ,1})
+	gp = groupsproductivity(pn, groups)
+	l = length(gp.groupsize)
+	groupprod = Float64[]
+	npapers = Float64[]
+	wpapers = Float64[]
+	for i in 1:l
+		push!(groupprod, getQ(gp.groupprod[i],
+													pn.prodsampleQ[:g][!,Symbol(gp.groupsize[i])]))
+		push!(npapers, getQ(gp.npapers[i],
+													pn.prodsampleQ[:n][!,Symbol(gp.groupsize[i])]))
+		push!(wpapers, getQ(gp.wpapers[i],
+													pn.prodsampleQ[:w][!,Symbol(gp.groupsize[i])]))
+	end
+	return (groupsize=gp.groupsize, groupprod=groupprod, npapers=npapers,
+					wpapers=wpapers)
+end
+
+"""
+    getQ(v, quants)
+
+		Return the probability value for a given observed value `v`. The
+		probability value is obtained as largest probability in QUANTS for
+		which it is true that `v` is greater than the given quantile.
+"""
+function getQ(v, quants)
+	i = sum(quants .<= v)
+	if i == 0
+		return 0.0
+	else
+		return QUANTS[i]
+	end
+end
+
+"""
+    QQvals(obsQ, theoP)
+
+Return the proportion of values faling between probabilities in theoP.
+"""
+function QQvals(obsQ, theoP)
+	n = countmap(obsQ)
+	z = zeros((length(n),2))
+	i = 1
+	for k in sort(collect(keys(n)))
+		z[i,1] = k
+		z[i,2] = n[k]
+		i += 1
+	end
+	ztot = sum(z[:,2])
+	z[:,2] = cumsum(z[:,2])
+	z[:,2] ./= ztot
+end
+
+"""
     groupsproductivity(pn, groups)
 
 Return group size, group productivity, mean number of papers and
@@ -380,12 +439,12 @@ function groupsproductivity(pn::PubNet,
 end
 
 """
-    samplingproductivity(pn, groups, nrep)
+    samplingproductivityraw(pn, groups, nrep)
 
 Calculate the productivity for random samples drawn from individuals not
-members of groups.
+members of groups. Return raw walues.
 """
-function samplingproductivity(pm::PubMat, cm::ColMat, npapers::Array{Int,1},
+function samplingproductivityraw(pm::PubMat, cm::ColMat, npapers::Array{Int,1},
 															wpapers::Array{Float64,},
 															groups::Array{Array{String,1},1}, nrep::Int=10)
 	members = collect(Iterators.flatten(groups))
@@ -407,16 +466,23 @@ function samplingproductivity(pm::PubMat, cm::ColMat, npapers::Array{Int,1},
 			push!(nnull[s], mean(npapers[mi]))
 			push!(wnull[s], mean(wpapers[mi]))
 		end
-		gnull[s] = quantile(gnull[s], QUANTS)
-		nnull[s] = quantile(nnull[s], QUANTS)
-		wnull[s] = quantile(wnull[s], QUANTS)
 	end
 	return gnull, nnull, wnull
 end
-function samplingproductivity(pn::PubNet,
+function samplingproductivityraw(pn::PubNet,
 														 groups::Array{Array{String,1},1}, nrep=10)
-	return samplingproductivity(pn.puma, pn.coma, pn.npapers, pn.wpapers,
+	return samplingproductivityraw(pn.puma, pn.coma, pn.npapers, pn.wpapers,
 															groups, nrep)
+end
+function samplingproductivityraw(filename::String, pn::PubNet,
+														 groups::Array{Array{String,1},1}, nrep=10)
+	g, n, w = samplingproductivityraw(pn.puma, pn.coma, pn.npapers, pn.wpapers,
+															groups, nrep)
+	prodres = vcat(DataFrame(g), DataFrame(n), DataFrame(w))
+	prodres[!,:measure] = vcat(repeat(["group"], Int(nrow(prodres)/3)),
+														repeat(["npaper"], Int(nrow(prodres)/3)),
+													 repeat(["wpaper"], Int(nrow(prodres)/3)))
+	CSV.write(filename, prodres)
 end
 
 """
