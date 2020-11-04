@@ -24,10 +24,16 @@ source("../analyse-publications/pli-R-v0.0.3-2007-07-25/pareto.R")
 ## functions to fit heavy tailed distributions {{{2
 
 fit.weibull <- function(d, x.min) {
-	zd <- discweib.fit(d, x.min)
+	zd <- try(discweib.fit(d, x.min), silent=TRUE)
+	if("try-error" %in% class(zd)) {
+		return(NA)
+	}
 	x <- 0:(100*max(d))
 	fd <- ddiscweib(x, zd$shape, zd$scale, zd$threshold)
 	i <- !is.na(fd)
+	if(sum(i) == 0) {
+		return(NA)
+	}
 	fd <- cumsum(fd[i])
 	#fd <- c(0, fd[-length(fd)])
 	list(zd=zd, fd=fd, x=x[i])
@@ -44,7 +50,10 @@ fit.exponential <- function(d, x.min) {
 }
 
 fit.powerlaw <- function(d, x.min) {
-	zd <- zeta.fit(d, x.min)
+	zd <- try(zeta.fit(d, x.min), silent=TRUE)
+	if("try-error" %in% class(zd)) {
+		return(NA)
+	}
 	x <- 0:(100*max(d))
 	fd <- dzeta(x, zd$threshold, zd$exponent)
 	i <- !is.na(fd)
@@ -54,7 +63,10 @@ fit.powerlaw <- function(d, x.min) {
 }
 
 fit.lognormal <- function(d, x.min) {
-	zd <- fit.lnorm.disc(d, x.min)
+	zd <- try(fit.lnorm.disc(d, x.min), silent=TRUE)
+	if("try-error" %in% class(zd)) {
+		return(NA)
+	}
 	x <- 0:(100*max(d))
 	fd <- dlnorm.disc(x, zd$meanlog, zd$sdlog)
 	i <- !is.na(fd) & x >= x.min
@@ -65,7 +77,10 @@ fit.lognormal <- function(d, x.min) {
 }
 
 fit.powerlawexp <- function(d, x.min) {
-	zd <- discpowerexp.fit(d, x.min)
+	zd <- try(discpowerexp.fit(d, x.min), silent=TRUE)
+	if("try-error" %in% class(zd)) {
+		return(NA)
+	}
 	x <- 0:(100*max(d))
 	fd <- ddiscpowerexp(x, zd$exponent, zd$rate, zd$threshold)
 	i <- !is.na(fd)
@@ -74,14 +89,23 @@ fit.powerlawexp <- function(d, x.min) {
 	list(zd=zd, fd=fd, x=x[i])
 }
 
-fitter.funs <- list(powerlaw=fit.powerlaw, powerlawexp=fit.powerlawexp,
-										lognormal=fit.lognormal, weibull=fit.weibull,
-										exponential=fit.exponential)
+fitter.funs <- list(lognormal=fit.lognormal, weibull=fit.weibull, exponential=fit.exponential,
+										powerlaw=fit.powerlaw, powerlawexp=fit.powerlawexp)
 
 ## functions to find x.min {{{2
 
-find.x.min <- function(d, x.min, fitter=fit.powerlaw) {
+find.x.max <- function(d, n.x.max=100) {
+	# find the maximum of `d` for which `length(d[d >= x.max]) > n.x.max`
+	t.d <- table(d)
+	cs.d <- cumsum(rev(t.d))
+	i <- which(cs.d >= n.x.max)
+	return(as.numeric(names(cs.d)[i])[1])
+}
+
+find.x.min <- function(d, x.min, fitter=fit.powerlaw, x.max=NULL) {
 	if(length(x.min) == 1) {x.min = c(0, x.min)}
+	if(is.null(x.max)) {x.max = find.x.max(d)}
+	if(x.min[2] > x.max) {x.min[2] = x.max}
 	u.d <- sort(unique(d))
 	xs <- u.d[x.min[1] < u.d & u.d <= x.min[2]]
 	Ds <- rep(NA, length(xs))
@@ -89,7 +113,9 @@ find.x.min <- function(d, x.min, fitter=fit.powerlaw) {
 	mx <- 0
 	fitted <- NA
 	for(i in 1:length(xs)) {
+		print(i)
 		r <- fitter(d, xs[i])
+		if(is.na(r)) {next}
 		rD <- KS.D(d, r)
 		Ds[i] <- rD
 		if(rD < mD) {
@@ -98,7 +124,8 @@ find.x.min <- function(d, x.min, fitter=fit.powerlaw) {
 			fitted = r
 		}
 	}
-	list(D=mD, x=mx, fitted=fitted)
+	#list(D=mD, x=mx, fitted=fitted, Ds=Ds, xs=xs)
+	list(D=mD, x=mx, fitted=fitted, x.max=x.max)
 }
 
 KS.D <- function(d, fit) {
@@ -143,7 +170,6 @@ rand.weibull <- function(d, fit) {
 	rthreshold <- fit$zd$threshold-0.5
 	ntail <- sum(i)
 	ptail <- ntail/n
-	r <- sample(d[!i], n, replace=TRUE)
 	ne <- n * (1/pweibull(rthreshold, fit$zd$shape, fit$zd$scale))
 	rtail <- NULL
 	while(length(rtail) < n) {
@@ -152,8 +178,13 @@ rand.weibull <- function(d, fit) {
 		rtail <- c(rtail, rt)
 	}
 	rtail <- round(rtail[1:n])
-	ii <- runif(n) < ptail
-	return(c(r[!ii], rtail[ii]))
+	if(sum(!i) > 0) {
+		r <- sample(d[!i], n, replace=TRUE)
+		ii <- runif(n) < ptail
+		return(c(r[!ii], rtail[ii]))
+	} else {
+		return(rtail)
+	}
 }
 
 rand.exponential <- function(d, fit) {
@@ -162,7 +193,6 @@ rand.exponential <- function(d, fit) {
 	rthreshold <- fit$zd$threshold-0.5
 	ntail <- sum(i)
 	ptail <- ntail/n
-	r <- sample(d[!i], n, replace=TRUE)
 	ne <- n * (1/pexp(rthreshold, fit$zd$lambda))
 	rtail <- NULL
 	while(length(rtail) < n) {
@@ -171,8 +201,13 @@ rand.exponential <- function(d, fit) {
 		rtail <- c(rtail, rt)
 	}
 	rtail <- round(rtail[1:n])
-	ii <- runif(n) < ptail
-	return(c(r[!ii], rtail[ii]))
+	if(sum(!i) > 0) {
+		r <- sample(d[!i], n, replace=TRUE)
+		ii <- runif(n) < ptail
+		return(c(r[!ii], rtail[ii]))
+	} else {
+		return(rtail)
+	}
 }
 
 rand.lognormal <- function(d, fit) {
@@ -181,17 +216,23 @@ rand.lognormal <- function(d, fit) {
 	rthreshold <- fit$zd$threshold-0.5
 	ntail <- sum(i)
 	ptail <- ntail/n
-	r <- sample(d[!i], n, replace=TRUE)
 	ne <- n * (1/plnorm(rthreshold, fit$zd$meanlog, fit$zd$sdlog))
 	rtail <- NULL
 	while(length(rtail) < n) {
 		rt <- rlnorm(ne, fit$zd$meanlog, fit$zd$sdlog)
+		#print(length(rt))
 		rt <- rt[rt >= rthreshold]
 		rtail <- c(rtail, rt)
+		#print(length(rtail))
 	}
 	rtail <- round(rtail[1:n])
-	ii <- runif(n) < ptail
-	return(c(r[!ii], rtail[ii]))
+	if(sum(!i) > 0) {
+		r <- sample(d[!i], n, replace=TRUE)
+		ii <- runif(n) < ptail
+		return(c(r[!ii], rtail[ii]))
+	} else {
+		return(rtail)
+	}
 }
 
 rand.powerlaw <- function(d, fit) {
@@ -199,10 +240,14 @@ rand.powerlaw <- function(d, fit) {
 	i <- d >= fit$zd$threshold
 	ntail <- sum(i)
 	ptail <- ntail/n
-	r <- sample(d[!i], n, replace=TRUE)
 	rtail <- round(rpareto(n, fit$zd$threshold-0.5, fit$zd$exponent))
-	ii <- runif(n) < ptail
-	return(c(r[!ii], rtail[ii]))
+	if(sum(!i) > 0) {
+		r <- sample(d[!i], n, replace=TRUE)
+		ii <- runif(n) < ptail
+		return(c(r[!ii], rtail[ii]))
+	} else {
+		return(rtail)
+	}
 }
 
 rand.powerlawexp <- function(d, fit) {
@@ -210,11 +255,15 @@ rand.powerlawexp <- function(d, fit) {
 	i <- d >= fit$zd$threshold
 	ntail <- sum(i)
 	ptail <- ntail/n
-	r <- sample(d[!i], n, replace=TRUE)
 	rtail <- round(rpowerexp(n, fit$zd$threshold-0.5, fit$zd$exponent,
 													 fit$zd$rate))
-	ii <- runif(n) < ptail
-	return(c(r[!ii], rtail[ii]))
+	if(sum(!i) > 0) {
+		r <- sample(d[!i], n, replace=TRUE)
+		ii <- runif(n) < ptail
+		return(c(r[!ii], rtail[ii]))
+	} else {
+		return(rtail)
+	}
 }
 
 rgen.funs <- list(powerlaw=rand.powerlaw, lognormal=rand.lognormal,
@@ -223,22 +272,37 @@ rgen.funs <- list(powerlaw=rand.powerlaw, lognormal=rand.lognormal,
 
 ## functions to calculate goodness-of-fit {{{2
 
-goodness.of.fit <- function(d, fit, nrep=10, distribution="powerlaw") {
-	x.mins <- fit$zd$threshold * c(0.5, 1.5)
+goodness.of.fit <- function(d, fit, x.max, nrep=10, distribution="powerlaw") {
+	x.mins <- round(fit$zd$threshold * c(0.5, 1.5))
 	Dobs <- KS.D(d, fit)
 	Ds <- rep(NA, nrep)
 	for(i in 1:nrep) {
+		cat("GOF (", distribution, "): ", i, "\n", sep="")
 		r <- rgen.funs[[distribution]](d, fit)
-		f <- find.x.min(r, x.mins, fitter.funs[[distribution]])
-		Ds[i] <- f$D
+		if(sum(is.na(r)) > 0) {
+			Ds[i] <- NA
+		} else {
+			#cat("GOF generating random deviates finished.\n")
+			f <- find.x.min(r, x.mins, fitter.funs[[distribution]], x.max)
+			Ds[i] <- f$D
+		}
 	}
-	return(list(p=sum(Ds > Dobs)/length(Ds), Dobs=Dobs, Drand=Ds))
+	Ds <- Ds[!is.na(Ds)]
+	if(length(Ds) > 0) {
+		return(list(p=sum(Ds > Dobs)/length(Ds), Dobs=Dobs, Drand=Ds))
+	} else {
+		return(list(p=NA, Dobs=Dobs, Drand=rep(NA, length(d))))
+	}
 }
 
 ## the main work horse function
 
 my.format <- function(n, digits) {
-	formatC(n, digits=digits, format="f")
+	if(is.na(n)) {
+		return(NA)
+	} else {
+		formatC(n, digits=digits, format="f")
+	}
 }
 
 param.str <- function(distribution, fitted) {
@@ -260,18 +324,32 @@ param.str <- function(distribution, fitted) {
 
 heavy.tailed <- function(d, x.min, nrep=10, filename=NULL, variable="") {
 	if(is.null(filename)) stop("ERROR: filename must be given!")
-	sink(filename)
+	#sink(filename)
 	dist.names <- names(fitter.funs)
-	cat(" **Ditribution** | _p_ | _D_~obs~ | _x_~min~ | _n_ | **Parameters**\n")
-	cat(":------------|:----:|:----:|:-----:|:----:|:-------------\n")
+	cat(" **Ditribution** | _p_ | _D_~obs~ | _x_~min~ | _n_ | **Parameters**\n", file=filename)
+	cat(":------------|:----:|:----:|:-----:|:----:|:-------------\n",
+			file=filename, append=TRUE)
 	for(dn in dist.names) {
+		cat("Distribution:", dn, '\n')
 		r1 <- find.x.min(d, x.min, fitter.funs[[dn]])
-		r2 <- goodness.of.fit(d, r1$fitted, nrep, dn)
-		cat(dn, "|", my.format(r2$p, 3), "|", my.format(r2$Dobs,3), "|",
-				r1$x, "|", sum(d >= r1$x), "|", param.str(dn, r1$fitted$zd),
-				"\n", sep=" ")
+		if(length(r1$fitted)==1) {
+			cat("x.min was not found\n")
+			cat(dn, "|", my.format(NA, 3), "|", my.format(NA,3), "|",
+					NA, "|", NA, "|", NA,
+					"\n", sep=" ", file=filename, append=TRUE)
+			cat("Results written\n")
+		} else {
+			cat("x.min found\n")
+			print(r1$fitted$zd)
+			r2 <- goodness.of.fit(d, r1$fitted, r1$x.max, nrep, dn)
+			cat("goodness of fit calculated\n")
+			cat(dn, "|", my.format(r2$p, 3), "|", my.format(r2$Dobs,3), "|",
+					r1$x, "|", sum(d >= r1$x), "|", param.str(dn, r1$fitted$zd),
+					"\n", sep=" ", file=filename, append=TRUE)
+			cat("Results written\n")
+		}
 	}
-	sink()
+	#sink()
 }
 
 # fit power law with exponential cut-off {{{1
