@@ -1,6 +1,6 @@
 ---
 title: "Publication games: in the web of reciprocity"
-author: Z Barta
+author: Z Barta; T Magura
 date: !__DATE__
 ---
 <!--
@@ -53,7 +53,7 @@ We compare the publication performance of two authors, author _A_ and author _B_
 
 For simplicity, we assume that _p_~A~ = _p_~B~ = _p_, _G_~A~ = _G_~B~ = _G_ (_G_ > 1) and _c_~A~ = _c_~B~ = _c_, i.e. author groups are of the same size, authors produce the same number of primary papers and they have the same number of coauthors from outside of the group. In this case the total numbers of papers produced by the groups are equal (_Gp_ = _G_~A~_p_~A~ and _G_~B~_p_~B~, respectively). The total numbers of papers (co)authored by author _A_ and _B_ are, however, different. Author _A_ writes _n_~A~ = _p_~A~ = _p_ papers. On the other hand, author _B_ (co)authors  _n_~B~ = _p_~B~ + (_G_~B~ - 1) _p_~B~ = _G_~B~ _p_~B~ = _Gp_ papers. In the case of author _B_ the term (_G_~B~ - 1)_p_~B~ represents the papers on which author _B_ is invited. It is easy to see that as far as _G_ > 1, author _B_ will have more paper than author _A_, i.e _n_~B~ > _n_~A~. 
 
-A natural way to correct for this bias is to taking into account the number of authors each paper has and instead of counting the papers themselves as a measure of productivity sum the inverse of the number of authors [@Vavrycuk18e0195509]:
+A natural way to correct for this bias is to taking into account the number of authors each paper has and instead of counting the papers themselves as a measure of productivity sum the inverse of the number of authors [@vavrycuk2018]:
 
 $$
 w = \sum_{i=1}^{n} \frac{1}{1+C}.
@@ -97,7 +97,7 @@ To compensate for this productivity bias, author _A_ should produce _w_~B~/_w_~A
 
 Authors in group _A_ can also compensate for the productivity bias by decreasing the number of their collaborators from outside of the group. This reduction must be by a factor of _G_: _c_~A~ = _c_~B~ / _G_.
 
-A useful modification to the weighted performance scheme is the so called _first-author-emphasis_ scheme [@Vavrycuk18e0195509]. In this scheme, the first authors receive a bonus, _b_, to recognise their leading role in producing the papers. Under this scheme the weighted publication performance for author _A_, _w_~A~', is:
+A useful modification to the weighted performance scheme is the so called _first-author-emphasis_ scheme [@vavrycuk2018]. In this scheme, the first authors receive a bonus, _b_, to recognise their leading role in producing the papers. Under this scheme the weighted publication performance for author _A_, _w_~A~', is:
 
 $$
 w_{A}' = \sum_{i=1}^{n_A} \left(b + \frac{1-b}{1+c_A}\right) = \sum_{i=1}^{p}
@@ -160,18 +160,32 @@ The simulations strengthens the results of the model above, namely under real wo
 
 # The prevalence of cartel formation
 
-Given the significant benefit founding cartels provides, naturally arise the questions of (i) whether cartels can be identified in real !pubnets and (ii) how prevalent they are there. To answer these questions we first perform simulation studies then investigates real !pubnets for the sign of cartel formation.
+Given the significant benefit founding cartels provides, naturally arise the questions of (i) whether cartels can be identified in real !pubnets and (ii) how prevalent they are there. To answer these questions we first perform simulation studies to identify possible signs of cartel formation then investigates real !pubnets for these signs.
 
 ## Footprints of cartels
 
-We use the procedure outlined above to simulate !pubnets with the following differences: Now we simulate many communities and many more authors. The community sizes, _c_~l~, are drawn from a saturated power-law distribution with $\gamma$ = 2.5 and saturation point of 10 [@AlbertLaszloBarabasi16]. The primary productivity of authors follows a saturated power-law distribution with an exponential cutoff with parameters $\gamma$ = 2.5, _k_~sat~ = 10 and _k_~cut~ = 450 [@AlbertLaszloBarabasi16]. The number of potential papers in community _l_, _p_~l~, is given as _p_~l~ = 6 _c_~l~. After the combination of the simulated communities we apply a degree-preserving randomisation [@AlbertLaszloBarabasi16] to rewire 10% of the links between authors and papers and hence connecting the communities together. We refer these networks as "random" networks hereafter. After generating the random networks we forms cartels in each community. The size of these cartels follows a power-law distribution ($\gamma$ = 2.5) truncated at 20. We added one to these values to avoid single person cartels. Around 0.1% of the authors in each community take part in the cartels.
+We use the procedure outlined above to simulate !pubnets with the following differences: Now we simulate many communities and many more authors. The community sizes, _c_~l~, are drawn from a saturated power-law distribution with $\gamma$ = 2.5 and saturation point of 10 [@barabasi2016]. The primary productivity of authors follows a saturated power-law distribution with an exponential cutoff with parameters $\gamma$ = 2.5, _k_~sat~ = 10 and _k_~cut~ = 450 [@barabasi2016]. The number of potential papers in community _l_, _p_~l~, is given as _p_~l~ = 6 _c_~l~. After the combination of the simulated communities we apply a degree-preserving randomisation [@barabasi2016] to rewire 10% of the links between authors and papers and hence connecting the communities together. We refer these networks as "random" networks hereafter. After generating the random networks we forms cartels in each community. The size of these cartels follows a power-law distribution ($\gamma$ = 2.5) truncated at 20. We added one to these values to avoid single person cartels. Around 0.1% of the authors in each community take part in the cartels.
 
 The degree distributions of the !colgraphs are not affected by cartel formation. Foundation of cartels, however, increases the proportion of nodes with high strength (the sum of weights of the node's links in the !colgraphs) and the proportion of papers with many authors (Figure 7). More interestingly, the frequency of links with high weights also increases when cartels founded. Remarkably, this results in many links with maximum weights which might be a characteristic sign of cartel formation (Figure 7). 
 
-![!FIGURE(7) The effects of founding cartels. The panels show the distribution of link weihts, node strengthes and the number of authors per papers (from top to bottom). Orange lines show the empirical complementary cummulative distribution function for ten separate simulations (dashed lines) and the combination of these runs (solid lines). Green lines illustrate the same for publication networks where cartels added (for details see main text).](paperfigs/cartel_footprint-01.!EXT)
+![!FIGURE(7) The effects of founding cartels. The panels show the distribution of link weights, node strengthes and the number of authors per papers (from top to bottom). Orange lines show the empirical complementary cummulative distribution function for ten separate simulations (dashed lines) and the combination of these runs (solid lines). Green lines illustrate the same for publication networks where cartels added (for details see main text).](paperfigs/cartel_footprint-01.!EXT)
 
 ## Suspicious groups in real collaboration networks
 
+!TODO(check the effect of partial rewiring)
 
+![!FIGURE(8) The signs of subspicious groups in real networks.](paperfigs/real_networks.!EXT)
+
+![!FIGURE(9) The productivity of subspicious groups compared to random groups.](paperfigs/group_productivity.!EXT)
+
+!TODO(calculate proportion of authors who are in cartels and have significantly higher productivity than authors in random groups)
+
+!TODO(Extract cartels and describe their attributes, e.g. connectedness, diameter etc.)
+
+# General discussion
+
+- long period of data
+  -  short cartels cannot be detected because earlier/later independent publication activity dilute cartel activity
+  - early career researchers are more exposed; they have fewer papers, it is easier to produce strong strength between authors
 
 # References
