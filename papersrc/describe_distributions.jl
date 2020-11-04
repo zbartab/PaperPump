@@ -5,9 +5,11 @@ using RCall
 function calctables(pn::PubNet, basename::String)
 	R"source('../analyse-publications/fitpw.R')"
 	tocalc = [:degrees, :nauthors, :npapers]
+	#tocalc = [:nauthors, :npapers]
 	for i in tocalc
 		fname = string(basename,"-", String(i), ".txt")
 		d = getproperty(pn, i)
+		d = d[d .> 0]
 		R"heavy.tailed($d, 100, 1000, $fname)"
 	end
 end
