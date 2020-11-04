@@ -40,7 +40,7 @@ $(DOCX): $(SRC) groups.png weighted_production.png
 		--self-contained --filter pandoc-citeproc -o $@
 
 $(PDFS): $(SRC) t_sample_graphs_tex t_simulation_analyses_tex \
-	t_cartel_footprint_tex
+	t_cartel_footprint_tex t_real_networks_tex t_group_productivity_fig
 	$(FPP) -D"FIGURE(a)"="" -DEXT=pdf $< | pandoc -N --standalone \
 		--pdf-engine=xelatex --self-contained --filter pandoc-citeproc -o $@ 
 
@@ -93,3 +93,20 @@ t_cartel_footprint_tex: $(DSCR)/cartel_footprint.tex \
 	pdftk work/$(<F:.tex=.pdf) burst output $(DFIG)/$(<F:.tex=-%02d.pdf)
 	touch $@
 
+t_real_networks: $(DSCR)/real_networks.jl
+	cd $(DSCR) && julia $($<)
+	touch $@
+
+t_real_networks_tex: $(DSCR)/real_networks.tex t_real_networks
+	$(FPP) -I paperfigs/ $< > work/$(<F)
+	cd work && xetex $(<F)
+	mv work/$(<F:.tex=.pdf) $(DFIG)/
+	touch $@
+
+t_group_productivity: $(DSCR)/cartel_productivity.jl
+	cd $(DSCR) && julia $($<)
+	touch $@
+
+t_group_productivity_fig: $(DSCR)/group-productivity.R t_group_productivity
+	cd $(DSCR) && Rscript $($<)
+	touch $@
