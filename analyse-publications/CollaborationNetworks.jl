@@ -81,7 +81,7 @@ mutable struct PubNet
 		if isfile(prodfile) && mtime(prodfile) > mtime(file2)
 			prodres = CSV.read(prodfile)
 		else
-			g, n, w = samplingproductivity(puma, coma, npapers, wpapers, carts, 1000)
+			g, n, w = samplingproductivityraw(puma, coma, npapers, wpapers, carts, 1000)
 			#println("length: ", length(g))
 			prodres = vcat(DataFrame(g), DataFrame(n), DataFrame(w))
 			#println(nrow(prodres))
