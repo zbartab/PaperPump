@@ -10,10 +10,8 @@ project start date: 2019-10-13
 ---
 standalone: true
 toc: true
-bibliography: /home/apa/notes/articles.bib
+bibliography: PaperPump.yaml
 natbib: true
-biblio-files: /home/apa/notes/articles.bib
-biblio-style: /home/apa/lib/texinputs/AmNat
 biblio-title: References
 fontsize: 12pt
 papersize: a4paper
@@ -47,7 +45,7 @@ Under current conditions a scientist' reputation is proportional to the number o
 
 # The model
 
-We compare the publication performance of two authors, author _A_ and author _B_. Authors work in separate groups (group _A_ and group _B_, respectively) each of which contains _G_~i~ (_i_ = _A_ or _B_) people (including the focal author). Each author in group _A_ produces _p_~A~ papers in a year by collaborating with _c_~A~ authors from outside of the group, i.e. his/her prinary production is _p_~A~. Similarly, each author in group _B_ primarily produces _p_~B~ papers by collaborating with _c_~B~ people outside of the group. The difference between author _A_ and _B_ is that authors in group _A_ work independently of each other, while authors in group _B_ invite all other group members to be a coauthor on their papers independently of their contribution to that paper (Figure 1). In other words, authors in group _B_ form a !pubcart.
+We compare the publication performance of two authors, author _A_ and author _B_. Authors work in separate groups (group _A_ and group _B_, respectively) each of which contains _G_~i~ (_i_ = _A_ or _B_) people (including the focal author). Each author in group _A_ produces _p_~A~ papers in a year by collaborating with _c_~A~ authors from outside of the group, i.e. his/her primary production is _p_~A~. Similarly, each author in group _B_ primarily produces _p_~B~ papers by collaborating with _c_~B~ people outside of the group. The difference between author _A_ and _B_ is that authors in group _A_ work independently of each other, while authors in group _B_ invite all other group members to be a coauthor on their papers independently of their contribution to that paper (Figure 1). In other words, authors in group _B_ form a !pubcart.
 
 ![!FIGURE(1) The publication relationships in group _A_ and _B_. Nodes are authors, while edges symbolise shared publications. Groups of four authors are marked by the underlying shapes. In group _A_ authors work with several coauthors from outside of the group but they do not invite group mates to be coauthors on their own papers. Contrarary, authors in group _B_ form a !pubcart i.e. each author invites all other aouthors in the group to be a coauthor (note the connections between group members).](paperfigs/groups.!EXT)
 
@@ -59,7 +57,7 @@ $$
 w = \sum_{i=1}^{n} \frac{1}{1+C}.
 $$
 
-Here, 1 in the denominator symbolises the focal author, while _C_ is the number of coauthors. For author _A_, _C_ = _c_~A~ = _c_. On the other hand, for author _B_, _C_ = (_G_~B~ - 1) + _c_~B~ = (_G_ - 1) + _c_. If _c_ = 0, then the division by the number of coauthors works, we regain the number of papers the authors produced without inviting their group members.
+Here, number 1 in the denominator symbolises the focal author, while _C_ is the number of coauthors. For author _A_, _C_ = _c_~A~ = _c_. On the other hand, for author _B_, _C_ = (_G_~B~ - 1) + _c_~B~ = (_G_ - 1) + _c_. If _c_ = 0, then the division by the number of coauthors works, we regain the number of papers the authors produced without inviting their group members.
 
 For author _A_:
 $$
@@ -122,7 +120,7 @@ $$
 \frac{w_{B}'}{w_{A}'} = \frac{p(G+bc)}{G+c} \times \frac{1+c}{p(1+bc)} = \frac{G+c[G+b(1+c)]}{G+c[1+b(G+c)]},
 $$
 
-shows that for _w_~B~'/_w_~A~' > 1, the condition _c_ > 0 should also be fulfilled. As numerical computation indicates (Figure 2) the bias is decreased by introducing the first authorship bonus, but it is still significant. @Vavrycuk18e0195509, for instance, recommend a bonus of _b_ = 0.2, but in this case author _B_ sill has around 50% more credit for the same work than author _A_ has. The difference between author _A_ and _B_ decreases as _b_ increases (Figure 2b), but this way coauthorship is worth less and less, undermining the benefits of collaborations.
+shows that for _w_~B~'/_w_~A~' > 1, the condition _c_ > 0 should also be fulfilled. As numerical computation indicates (Figure 2) the bias is decreased by introducing the first authorship bonus, but it is still significant. @vavrycuk2018, for instance, recommend a bonus of _b_ = 0.2, but in this case author _B_ sill has around 50% more credit for the same work than author _A_ has. The difference between author _A_ and _B_ decreases as _b_ increases (Figure 2b), but this way coauthorship is worth less and less, undermining the benefits of collaborations.
 
 To summarise, this simple model shows that the formation of !pubcarts can be an advantageous, but unethical, strategy in terms of increasing publication productivity even if one control for the number of coauthors of papers. Note, however, that this model might be overly simplified as all authors have the same primary productivity and we do not investigated how productivity of authors outside of the cartels changes as a consequence of founding cartels. To obtain a more realistic understanding of !pubcarts next we develop a simulation of the publication process.
 
@@ -156,7 +154,7 @@ We further generalise the simulation results by setting the prior productivity o
 
 ![!FIGURE(6) The effect of cartel formation on the productivity of cartel members and non-members: prior productivity of authors differs. The top panels illustrate the collaboration graph before and after cartel formation. The middle panels show how the number of papers produced by members and non-members changes because of founding cartel. The bottom panels illustrate the same but using the weighted number of papers as a measure of productivity. Collaboration graph formed with _n_~C~ = 1, _c_~l~ = 30, _k_~j~ = j, _p_~l~ = 60, _p_~c~ = 1 and $\kappa =\{1,2,3,29,30\}$.](paperfigs/simulation_analyses-02.!EXT)
 
-The simulations strengthens the results of the model above, namely under real world conditions (i.e. productivity of authors differs, out-of-group collaborations) the number of papers as a measure of productivity cannot correct for the formation of cartels; members' productivity always increases by founding cartels. This effect, because the great benefit in terms of productivity it offers, can put a huge pressure on scientists to establish cartels under the current circumstances found in the academic world, where most measures of productivity, e.g. citation counts, _h_-index, is based on the unweighted number of papers an author produces!TODO(we need a citation for this). Unfortunately, switching to the use of weighted number of papers does not solve the problems arising from the possibility of cartel formation, the productivity of members increases in most of the cases when they found cartels. Despite of this result, using weighted number of papers can offer a significant opportunity to reduce unethical publication practice, because cartel formation reduces the productivity of out-of-cartel collaborators, generating a conflict of interest between cartel members and non-members. This might lead to a situation when cartel members become isolated without the advantages of out-of-group collaborations and hence resulting a significant decrease in the benefits of cartels formation. The results of the simulation also suggest that, given that weighted number of papers used to rate authors, cartel members should be of similar prior productivity, because cartel establishment with lowly ranked authors can have a detrimental effect on the productivity of prolific authors. This would also introduce a conflict of interest between authors leading to that founding cartels is only worth for low productivity authors among themselves, because (i) highly ranked authors do not need to manipulate their productivity indices (they are already high) and (ii) they can actually loose on cartel formation, given that productivity is measured by weighted number of papers. As currently cartel formation cannot be penalised in science!TODO(we need a citation for this) we highly recommend to switch to use weighted number of papers as a basis of measuring of productivity, because it introduces conflicts of interest that might drive the publication system towards self-purification.
+The simulations strengthens the results of the model above, namely under real world conditions (i.e. productivity of authors differs, out-of-group collaborations) the number of papers as a measure of productivity cannot correct for the formation of cartels; members' productivity always increases by founding cartels. This effect, because the great benefit in terms of productivity it offers, can put a huge pressure on scientists to establish cartels under the current circumstances found in the academic world, where most measures of productivity, e.g. citation counts, _h_-index, is based on the unweighted number of papers an author produces!TODO(we need a citation for this). Unfortunately, switching to the use of weighted number of papers does not solve the problems arising from the possibility of cartel formation, the productivity of members increases in most of the cases when they found cartels. Despite of this result, using weighted number of papers can offer a significant opportunity to reduce unethical publication practice, because cartel formation reduces the productivity of out-of-cartel collaborators, generating a conflict of interest between cartel members and non-members. This might lead to a situation when cartel members become isolated without the advantages of out-of-group collaborations and hence resulting a significant decrease in the benefits of cartel formation. The results of the simulation also suggest that, given that weighted number of papers used to rate authors, cartel members should be of similar prior productivity, because cartel establishment with lowly ranked authors can have a detrimental effect on the productivity of prolific authors. This would also introduce a conflict of interest between authors leading to that founding cartels is only worth for low productivity authors among themselves, because (i) highly ranked authors do not need to manipulate their productivity indices (they are already high) and (ii) they can actually loose on cartel formation, given that productivity is measured by weighted number of papers. As currently cartel formation cannot be penalised in science!TODO(we need a citation for this) we highly recommend to switch to use weighted number of papers as a basis of measuring of productivity, because it introduces conflicts of interest that might drive the publication system towards self-purification.
 
 # The prevalence of cartel formation
 
@@ -172,6 +170,8 @@ The degree distributions of the !colgraphs are not affected by cartel formation.
 
 ## Suspicious groups in real collaboration networks
 
+
+
 !TODO(check the effect of partial rewiring)
 
 ![!FIGURE(8) The signs of subspicious groups in real networks.](paperfigs/real_networks.!EXT)
@@ -180,7 +180,7 @@ The degree distributions of the !colgraphs are not affected by cartel formation.
 
 !TODO(calculate proportion of authors who are in cartels and have significantly higher productivity than authors in random groups)
 
-!TODO(Extract cartels and describe their attributes, e.g. connectedness, diameter etc.)
+!TODO("Extract cartels and describe their attributes, e.g. connectedness, diameter etc.")
 
 # General discussion
 
