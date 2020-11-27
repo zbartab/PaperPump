@@ -25,9 +25,10 @@ function plotres(x, s, xlab, plotfun=loglog, rmzero=true)
 		plotfun(eCCDF2(y)..., "--", ds="steps",
 						color="orange", alpha=0.1)
 	end
-	legend(["real network"])
+	legend(["real network", "rewired"])
 	xlabel(xlab)
 	ylabel("eCCDF")
+	PyPlot.grid()
 	tight_layout()
 end
 
