@@ -17,3 +17,8 @@
 *.Q
 *.prod
 t_*
+analyse-publications/MTMT/
+analyse-publications/dblp/
+analyse-publications/cache/
+analyse-publications/Rcode*
+analyse-publications/pli-R*
