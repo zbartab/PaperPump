@@ -307,17 +307,17 @@ my.format <- function(n, digits) {
 
 param.str <- function(distribution, fitted) {
 	return(switch(distribution,
-				 powerlaw = paste("$\\\\gamma = ", my.format(fitted$exponent,3),"$",
+				 powerlaw = paste("$\\gamma = ", my.format(fitted$exponent,3),"$",
 													sep=""),
-				 powerlawexp = paste("$\\\\gamma = ", my.format(fitted$exponent,3),
-														 "$, $\\\\lambda = ",
+				 powerlawexp = paste("$\\gamma = ", my.format(fitted$exponent,3),
+														 "$, $\\lambda = ",
 														 my.format(fitted$rate,3),"$", sep=""),
 				 lognormal = paste("log(mean) = ", my.format(fitted$meanlog,3),
 													 ", log(SD) = ", my.format(fitted$sdlog,3), sep=""),
 				 weibull = paste("$k = ", my.format(fitted$shape,3), 
-												 "$, $\\\\lambda = ",
+												 "$, $\\lambda = ",
 												 my.format(fitted$scale, 3),"$", sep=""),
-				 exponential = paste("$\\\\lambda = ", my.format(fitted$lambda, 3),
+				 exponential = paste("$\\lambda = ", my.format(fitted$lambda, 3),
 														 "$", sep="")
 				 ))
 }
