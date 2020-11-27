@@ -13,25 +13,31 @@ function simulatepubnets()
 	rnetsrw = Dict()
 	rnetsrl = Dict()
 	rnetsca = Dict()
+	rnetscr = Dict() # network with cartels rewired randomly
 	for i in 1:10
-		cs = expectedpapers(100, 500, 2.5, 10) # community sizes
+		cs = expectedpapers(500, 500, 2.5, 10) # community sizes
 		#cs = sample(commsizes, 100, replace=false)
 		k = saturatedexpectedpapers(Int(sum(cs)), 100) # number of papers
 		rpmrw, rpm, rpmc = rndpubnet(k, 6.0, Int.(cs), 0.1, carts, 0.001)
 		rpmrw3 = selectauthors(rpmrw, 3)
 		rpm3 = selectauthors(rpm, 3)
 		rpmc3 = selectauthors(rpmc, 3)
+		rpmcr = rewire(rpmc3, 0.9)
+		rpmcr3 = selectauthors(rpmcr, 3)
 		rcmrw = collaborationmatrix(rpmrw3)
 		rcm = collaborationmatrix(rpm3)
 		rcmc = collaborationmatrix(rpmc3)
+		rcmcr = collaborationmatrix(rpmcr3)
 		rnetsrw[i] = PubNet(rpmrw, rcmrw, 0.5, "",
 												"../analyse-publications/comm_detection.sh")
 		rnetsrl[i] = PubNet(rpm, rcm, 0.5, "",
 											"../analyse-publications/comm_detection.sh")
 		rnetsca[i] = PubNet(rpmc, rcmc, 0.5, "",
 													"../analyse-publications/comm_detection.sh")
+		rnetscr[i] = PubNet(rpmcr, rcmcr, 0.5, "",
+													"../analyse-publications/comm_detection.sh")
 	end
-	return rnetsrw, rnetsrl, rnetsca
+	return rnetsrw, rnetsrl, rnetsca, rnetscr
 end
 
 function combineruns(pubnet, property)
@@ -48,44 +54,45 @@ function plotres(property::Symbol, xlab::String="", plotrndlink=false,
 	newplot && figure()
 	for k in keys(rnetsrw)
 		plotfun(eCCDF2(getproperty(rnetsrw[k], property))..., "--",
-						alpha=0.25, color="orange", ds="steps")
-	end
-	if plotrndlink
-		for k in keys(rnetsrl)
-			plotfun(eCCDF2(getproperty(rnetsrl[k], property))..., "--",
-							alpha=0.25, color="blue", ds="steps")
-		end
+						alpha=0.25, color="magenta", ds="steps")
 	end
 	for k in keys(rnetsca)
 		plotfun(eCCDF2(getproperty(rnetsca[k], property))..., "--",
 						alpha=0.25, color="green", ds="steps")
 	end
+	if plotrndlink
+		for k in keys(rnetscr)
+			plotfun(eCCDF2(getproperty(rnetscr[k], property))..., "--",
+							alpha=0.25, color="orange", ds="steps")
+		end
+	end
 	drw = combineruns(rnetsrw, property)
-	drl = combineruns(rnetsrl, property)
+	drl = combineruns(rnetscr, property)
 	dca = combineruns(rnetsca, property)
-	plotfun(eCCDF2(drw)..., "-", ds="steps", color="orange", label="random")
-	plotrndlink && plotfun(eCCDF2(drl)..., "-", ds="steps", color="blue",
-												 label="link")
+	plotfun(eCCDF2(drw)..., "-", ds="steps", color="magenta",
+					label="no-cartels")
 	plotfun(eCCDF2(dca)..., "-", ds="steps", color="green",
 					label="cartels added")
-	legend()
-	ylabel("eCCDF")
-	xlabel(xlab)
+	plotrndlink && plotfun(eCCDF2(drl)..., "-", ds="steps", color="orange",
+												 label="rewired")
+	PyPlot.legend()
+	PyPlot.ylabel("eCCDF")
+	PyPlot.xlabel(xlab)
 	PyPlot.grid()
-	tight_layout()
+	PyPlot.tight_layout()
 end
 
 Random.seed!(101)
 
-rnetsrw, rnetsrl, rnetsca = simulatepubnets()
+rnetsrw, rnetsrl, rnetsca, rnetscr = simulatepubnets()
 
-plotres(:degrees, "degrees")
+plotres(:degrees, "degrees", true)
 savefig("../paperfigs/cartel_footprint-degree.pdf")
 
-plotres(:strengthes, "strength")
+plotres(:strengthes, "strength", true)
 savefig("../paperfigs/cartel_footprint-strength.pdf")
 
-plotres(:weights, "weight", false, true, semilogy)
+plotres(:weights, "weight", true, true, semilogy)
 savefig("../paperfigs/cartel_footprint-weight.pdf")
 
 plotres(:npapers, "number of papers")
