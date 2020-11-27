@@ -94,7 +94,7 @@ t_cartel_footprint_tex: $(DSCR)/cartel_footprint.tex \
 	touch $@
 
 t_real_networks: $(DSCR)/real_networks.jl
-	cd $(DSCR) && julia $($<)
+	cd $(DSCR) && julia $(<F)
 	touch $@
 
 t_real_networks_tex: $(DSCR)/real_networks.tex t_real_networks
