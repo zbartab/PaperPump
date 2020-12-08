@@ -517,8 +517,7 @@ end
 Calculate the coherence of group `group` in publication network `pn`.
 Coherence calculation follows Wachs & Kertész 2019 SciRep 9:10818.
 """
-function coherence(pn::PubNet, group::Array{String,1})
-	gi = getauthorindex(pn.coma, group)
+function coherence(pn::PubNet, gi::Array{Int,1})
 	gsize = length(gi)
 	W = Float64[]
 	for i in 1:(gsize-1)
@@ -532,6 +531,10 @@ function coherence(pn::PubNet, group::Array{String,1})
 	gm = geomean(W)
 	return gm/am
 end
+function coherence(pn::PubNet, group::Array{String,1})
+	gi = getauthorindex(pn.coma, group)
+	return coherence(pn, gi)
+end
 
 """
     exclusivity(pn, group)
@@ -539,8 +542,7 @@ end
 Calculate the exclusivity of group `group` in publication network `pn`.
 Exclusivity calculation follows Wachs & Kertész 2019 SciRep 9:10818.
 """
-function exclusivity(pn::PubNet, group::Array{String, 1})
-	gi = getauthorindex(pn.coma, group)
+function exclusivity(pn::PubNet, gi::Array{Int, 1})
 	gsize = length(gi)
 	Win = Float64[]
 	for i in 1:(gsize-1)
@@ -558,6 +560,10 @@ function exclusivity(pn::PubNet, group::Array{String, 1})
 		end
 	end
 	return sum(Win)/(sum(Win)+sum(Wout))
+end
+function exclusivity(pn::PubNet, group::Array{String, 1})
+	gi = getauthorindex(pn.coma, group)
+	return exclusivity(pn, gi)
 end
 
 """
