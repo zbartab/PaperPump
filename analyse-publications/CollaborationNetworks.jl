@@ -77,26 +77,26 @@ mutable struct PubNet
 		end
 		H = converthierarchy(coga, H)
 		carts = cartels(coga, cutoff)
-		prodfile = replace(file2, r"\.mat$" => ".prod")
-		if isfile(prodfile) && mtime(prodfile) > mtime(file2)
-			prodres = CSV.read(prodfile)
-		else
-			g, n, w = samplingproductivityraw(puma, coma, npapers, wpapers, carts, 1000)
-			#println("length: ", length(g))
-			prodres = vcat(DataFrame(g), DataFrame(n), DataFrame(w))
-			#println(nrow(prodres))
-			prodres[!,:measure] = vcat(repeat(["group"], Int(nrow(prodres)/3)),
-																repeat(["npaper"], Int(nrow(prodres)/3)),
-																repeat(["wpaper"], Int(nrow(prodres)/3)))
-			CSV.write(prodfile, prodres)
-		end
-		prodsampleQ = Dict{Symbol, DataFrame}()
-		prodsampleQ[:g] = prodres[prodres.measure .== "group",1:(end-1)]
-		prodsampleQ[:n] = prodres[prodres.measure .== "npaper",1:(end-1)]
-		prodsampleQ[:w] = prodres[prodres.measure .== "wpaper",1:(end-1)]
+#		prodfile = replace(file2, r"\.mat$" => ".prod")
+#		if isfile(prodfile) && mtime(prodfile) > mtime(file2)
+#			prodres = CSV.read(prodfile, DataFrame)
+#		else
+#			g, n, w = samplingproductivityraw(puma, coma, npapers, wpapers, carts, 1000)
+#			#println("length: ", length(g))
+#			prodres = vcat(DataFrame(g), DataFrame(n), DataFrame(w))
+#			#println(nrow(prodres))
+#			prodres[!,:measure] = vcat(repeat(["group"], Int(nrow(prodres)/3)),
+#																repeat(["npaper"], Int(nrow(prodres)/3)),
+#																repeat(["wpaper"], Int(nrow(prodres)/3)))
+#			CSV.write(prodfile, prodres)
+#		end
+#		prodsampleQ = Dict{Symbol, DataFrame}()
+#		prodsampleQ[:g] = prodres[prodres.measure .== "group",1:(end-1)]
+#		prodsampleQ[:n] = prodres[prodres.measure .== "npaper",1:(end-1)]
+#		prodsampleQ[:w] = prodres[prodres.measure .== "wpaper",1:(end-1)]
 		return new(puma, coma, coga, nauthors, npapers, wpapers, strengthes,
 							 weights, degrees, clustcoefs, Q, H, cutoff,
-							carts, prodsampleQ)
+							 carts)#, prodsampleQ)
 	end
 end
 
@@ -218,6 +218,14 @@ function getauthorIDs(colnet::MetaGraph{Int64, Float64},
 	ids = getauthorIDs(colnet)
 	return ids[group]
 end
+function getauthorIDs(coma::ScienceMat, inds::Array{Int, 1})
+	ids = Array{String, 1}()
+	for i in inds
+		id = findall(x -> x == i, coma.authorIDs)
+		length(id) > 0 && push!(ids, id[1])
+	end
+	return ids
+end
 
 """
     getauthorindex(coma, ids)
@@ -228,7 +236,10 @@ Return the indices in collaboration matrix `coma` of authors listed in
 function getauthorindex(coma::ScienceMat, ids::Array{String,1})
 	indices = Int[]
 	for id in ids
-		push!(indices, coma.authorIDs[id])
+		if haskey(coma.authorIDs, id)
+			i = coma.authorIDs[id]
+			push!(indices, i)
+		end
 	end
 	return indices
 end
@@ -492,6 +503,9 @@ Return the size of the matrix component of a `ScienceMat` object.
 """
 function size(m::ScienceMat)
 	return size(m.mat)
+end
+function size(m::ScienceMat, i::Int)
+	return size(m.mat, i)
 end
 
 """
