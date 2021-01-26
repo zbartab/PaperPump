@@ -49,6 +49,23 @@ function recordauthors(filelist::Array{String,1})
 end
 
 """
+    subject(cikk)
+
+Returns the subject of the given paper.
+"""
+function subject(cikk)
+	if haskey(cikk, "ratings") && haskey(cikk["ratings"][1], "subject")
+		return cikk["ratings"][1]["subject"]["label"]
+	else
+		return nothing
+	end
+end
+function subjects(cikkek)
+	s = map(i -> subject(cikkek[i]), 1:length(cikkek))
+	return s
+end
+
+"""
     hasranking(cikk)
 
 Returns `true` if MTMT paper record `cikk` has journal ranking field.
@@ -135,4 +152,34 @@ function files2MTMTpubmat(datadir::String)
 	#fMTMT = fMTMT[1:100]
 	recs, auIDs, pIDs = recordauthors(fMTMT)
 	return recs2pubmat(recs, auIDs, pIDs)
+end
+
+"""
+    paperssubject(pn, datadir)
+
+Return a dictionary with the subject identification of the papers in
+MTMT database
+"""
+function paperssubject(pn::PubNet, datadir::String)
+	MTMT_dir = joinpath(pwd(), datadir);
+	fMTMT = readdir(MTMT_dir);
+	filter!((x) -> occursin(r"[0-9]\.json$", x), fMTMT);
+	fMTMT = joinpath.(MTMT_dir, fMTMT);
+	journalsubjects = Dict{String, String}()
+	for f in fMTMT
+		rs = read_MTMT(f)
+		rs == nothing && continue
+		for r in rs
+			pid = string(r["mtid"])
+			(!hasranking(r) || !haskey(pn.puma.paperIDs, pid)) && continue
+			s = subject(r)
+			if s == nothing
+				s = "nothing"
+			else
+				s = replace(s, r"^Scopus - " => "")
+			end
+			journalsubjects[pid] = s
+		end
+	end
+	return journalsubjects
 end
