@@ -1,7 +1,7 @@
 
-# contains recipies to assemble PaperPump Appendix A
+# contains recipies to assemble PaperPump Appendix
 
-SRC = PaperPump_AppendixA.md
+SRC = PaperPump_Appendix.md
 
 FPP = filepp -kc \& -mp !
 
