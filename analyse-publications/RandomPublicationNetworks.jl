@@ -357,11 +357,121 @@ distribution is sampled from `k`, the number of papers is around
 `pratio` times the author numbers. The generated network builds up from
 communities whose size is given by `commsizes`.
 """
-function rndpubnet(k, pratio, commsizes, p_rewire=0.01,
-									 cartsizes=nothing, p_carts=0.2)
+function rndpubnet3(k, pratio, commsizes, p_rewire=0.01,
+										cartsizes=nothing, p_carts=0.2, α=5, β=1)
 	local pm
 	first = true
 	csizes = []
+	cartels = Array{Array{Int, 1}, 1}()
+	for cs in commsizes
+		k0 = sample(k, cs, replace=false)
+		p = Int(round(cs*pratio))
+		pm0 = generate_publicationmatrix(k0, p)
+		push!(csizes, size(pm0))
+		if first
+			pm = pm0
+			first = false
+		else
+			m = combine_sparsematrices(pm.mat, pm0.mat)
+			pm = generate_publicationmatrix(m)
+		end
+	end
+	pmrw = rewire(pm, p_rewire)
+	pm = deepcopy(pmrw)
+	if !isnothing(cartsizes)
+		pmc = deepcopy(pmrw)
+		sampledist = Beta(α,β)
+		na = size(pmc, 2)
+		ncartmembs = Int(round(p_carts * na))
+		local scartsizes
+		while true
+			scartsizes = cumsum(cartsizes)
+			if scartsizes[end] > ncartmembs
+				break
+			else
+				cartsizes = vcat(cartsizes, cartsizes)
+			end
+		end
+		ncarts = findlast(scartsizes .<= ncartmembs)
+		cartmembs = sort(sample(1:na, Int(scartsizes[ncarts]), replace=false))
+		fi = 1
+		for i in 1:ncarts
+			li = Int(fi+cartsizes[i])-1
+			cart = cartmembs[fi:li]
+			addcartel!(pmc.mat, cart, rand(sampledist))
+			push!(cartels, cart)
+			fi = li + 1
+		end
+		addrndlinks!(pm.mat, sum(pmc.mat) - sum(pm.mat))
+		return pmrw, pm, pmc, cartels
+	else
+		return pmrw, pm, pm, cartels
+	end
+end
+function rndpubnet2(k, pratio, commsizes, p_rewire=0.01,
+									 cartsizes=nothing, p_carts=0.2, α=5, β=1)
+	local pm
+	first = true
+	csizes = []
+	cartels = Array{Array{Int, 1}, 1}()
+	for cs in commsizes
+		k0 = sample(k, cs, replace=false)
+		p = Int(round(cs*pratio))
+		pm0 = generate_publicationmatrix(k0, p)
+		push!(csizes, size(pm0))
+		if first
+			pm = pm0
+			first = false
+		else
+			m = combine_sparsematrices(pm.mat, pm0.mat)
+			pm = generate_publicationmatrix(m)
+		end
+	end
+	pmrw = rewire(pm, p_rewire)
+	pm = deepcopy(pmrw)
+	if !isnothing(cartsizes)
+		pmc = deepcopy(pmrw)
+		sampledist = Beta(α,β)
+		minc = minimum(cartsizes)
+		membersadded = 0
+		while membersadded < size(pmc.mat,2) * p_carts
+			sr = 1
+			sc = 1
+			for cs in csizes
+				rand() > p_carts && continue
+				mw = pm.mat[sr:(sr+cs[1]-1),sc:(sc+cs[2]-1)]
+				mwc = pmc.mat[sr:(sr+cs[1]-1),sc:(sc+cs[2]-1)]
+				local c
+				na = size(mwc, 2)
+				if minc <= na
+					while true
+						c = sample(cartsizes, 1)
+						c = c[1]
+						c <= na && break
+					end
+					cart = sample(1:na, Int(c), replace=false)
+					addcartel!(mwc, cart, rand(sampledist))
+					membersadded += c
+					push!(cartels, cart .+ sc .- 1)
+				end
+				addrndlinks!(mw, sum(mwc)-sum(mw))
+				pm.mat[sr:(sr+cs[1]-1),sc:(sc+cs[2]-1)] = mw
+				pmc.mat[sr:(sr+cs[1])-1,sc:(sc+cs[2]-1)] = mwc
+				sr += cs[1]
+				sc += cs[2]
+			end
+		end
+		return pmrw, pm, pmc, cartels
+	else
+		return pmrw, pm, pm, cartels
+	end
+end
+function rndpubnet(k, pratio, commsizes, p_rewire=0.01,
+									 cartsizes=nothing, p_carts=0.2, α=5, β=1)
+	local pm
+	first = true
+	csizes = []
+	cartels = Array{Array{Int, 1}, 1}()
 	for cs in commsizes
 		k0 = sample(k, cs, replace=false)
 		p = Int(round(cs*pratio))
@@ -380,7 +490,7 @@ function rndpubnet(k, pratio, commsizes, p_rewire=0.01,
 	pm = deepcopy(pmrw)
 	if !isnothing(cartsizes)
 		pmc = deepcopy(pmrw)
-		sampledist = Beta(5,1)
+		sampledist = Beta(α,β)
 		minc = minimum(cartsizes)
 		sr = 1
 		sc = 1
@@ -402,6 +512,7 @@ function rndpubnet(k, pratio, commsizes, p_rewire=0.01,
 					#addcartel!(mwc, cart, rand(sampledist))
 					addcartel!(mwc, cart, rand(sampledist))
 					membersadded += c
+					push!(cartels, cart .+ sc .- 1)
 				end
 			end
 			addrndlinks!(mw, sum(mwc)-sum(mw))
@@ -411,9 +522,9 @@ function rndpubnet(k, pratio, commsizes, p_rewire=0.01,
 			sr += cs[1]
 			sc += cs[2]
 		end
-		return pmrw, pm, pmc
+		return pmrw, pm, pmc, cartels
 	else
-		return pmrw, pm, pm
+		return pmrw, pm, pm, cartels
 	end
 end
 function rndpubnet2(k, pratio, commsizes, cartsizes, p_carts=0.2)
