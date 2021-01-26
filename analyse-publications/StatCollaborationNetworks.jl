@@ -166,6 +166,20 @@ function eCCDF2(x::Array{Float64, 1})
 	#y = vcat(1, y[1:(end-1)])
 	return xs, y
 end
+function eCCDF3(x::Array{Int, 1}, normfun::Function=mean)
+	xx = x ./ normfun(x)
+	xs = sort(xx)
+	y = collect(length(xs):-1:1) ./ length(xs)
+	#y = vcat(1, y[1:(end-1)])
+	return xs, y
+end
+function eCCDF3(x::Array{Float64, 1}, normfun::Function=mean)
+	xx = x ./ normfun(x)
+	xs = sort(xx)
+	y = collect(length(xs):-1:1) ./ length(xs)
+	#y = vcat(1, y[1:(end-1)])
+	return xs, y
+end
 
 """
     pubnetstats(pn)
@@ -527,9 +541,13 @@ function coherence(pn::PubNet, gi::Array{Int,1})
 																												:weight))
 		end
 	end
-	am = mean(W)
-	gm = geomean(W)
-	return gm/am
+	if length(W) < 1
+		return 0.0
+	else
+		am = mean(W)
+		gm = geomean(W)
+		return gm/am
+	end
 end
 function coherence(pn::PubNet, group::Array{String,1})
 	gi = getauthorindex(pn.coma, group)
