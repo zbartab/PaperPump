@@ -35,9 +35,9 @@ patch:
 	patch < work/$(SRC).patch
 	touch $(SRC)
 
-$(DOCX): $(SRC) groups.png weighted_production.png
-	$(FPP) $< | pandoc -c ~/lib/markdown/pandoc.css --mathml -N --standalone \
-		--self-contained --filter pandoc-citeproc -o $@
+$(DOCX): $(SRC) $(PDFS)
+	$(FPP) -DEXT=png $< | pandoc -c ~/lib/markdown/pandoc.css --mathml \
+		-N --standalone --self-contained --filter pandoc-citeproc -o $@
 
 $(PDFS): $(SRC) t_sample_graphs_tex t_simulation_analyses_tex \
 	t_cartel_footprint_tex t_real_networks_tex t_group_productivity_fig
@@ -104,9 +104,10 @@ t_real_networks_tex: $(DSCR)/real_networks.tex t_real_networks
 	touch $@
 
 t_group_productivity: $(DSCR)/cartel_productivity.jl
-	cd $(DSCR) && julia $($<)
+	cd $(DSCR) && julia $(<F)
 	touch $@
 
-t_group_productivity_fig: $(DSCR)/group-productivity.R t_group_productivity
-	cd $(DSCR) && Rscript $($<)
+t_group_productivity_fig: $(DSCR)/group-productivity.jl t_group_productivity
+	cd $(DSCR) && julia $(<F)
 	touch $@
+

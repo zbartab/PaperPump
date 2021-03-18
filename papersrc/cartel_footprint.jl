@@ -648,6 +648,8 @@ tight_layout()
 
 savefig("../paperfigs/cartel_footprint-p.pdf")
 
+exit()
+
 # number of cartels as the function of cutoffs {{{1
 
 function cartelsizes(pn, cutoffs=0.2:0.01:0.8) #{{{2
@@ -714,6 +716,8 @@ end
 resdf = DataFrame(res, [:pcarts, :alpha, :D, :cartadded, :cartfound,
 												:overlap, :TPR, :FPR, :Fval])
 
+aggresdf = aggregate(resdf, [1,2,3], mean)
+
 savefig("../work/screen.pdf")
 
 PyPlot.plot(cutoffs, maximum.(ncMTMT), label="MTMT")
@@ -743,132 +747,6 @@ tight_layout()
 
 
 # sandbox {{{1
-
-## journal subjects {{{2
-
-### get the subject of the journal publishing the given paper
-include("../analyse-publications/MTMT/ProcessMTMTrecords.jl")
-
-js = paperssubject(pnMTMT, "../analyse-publications/MTMT/MTMT-downloads/")
-
-### get the main subject groupping for each paper
-# get the subject hierarchy from here: https://pg.edu.pl/documents/611754/75313317/asjc
-# this give you `ascj.pdf` showing to which main category a given subject belongs
-# prepare a txt from the pdf: pdftotext -nopgbrk -layout asjc.pdf
-
-# read the file
-asjc_s = open("../analyse-publications/MTMT/asjc.txt") do file
-	readlines(file)
-end
-
-# prepare a Dict of subjects
-asjcD = Dict{String, Array{String, 1}}()
-for l in asjc_s[2:end]
-	l = chomp(l)
-	if occursin(r"^[A-Za-z]", l)
-		global k = l
-		asjcD[k] = Array{String, 1}()
-	else
-		push!(asjcD[k], replace(l, r"^\s*" => ""))
-	end
-end
-# we have some subject categories missing from the file so we add these
-# to the dict
-push!(asjcD["Social Sciences"], "E-learning")
-push!(asjcD["Materials Science"], "Nanoscience and Nanotechnology")
-push!(asjcD["Health Professions"], "Sports Science")
-
-missingsubs = Array{String, 1}()
-jMs = Dict{String, String}()
-for k in keys(js)
-	s = js[k]
-	found = false
-	for ks = keys(asjcD)
-		if any(x -> s == x, asjcD[ks])
-			jMs[k] = ks
-			found = true
-			break
-		end
-	end
-	if !found
-		push!(missingsubs, s)
-		jMs[k] = "nothing"
-	end
-end
-
-function selectsubjects(pm::PubMat, subjects::Dict{String, String},
-												subject::String)
-	i = Array{Int, 1}()
-	for k in keys(subjects)
-		if subjects[k] == subject
-			push!(i, pm.paperIDs[k])
-		end
-	end
-	i = sort(i)
-	pmred = pm.mat[i,:]
-	np = papernumbers(pmred)
-	j = np .> 0
-	pmred = pmred[:,j]
-	return PubMat(pmred, updateIDs(pm.authorIDs, j),
-								updateIDs(pm.paperIDs, i))
-end
-
-function subjectnet(pm::PubMat, subjects::Dict{String, String},
-										subject::String, npapers=3)
-	spm = selectsubjects(pm, subjects, subject)
-	spm = selectauthors(spm, npapers)
-	scm = collaborationmatrix(spm)
-	return PubNet(spm, scm, 0.5, "", "../analyse-publications/comm_detection.sh")
-end
-
-mainsubjects = Array{String, 1}()
-for k in keys(jMs)
-	push!(mainsubjects, jMs[k])
-end
-mainsubjects = countmap(mainsubjects)
-msname = Array{String, 1}()
-mscount = Array{Int, 1}()
-for s in keys(mainsubjects)
-	push!(msname, s)
-	push!(mscount, mainsubjects[s])
-end
-
-i = sortperm(mscount, rev=true)
-msname = msname[i]
-mscount = mscount[i]
-
-msnets = Dict()
-for s in msname[1:5]
-	msnets[s] = subjectnet(pnMTMT.puma, jMs, s)
-end
-
-for s in keys(msnets)
-	println(s, ": ", round(length(msnets[s].cartels)/nv(msnets[s].coga), digits=3))
-end
-
-figure()
-PyPlot.loglog(eCCDF3(pndblp.strengthes)..., ds="steps", alpha=0.5, label="dblp")
-PyPlot.loglog(eCCDF3(pnMTMT.strengthes)..., ds="steps", alpha=0.5, label="MTMT")
-for s in keys(msnets)
-	PyPlot.loglog(eCCDF3(msnets[s].strengthes)..., ds="steps", alpha=0.5, label=s)
-end
-legend()
-xlabel("strengths")
-ylabel("eCCDF")
-tight_layout()
-
-figure()
-PyPlot.semilogy(eCCDF2(pndblp.weights)..., ds="steps", alpha=0.5, label="dblp")
-PyPlot.semilogy(eCCDF2(pnMTMT.weights)..., ds="steps", alpha=0.5, label="MTMT")
-for s in keys(msnets)
-	PyPlot.semilogy(eCCDF2(msnets[s].weights)..., ds="steps", alpha=0.5, label=s)
-end
-legend()
-xlabel("weights")
-ylabel("eCCDF")
-tight_layout()
-
-
 
 ## eCCDF {{{2
 

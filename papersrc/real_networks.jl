@@ -88,3 +88,17 @@ figure();
 plotres(mtmt, :wpapers, "weighted number of papers");
 savefig("../paperfigs/dblp-wpapers.pdf")
 
+csMTMT = length.(pnMTMT.cartels)
+csdblp = length.(pndblp.cartels)
+
+figure()
+PyPlot.hist(csdblp, density=false, log=true, alpha=0.5, label="dblp",
+						bins=2:26)
+PyPlot.hist(csMTMT, density=false, log=true, alpha=0.5, label="MTMT",
+						bins=2:26)
+xlabel("group size")
+ylabel("frequency")
+legend()
+tight_layout()
+savefig("../paperfigs/tight_group_size.pdf")
+
