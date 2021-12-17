@@ -27,7 +27,7 @@ To investigate the robustness of the cut-off rule to identify cartels we generat
 
 # Description of real publication networks
 
-The following table shows basic statistics for several attributes of the two real publication networks. Column 'Network' contains the network ID, _n_ is the sample size, _m_ gives the mean, M is the median, 'min' is the minimum, while 'max' is the maximum, 'LQ' and 'UQ' are the lower and upper quartiles, respectively. Terms in italic give the variables: _authors_ is the number of authors a paper has; _papers_ is the number of papers an author has; _weighted papers_ is the number of papers weighted by the reciprocal of their authors; _strengths_ is the strength of a given node (author), i.e. sum of weights the links connected to a given node have; _degrees_ gives the number of neighbours of a node; and _clustering coefficients_ is the local clustering coefficient of a node.
+The following table shows basic statistics for several attributes of the two real publication networks. Column 'Network' contains the network ID, _n_ is the sample size, _m_ gives the mean, M is the median, 'min' is the minimum, while 'max' is the maximum, 'LQ' and 'UQ' are the lower and upper quartiles, respectively. Terms in italic give the variables: _authors_ is the number of authors a paper has; _papers_ is the number of papers an author has; _weighted papers_ is the number of papers weighted by the reciprocal of their author numbers; _strengths_ is the strength of a given node (author), i.e. sum of weights the links connected to a given node have; _degrees_ gives the number of neighbours of a node; and _clustering coefficients_ is the local clustering coefficient of a node.
 
 !pagebreak
 
@@ -37,7 +37,7 @@ The following table shows basic statistics for several attributes of the two rea
 
 !pagebreak
 
-These tables describe the fit of several theoretical distributions to the degrees of the collaboration networks (Figure 1). The distributions fitted are [@clauset2009]: log-normal, Weibull, exponential, power-law and power-low with exponential cutoff. Column _p_ gives the probability of goodness of fit, _D_~obs~ is the test statistics, _x_~min~ is the minimum value included in the fit, and _n_ is the sample size. Column **Parameters** gives the estimated parameter values for the given distribution.
+These tables describe the fit of several theoretical distributions to the degrees of the collaboration networks (Figure 3). The distributions fitted are [@clauset2009]: log-normal, Weibull, exponential, power-law and power-low with exponential cutoff. Column _p_ gives the probability of goodness of fit, _D_~obs~ is the test statistics, _x_~min~ is the minimum value included in the fit, and _n_ is the sample size. Column **Parameters** gives the estimated parameter values for the given distribution.
 
 The MTMT dataset.
 
@@ -61,7 +61,7 @@ The relation between average group productivity (i.e. the number of distinct pap
 
 ![!FIGURE(A5) The relationship between the average group productivity and average number of papers for random groups and !TCGs for the MTMT (left) and the dblp (right) dataset. The lines are fitted by linear models. Note, the lines for the random groups have slopes of 1, while the slopes of lines for the !TCGs are less than 2.](paperfigs/paper_sharing-relations.!EXT)
 
-Consider a group of _a_ authors, where author _i_ produces _p_~i~ papers alone. Author can share _s_~i~ of her papers with others in the group. Under these conditions the group's productivity is given as
+Consider a group of _a_ authors, where author _i_ produces _p_~i~ papers alone. An author can share _s_~i~ of her papers with others in the group. Under these conditions the group's productivity is given as
 
 $$
 \sum_{i=1}^{a} p_i,
@@ -91,7 +91,9 @@ $$
 N_P = \frac{1}{a} \left[\sum_{i=1}^{a} p_i + (a-1)\sum_{i=1}^{a} s_i\right].
 $$
 
-We consider three cases. First, _s_~i~ = _p_~i~:
+We consider three cases.
+
+__Case I__. Let _s_~i~ = _p_~i~, then the average number of papers is given as
 
 $$
 N_P = \frac{1}{a}\left[\sum_{i=1}^{a} p_i + (a-1)\sum_{i=1}^{a} p_i\right] = \sum_{i=1}^{a} p_i.
@@ -99,7 +101,7 @@ $$
 
 It follows that _N_~P~ = _a_ _G_~P~. In other words, the average number of papers is a linear function of the average group productivity with group size as slope. As $a \ge 2$, the slope should be larger than 2.
 
-For the second case we assume that each individual in the group shares the same number of papers with others, i.e. $s_i = s_j = s,\, \forall i \ne j$. Then
+__Case II__. We assume that each individual in the group shares the same number of papers with others, i.e. $s_i = s_j = s,\, \forall i \ne j$. Then
 
 $$
 N_P = \frac{1}{a} \left[\sum_{i=1}^{a} p_i + (a-1)a s\right] = (a-1)s + \frac{1}{a}\sum_{i=1}^{a} p_i = (a-1)s + G_P.
@@ -107,7 +109,7 @@ $$
 
 Here _N_~P~ is also a linear function of _G_~P~ with slope equals 1.
 
-For the third case we assume that each author shares a constant portion, _c_, of her papers with others, i.e. _s_~i~ = _c_ _p_~i~, _c_ < 1. Under this condition,
+__Case III__. We assume that each author shares a constant portion, _c_, of her papers with others, i.e. _s_~i~ = _c_ _p_~i~, _c_ < 1. Under this condition,
 
 $$
 N_P = \frac{1}{a} \left[\sum_{i=1}^{a} p_i + (a-1)\sum_{i=1}^{a} c p_i\right].
@@ -119,7 +121,7 @@ $$
 N_P = \left[1 + c(a-1)\right] G_P.
 $$
 
-Let $\rho = 1 + c(a-1)$. Then $\rho$ can be estimated as $\rho = N_P / G_P$. From this the level of sharing, _c_, can be obtained as
+Here the average number of papers is again a linear function of average group productivity. Now, let $\rho = 1 + c(a-1)$. Then $\rho$ can be estimated as $\rho = N_P / G_P$. From this the level of sharing, _c_, can be obtained as
 
 $$
 c = \frac{\rho -1}{a-1}.
