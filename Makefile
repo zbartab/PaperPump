@@ -20,6 +20,12 @@ pdf: $(PDFS)
 html: $(HTML)
 docx: $(DOCX)
 
+edit:
+	gvim $(SRC)
+
+view:
+	zathura $(PDFS) &
+
 #cp -a $< ~/Dropbox/Draft/work/
 
 2cloud: $(SRC)
