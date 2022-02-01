@@ -3,6 +3,7 @@ using HypothesisTests, GLM
 
 include("../analyse-publications/PaperPump.jl")
 include("../analyse-publications/CommunitiesNetworks.jl")
+
 matplotlib.use("PDF")
 
 function plprod(cartdata, variable, rnddata, xlab="")
@@ -76,6 +77,30 @@ pdblp[:raw] = CSV.read("../analyse-publications/dblp/dblppubmat-productivity_raw
 											 DataFrame)
 pdblp[:car] = CSV.read("../analyse-publications/dblp/dblppubmat-cartel_productivity.csv",
 											 DataFrame)
+
+m = Matrix(pMTMT[:raw][pMTMT[:raw][:measure] .== "group",
+											 1:(size(pMTMT[:raw], 2)-1)])
+gMTMT = reshape(m, prod(size(m)))
+
+m = Matrix(pMTMT[:raw][pMTMT[:raw][:measure] .== "npaper",
+											 1:(size(pMTMT[:raw], 2)-1)])
+nMTMT = reshape(m, prod(size(m)))
+
+m = Matrix(pMTMT[:raw][pMTMT[:raw][:measure] .== "wpaper",
+											 1:(size(pMTMT[:raw], 2)-1)])
+wMTMT = reshape(m, prod(size(m)))
+
+m = Matrix(pdblp[:raw][pdblp[:raw][:measure] .== "group",
+											 1:(size(pdblp[:raw], 2)-1)])
+gdblp = reshape(m, prod(size(m)))
+
+m = Matrix(pdblp[:raw][pdblp[:raw][:measure] .== "npaper",
+											 1:(size(pdblp[:raw], 2)-1)])
+ndblp = reshape(m, prod(size(m)))
+
+m = Matrix(pdblp[:raw][pdblp[:raw][:measure] .== "wpaper",
+											 1:(size(pdblp[:raw], 2)-1)])
+wdblp = reshape(m, prod(size(m)))
 
 # number of authors in tight groups
 sum(pMTMT[:car].groupsize)
