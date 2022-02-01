@@ -6,24 +6,30 @@ include("../analyse-publications/CommunitiesNetworks.jl")
 
 matplotlib.use("PDF")
 
-function plprod(cartdata, variable, rnddata, xlab="")
+function plprod(sbplt, cartdata, variable, rnddata, xlab="")
 	cad = cartdata[:car][variable]
 	maxx = (mx1 = maximum(cad)) < (mx2 = maximum(rnddata)) ? mx2 : mx1
 	meanx = round(median(cad), digits=1)
-	PyPlot.hist(cad, density=true, label="tight groups, M = $meanx",
+	sbplt.hist(cad, density=true, label="tight groups, M = $meanx",
 							alpha=0.25, bins=0:5:maxx, log=false)
 	meanx = round(median(rnddata), digits=1)
-	PyPlot.hist(rnddata, density=true, label="random groups, M = $meanx",
+	sbplt.hist(rnddata, density=true, label="random groups, M = $meanx",
 							alpha=0.25, bins=0:5:maxx, log=false)
-	#ttest = UnequalVarianceTTest(cad, rnddata)
-	#tdf = round(ttest.df, digits=1)
-	#tt = round(ttest.t, digits=2)
-	#PyPlot.text(maxx, 0.03, L"t_{%$tdf} = %$tt", horizontalalignment="right")
-	legend(fontsize=:small)
-	xlabel(xlab)
-	ylabel("density")
-	tight_layout()
+	sbplt.legend(fontsize=:small)
+	sbplt.set_xlabel(xlab)
+	sbplt.set_ylabel("density")
+	ins = sbplt.inset_axes([0.65, 0.05, 0.3, 0.65])
+	ins.boxplot(cad, positions=[1], showfliers=false, #labels=(""),
+							patch_artist=true, boxprops = Dict("facecolor" => "C0",
+																								 "alpha" => 0.25))
+	ins.boxplot(rnddata, positions=[2], showfliers=false, #labels=(""),
+							patch_artist=true, boxprops = Dict("facecolor" => "C1",
+																								 "alpha" => 0.25))
+	ins.set_xticklabels(labels="")
+	ins.tick_params(axis="x", bottom=false)
+	ins.tick_params(axis="y", labelsize=:small)
 end
+
 
 function toppers(cartdata, variable, rnddata, Q)
 	cad = cartdata[:car][variable]
@@ -110,19 +116,15 @@ sum(pdblp[:car].groupsize)
 nrow(pMTMT[:car])
 nrow(pdblp[:car])
 
-figure(figsize=(7,7))
-subplot(3,2,1)
-plprod(pMTMT, :npapers, nMTMT, "mean number of papers")
-subplot(3,2,2)
-plprod(pdblp, :npapers, ndblp, "mean number of papers")
-subplot(3,2,3)
-plprod(pMTMT, :groupprod, gMTMT, "mean group productivity")
-subplot(3,2,4)
-plprod(pdblp, :groupprod, gdblp, "mean group productivity")
-subplot(3,2,5)
-plprod(pMTMT, :wpapers, wMTMT, "mean weighted number of papers")
-subplot(3,2,6)
-plprod(pdblp, :wpapers, wdblp, "mean weighted number of papers")
+sbplts = PyPlot.subplots(3,2,figsize=(7,7))
+plprod(sbplts[2][1], pMTMT, :npapers, nMTMT, "mean number of papers")
+plprod(sbplts[2][2], pMTMT, :groupprod, gMTMT, "mean group productivity")
+plprod(sbplts[2][3], pMTMT, :wpapers, wMTMT, "mean weighted number of papers")
+plprod(sbplts[2][4], pdblp, :npapers, ndblp, "mean number of papers")
+plprod(sbplts[2][5], pdblp, :groupprod, gdblp, "mean group productivity")
+plprod(sbplts[2][6], pdblp, :wpapers, wdblp, "mean weighted number of papers")
+tight_layout()
+
 savefig("../paperfigs/group_productivity.pdf")
 
 dfMTMT = createDF(pMTMT)
