@@ -27,7 +27,7 @@ function plprod(sbplt, cartdata, variable, rnddata, xlab="")
 																								 "alpha" => 0.25))
 	ins.set_xticklabels(labels="")
 	ins.tick_params(axis="x", bottom=false)
-	ins.tick_params(axis="y", labelsize=:small)
+	ins.tick_params(axis="y", labelsize="xx-small")
 end
 
 
@@ -109,12 +109,42 @@ m = Matrix(pdblp[:raw][pdblp[:raw][:measure] .== "wpaper",
 wdblp = reshape(m, prod(size(m)))
 
 # number of authors in tight groups
-sum(pMTMT[:car].groupsize)
-sum(pdblp[:car].groupsize)
+naMTMT = sum(pMTMT[:car].groupsize)
+nadblp = sum(pdblp[:car].groupsize)
 
 # number of tight groups
 nrow(pMTMT[:car])
 nrow(pdblp[:car])
+
+MgMTMT = median(gMTMT)
+MnMTMT = median(nMTMT)
+Mgdblp = median(gdblp)
+Mndblp = median(ndblp)
+
+q = 0.5
+MgMTMT = quantile(gMTMT, q)
+MnMTMT = quantile(nMTMT, q)
+Mgdblp = quantile(gdblp, q)
+Mndblp = quantile(ndblp, q)
+
+i1 = pMTMT[:car][:groupprod] .> MgMTMT;
+i2 = pdblp[:car][:groupprod] .> Mgdblp;
+i3 = pMTMT[:car][:npapers] .> MnMTMT;
+i4 = pdblp[:car][:npapers] .> Mndblp;
+
+# relative group productivity
+s1 = sum(pMTMT[:car][i1, :groupsize])/naMTMT;
+s2 = sum(pdblp[:car][i2, :groupsize])/nadblp;
+q < 0.5 ? 1-s1 : s1
+q < 0.5 ? 1-s2 : s2
+
+# relative number of papers
+s3 = sum(pMTMT[:car][i3, :groupsize])/naMTMT;
+s4 = sum(pdblp[:car][i4, :groupsize])/nadblp;
+q < 0.5 ? 1-s3 : s3
+q < 0.5 ? 1-s4 : s4
+
+
 
 sbplts = PyPlot.subplots(3,2,figsize=(7,7))
 plprod(sbplts[2][1], pMTMT, :npapers, nMTMT, "mean number of papers")
@@ -126,6 +156,8 @@ plprod(sbplts[2][6], pdblp, :wpapers, wdblp, "mean weighted number of papers")
 tight_layout()
 
 savefig("../paperfigs/group_productivity.pdf")
+
+# 
 
 dfMTMT = createDF(pMTMT)
 dfdblp = createDF(pdblp)
@@ -223,34 +255,38 @@ ylabel("density")
 tight_layout()
 savefig("../paperfigs/paper_sharing.pdf")
 
+figure(figsize=(5, 10))
+subplot(3,1,1)
 mybins = 0:0.05:1
 qnMTMT = calcquantile(dfMTMT, :npapers)
 qndblp = calcquantile(dfdblp, :npapers)
-close("all")
+#close("all")
 PyPlot.hist(qnMTMT, density=true, bins=mybins, label="MTMT", alpha=0.25)
 PyPlot.hist(qndblp, density=true, bins=mybins, label="dblp", alpha=0.25)
 xlabel("quantiles")
 ylabel("density")
 title("number of papers")
 legend()
-tight_layout()
-savefig("../work/screen.pdf")
+#tight_layout()
+#savefig("../work/screen.pdf")
 
+subplot(3,1,2)
 qgMTMT = calcquantile(dfMTMT, :groupprod);
 qgdblp = calcquantile(dfdblp, :groupprod);
-close("all")
+#close("all")
 PyPlot.hist(qgMTMT, density=true, bins=mybins, label="MTMT", alpha=0.25)
 PyPlot.hist(qgdblp, density=true, bins=mybins, label="dblp", alpha=0.25)
 xlabel("quantiles")
 ylabel("density")
 title("group productivity")
 legend()
-tight_layout()
-savefig("../work/screen.pdf")
+#tight_layout()
+#savefig("../work/screen.pdf")
 
+subplot(3,1,3)
 qwMTMT = calcquantile(dfMTMT, :wpapers);
 qwdblp = calcquantile(dfdblp, :wpapers);
-close("all")
+#close("all")
 PyPlot.hist(qwMTMT, density=true, bins=mybins, label="MTMT", alpha=0.25)
 PyPlot.hist(qwdblp, density=true, bins=mybins, label="dblp", alpha=0.25)
 xlabel("quantiles")
@@ -258,7 +294,8 @@ ylabel("density")
 title("weighted number of papers")
 legend()
 tight_layout()
-savefig("../work/screen.pdf")
+
+savefig("../paperfigs/cartels_quantiles.pdf")
 
 # proportion of tight groups with significantly lower number of papers than
 # random groups
