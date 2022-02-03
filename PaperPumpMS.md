@@ -219,9 +219,11 @@ One of the major advantage of forming collaboration groups is thought to be the 
 
 ![!FIGURE(11) The productivity of !TCGs compared to similarly sized random groups. Left panels show the distributions of different productivity measures for the MTMT dataset, while right panels show the same for the dblp dataset. Tightly connected groups (tight groups in the legends) are authors connected by links with weights of 0.5 or more. Random groups were formed by choosing authors randomly from the pools of authors not involved in !TCGs. The size of the random groups follows the size of the !TCGs. Medians (M) of the measures for the two types of groups are given in figure legends.](paperfigs/group_productivity.!EXT)
 
-According to the calculations in the Appendix, authors in !TCGs share in average 63.3% (MTMT) and 67.3% (dblp) of their papers among their group mates. In many groups (MTMT: 15.7%, dblp: 22.6%), however, authors share even more than 80% of their papers (Figure 12). 
+![!FIGURE(12) The distribution of quntiles](paperfigs/cartels_quantiles.!EXT)
 
-![!FIGURE(12) The level of paper sharing among authors of !TCGs in the MTMT and the dblp datasets. The levels were calculated according to the calculations presented in the Appendix.](paperfigs/paper_sharing.!EXT)
+According to the calculations in the Appendix, authors in !TCGs share in average 63.3% (MTMT) and 67.3% (dblp) of their papers among their group mates. In many groups (MTMT: 15.7%, dblp: 22.6%), however, authors share even more than 80% of their papers (Figure 13). 
+
+![!FIGURE(13) The level of paper sharing among authors of !TCGs in the MTMT and the dblp datasets. The levels were calculated according to the calculations presented in the Appendix.](paperfigs/paper_sharing.!EXT)
 
 !TODO(calculate proportion of authors who are in cartels and have significantly higher productivity than authors in random groups)
 
