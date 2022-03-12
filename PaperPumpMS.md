@@ -28,6 +28,8 @@ geometry:
 
 # Definitions
 
+Proba
+
 &define TODO(tobedone)
 &define pubcart publication cartel
 &define pub publication
@@ -52,7 +54,7 @@ As, among others, Charles Goodhart observed, if a metric is used as a target the
 
 Goodhart's law is well illustrated by the introduction of the number of papers as measure of productivity in science. Using this measure is based on the assumption that characteristics of scientific papers (like length or number of coauthors) are fixed and hence targeting more papers automatically leads to the generation of more new knowledge. Unfortunately, this was not what had happened, scientists responded in some unexpected, but clearly rational and sometimes unethical, ways [@fong2017; @gopalakrishna2021]. For instance, they reduced the length of papers [@fire2019], i.e. they are publishing the same amount of knowledge in more papers (salami articles). Furthermore, mangling with authorship appeared where offering authorship to those who did not contributed to the given paper considerably (honorary authorship) can quickly increase their number of publications, again without any increase in knowledge produced [@aubertbonn2021; @biagioli2019; @fong2017; @gopalakrishna2021]. A possible sign of this questionable authorship practice can be the recent raise of number of authors per paper [@fire2019]. One may argue that more authors per paper is the sign of science becoming more interdisciplinary. A recent analysis is, however, unlikely to support this conclusion; the number of coauthors increases with time even after controlling for attributes related to complexity of science [@papatheodorou2008]. Another reason for the increased number of coauthors might be the increased efficiency that can follow from the increased possibility for division of labour facilitated by more authors [@demesnard2017]. In this case, however, it is expected that the number of papers per author also increases, which seems not to be the case [@fire2019].
 
-Questionable authorship practice, on the other hand, appears to be common. Recent surveys suggest that about 30% of authors were involved in these unethical practices [@biagioli2019; @fong2017; @gopalakrishna2021; @grossman2019; @halaweh2020; @marusic2011]. One of them is ghost authorship when someone who has significantly contributed to the article is excluded from the author bylist [@jabbehdari2017]. In other forms (honorary authorship) just the opposite happens; those are offered authorship who have not (considerably) contributed to the work published [@fong2017; @gopalakrishna2021]. Several reasons can be behind gifting authorship to someone. Junior authors might include more senior ones because of respect or they are forced to do so [@pan2020]. Senior authors may gift authorship to juniors in order to help them obtain post-doctoral scholarships or tenure [@vonbergen2017].
+Questionable authorship practice, on the other hand, appears to be common. Recent surveys suggest that about 30% of authors were involved in these unethical practices [@biagioli2019; @fong2017; @gopalakrishna2021; @grossman2019; @halaweh2020; @marusic2011]. One of these practices is ghost authorship when someone who has significantly contributed to the article is excluded from the author bylist [@jabbehdari2017]. In other forms (honorary authorship) just the opposite happens; those are offered authorship who have not (considerably) contributed to the work published [@fong2017; @gopalakrishna2021]. Several reasons can be behind gifting authorship to someone. Junior authors might include more senior ones because of respect or they are forced to do so [@pan2020]. Senior authors may gift authorship to juniors in order to help them obtain post-doctoral scholarships or tenure [@vonbergen2017].
 
 A very efficient way to increase the number of publications is to practice honorary authorship reciprocally. The most organised form of this behaviour is founding publication cartels. The cartel is formed by a group of people who agree to mutually invite each others to their own publications as guest authors without any contribution. As in recent assessment practice coauthored papers count as a whole publication to every coauthor on the bylist, publication cartels can significantly boost the productivity of cartel members. This is the phenomenon which is called as 'publication club' by @demesnard2017. As the noun of 'club' involves a positive connotation we prefer to use 'cartel' for this under studied but highly unethical behaviour. Simple argument suggests that sharing the credit of a publication among the coauthors can decrease the incentive of forming cartels [@demesnard2017]. The simplest scenario for sharing is the 1/_n_ rule under which only 1/_n_ part of a publication is attributed to each of the _n_ coauthors of the given paper [@demesnard2017].
 
@@ -68,7 +70,7 @@ Under current conditions a scientist' reputation is proportional to the number o
 
 We compare the publication performance of two authors, author _A_ and author _B_. Authors work in separate groups (group _A_ and group _B_, respectively) each of which contains _G_~i~ (_i_ = _A_ or _B_) people (including the focal author). Each author in group _A_ produces _p_~A~ papers in a year by collaborating with _c_~A~ authors from outside of the group, i.e. their primary production is _p_~A~. Similarly, each author in group _B_ primarily produces _p_~B~ papers by collaborating with _c_~B~ people outside of the group. The difference between author _A_ and _B_ is that authors in group _A_ work independently of each other, while authors in group _B_ invite all other group members to be a coauthor on their papers independently of their contribution to that paper (Figure 1). In other words, authors in group _B_ form a !pubcart.
 
-![!FIGURE(1) The publication relationships in group _A_ and _B_. Nodes are authors, while edges symbolise shared publications. Groups of four authors are marked by the underlying shapes. In group _A_ authors work with several coauthors from outside of the group but they do not invite group mates to be coauthors on their own papers. Contrarary, authors in group _B_ form a !pubcart i.e. each author invites all other aouthors in the group to be a coauthor (note the connections between group members).](paperfigs/groups.!EXT)
+![!FIGURE(1) The publication relationships in group _A_ and _B_. Nodes are authors, while edges symbolise shared publications. Groups of four authors are marked by the underlying shapes. In group _A_ authors work with several coauthors from outside of the group but they do not invite group mates to be coauthors on their own papers. Contrarary, authors in group _B_ form a !pubcart i.e. each author invites all other authors in the group to be a coauthor (note the connections between group members).](paperfigs/groups.!EXT)
 
 For simplicity, we assume that _p_~A~ = _p_~B~ = _p_, _G_~A~ = _G_~B~ = _G_ (_G_ > 1) and _c_~A~ = _c_~B~ = _c_, i.e. author groups are of the same size, authors produce the same number of primary papers and they have the same number of coauthors from outside of the group. In this case the total numbers of papers produced by the groups, the group productivity, are equal (_Gp_ = _G_~A~_p_~A~ and _G_~B~_p_~B~, respectively). The total numbers of papers (co)authored by author _A_ and _B_ are, however, different. Author _A_ writes _n_~A~ = _p_~A~ = _p_ papers. On the other hand, author _B_ (co)authors  _n_~B~ = _p_~B~ + (_G_~B~ - 1) _p_~B~ = _G_~B~ _p_~B~ = _Gp_ papers. In the case of author _B_ the term (_G_~B~ - 1)_p_~B~ represents the papers on which author _B_ is invited as honorary author. It is easy to see that as far as _G_ > 1, author _B_ will have more paper than author _A_, i.e _n_~B~ > _n_~A~. 
 
@@ -141,9 +143,9 @@ $$
 \frac{w_{B}'}{w_{A}'} = \frac{p(G+bc)}{G+c} \times \frac{1+c}{p(1+bc)} = \frac{G+c[G+b(1+c)]}{G+c[1+b(G+c)]},
 $$
 
-shows that for _w_~B~'/_w_~A~' > 1, the condition _c_ > 0 should also be fulfilled. As numerical computation indicates (Figure 2) the bias is decreased by introducing the first authorship bonus, but it is still significant. @vavrycuk2018, for instance, recommend a bonus of _b_ = 0.2, but in this case author _B_ sill has around 50% more credit for the same work than author _A_ has. The difference between author _A_ and _B_ decreases as _b_ increases (Figure 2b), but this way coauthorship is worth less and less, undermining the benefits of collaborations.
+shows that for _w_~B~'/_w_~A~' > 1, the condition _c_ > 0 should also be fulfilled. As numerical computation indicates (Figure 2) the bias is decreased by introducing the first authorship bonus, but it is still significant. @vavrycuk2018, for instance, recommend a bonus of _b_ = 0.2, but in this case author _B_ sill has around 50% more credit for the same work than author _A_ has. The difference between author _A_ and _B_ decreases as _b_ increases (Figure 2b), but this way coauthorship is worth less and less, undermining the possible benefits of collaborations.
 
-To summarise, this simple model shows that the formation of !pubcarts can be an advantageous, but unethical, strategy in terms of increasing publication productivity even if one control for the number of coauthors of papers. Note, however, that this model might be overly simplified as all authors have the same primary productivity and we do not investigated how productivity of authors outside of the cartels changes as a consequence of founding cartels. To obtain a more realistic understanding of !pubcarts next we develop a simulation of the publication process.
+To summarise, this simple model shows that the formation of !pubcarts can be an advantageous, but unethical, strategy in terms of increasing publication productivity even if one control for the number of coauthors of papers. Note, however, that this model might be overly simplified as all authors have the same primary productivity and we do not investigated how productivity of authors outside of the cartels changes as a consequence of founding cartels. Furthermore, in this simple model all cartel members come from the same group (institution) and hence it is easy to nullify the benefits of cartel foundation by dividing the number of papers an author (co)write by the number of coauthors on the bylist from the same group (institute). To obtain a more realistic understanding of !pubcarts next we develop a simulation of the publication process.
 
 # The simulation
 
@@ -151,7 +153,7 @@ To summarise, this simple model shows that the formation of !pubcarts can be an 
 &define MC _M_~C~
 &define GC _G_~C~
 
-We start simulating the !pub process with constructing a !pubmat of papers and authors, !MP (Figure 3). Element _a_~ij~ of !MP is one if author _j_ is on the bylist of paper _i_ and zero otherwise. Therefore, !MP can be considered as a matrix representation of a bipartite graph, where rows and columns represent the two types of nodes, papers and authors, respectively. To construct !MP we set up _n_~C~ communities the sizes of which are given by _c_~l~ (_l_ = 1 ... _n_~C~), i.e. community _l_ consists of _c_~l~ authors. The number of papers written by author _j_ in community _l_ is given by _k_~l,j~. For each community we first construct an empty submatrix (all _a_~ij~ = 0) of size _p_~l~ and _c_~l~, where _p_~l~ > max(_k_~l,j~), for each community. Then for each columns _j_ we randomly distributed _k_~l,j~ number of ones over the _p_~l~ empty places. When we have constructed the submatrix for each community, we combine them along their diagonal to form the whole !pubmat by filling the appearing off-diagonal empty cells with zeros. Finaly, we randomly switch 10% of the ones with zeros such that the marginal sums of rows and columns do not change [@barabasi2016]. This degree maintaining rewiring connects the separate communities into a more-or-less connected graph. Having constructed !MP we create a weighted collaboration (or co-authorship) matrix, !MC, by projecting !MP to the nodes of authors. The weights of !MC, _w_~ij~, are Jaccard similarity indices  calculated between each pair of authors _i_ and _j_ (_i_ $\ne$ _j_) as
+We start simulating the !pub process with constructing a !pubmat of papers and authors, !MP (Figure 3). Element _a_~ij~ of !MP is one if author _j_ is on the bylist of paper _i_ and zero otherwise. Therefore, !MP can be considered as a matrix representation of a bipartite graph, where rows and columns represent the two types of nodes, papers and authors, respectively. To construct !MP we set up _n_~C~ communities the sizes of which are given by _c_~l~ (_l_ = 1 ... _n_~C~), i.e. community _l_ consists of _c_~l~ authors. The number of papers written by author _j_ in community _l_ is given by _k_~l,j~. For each community we first construct an empty submatrix (all _a_~ij~ = 0) of size _p_~l~ and _c_~l~, where _p_~l~ > max(_k_~l,j~), for each community. Then for each columns _j_ we randomly distributed _k_~l,j~ number of ones over the _p_~l~ empty places. After we have constructed the submatrix for each community, we combine them along their diagonal to form the whole !pubmat by filling the appearing off-diagonal empty cells with zeros. Finaly, we randomly switch 10% of the ones with zeros such that the marginal sums of rows and columns do not change [@barabasi2016]. This degree maintaining rewiring connects the separate communities into a more-or-less connected graph. Having constructed !MP we create a weighted collaboration (or co-authorship) matrix, !MC, by projecting !MP to the nodes of authors. The weights of !MC, _w_~ij~, are Jaccard similarity indices  calculated between each pair of authors _i_ and _j_ (_i_ $\ne$ _j_) as
 
 $$
 w_{ij} = \frac{ | A_i \cap A_j | }{ | A_i \cup A_j | }.
@@ -161,7 +163,7 @@ Here, _A_~i~ is the set of papers to which author _i_ contributed. In other word
 
 ![!FIGURE(3) The construction of publication network. The top left panel shows the publication matrix, !MP. Each row and column of this matrix represents a paper and an author, respectively. Values of 1s indicate that an author is on the author list of a given paper, while dots symbolise zeros. From the publication matrix one can derive the collaboration matrix, !MC (bottom right panel) by calculating the Jaccard simmilarity (top right) for each possible pairs of authors. The bottom left panel shows the resulting weighted, undirected collaboration graph, !GC. The red squares exemplifies the calculation of Jaccar simmilarity.](paperfigs/sample_publication_network-01.!EXT)
 
-We simulated the formation of cartels by randomly choosing $|\kappa|$ authors several times within a community (Figure 4). Let $\kappa$ is the set of cartel members. Then, with probability _p_~c~, we changed each element _a_~ij~ = 0 of !MP to _a_~ij~ = 1 where the following conditions met: _j_ $\in \kappa$ and at least one _a_~ik~ = 1 with _k_ $\in \kappa$ but _k_ $\ne$ _j_. We project the resulting !pubmat, !MP' to !MC' and constructed the corresponding !colgraph, !GC'.
+We simulated the formation of cartels by randomly choosing $|\kappa|$ authors several times within a community (Figure 4). Let $\kappa$ is the set of cartel members. Then, with probability _p_~c~, we changed each element _a_~ij~ = 0 of !MP to _a_~ij~ = 1 where the following conditions met: _j_ $\in \kappa$ and at least one _a_~ik~ = 1 with _k_ $\in \kappa$ but _k_ $\ne$ _j_. We project the resulting !pubmat, !MP' to !MC' and constructed the corresponding !colgraph, !GC'. For the simulations follow we set _n_~C~ = 0.
 
 ![!FIGURE(4) The formation of cartels. The panels on the left illustrate a publication network without cartel. The panels on the right show how a cartel between authors A1, A4 and A6 can be formed: Author A6 invites authors A1 and A4 to be coauthors on paper p2, while author A1 do the same with authors A4 and A6 on paper p8. The small red rectangles mark the authorships gained this way. The bottom right panel shows the resulting collaboration graph, where the red edges connect cartel members. Note (i) the strong connections between members and (ii) adding cartels also changes the connections of non-members.](paperfigs/sample_publication_network-02.!EXT)
 
@@ -215,11 +217,28 @@ Most of the !TCGs were small, but groups of ten or more individuals also occurre
 
 ![!FIGURE(10) The frequency distribution of size of !TCGs in the MTMT and dblp !pubnets. Note the log scale on the vertical axis.](paperfigs/tight_group_size.!EXT)
 
-One of the major advantage of forming collaboration groups is thought to be the higher productivity these groups can achieve. To investigate this possibility we randomly formed groups from those authors who were not members of any !TCG. For each distinct size value of !TCGs we generated 30,000 random groups and calculated productivity measures for them. Surprisingly, the productivity of !TCGs, both in the MTMT and the dblp databases, was generally lower than that of similar sized groups formed randomly within these datasets. This result holds irrespectively of the measure used to characterise productivity (Figure 11). Nevertheless, forming !TCGs seems to be effective to increase the number of papers an author publishes. Of the !TCGs found in 8.8% (MTMT) and 15.8% (dblp) had their authors published significantly lower number of papers then authors in randomly formed groups. Contrary, in the case of average group productivity (i.e. number of distinct papers the group produced divided by group size) authors had significantly lower productivity in 34.0% (MTMT) and 62.7% (dblp) of !TCGs than authors in random groups of similar size.
+One of the major advantage of forming collaboration groups is thought to be the higher productivity these groups can achieve. To investigate this possibility we randomly formed groups from those authors who were not members of any !TCG. For each distinct size value of !TCGs we generated 30,000 random groups and calculated productivity measures for them. Surprisingly, the productivity of !TCGs, both in the MTMT and the dblp databases, were generally lower than that of similar sized groups formed randomly within these datasets (Figure 11). This result holds irrespectively of the measure used to characterise productivity (Figure 11). Nevertheless, forming !TCGs seems to be effective to increase the number of papers an author publishes; the difference between the medians of !TCGs and random groups is less in the case of the mean number of papers than in the case of group productivity (MTMT: 13.0 vs. 17.9 and 7.5 vs. 17.9; dblp: 6.0 vs. 10.9 and 3.5 vs. 10.9; Figure 11). As a consequence, many authors in the !TCGs can avoide to be in the worst five percentile if we consider the mean number of papers (Figure 12). On the other hand, by considering group productivity most of them end up in the worst five percentile (compare top and middle panels of Figure 12). Interestingly, many authors in !TCGs are in the best five percentile in terms of number of papers, but only few of them are still there when mean group productivity used as measure (Figure 12). Using the mean weighted number of papers as measure of productivity dampens the effect of tight connectedness (Figures 11 and 12).
+
+<!--
+13 ÷ 17,9
+= 0,72625698324022346369
+7,5 ÷ 17,9
+= 0,41899441340782122905
+3 ÷ 7
+= 0,42857142857142857143
+6 ÷ 10,9
+= 0,55045871559633027523
+3,5 ÷ 10,9
+= 0,32110091743119266055
+1,7 ÷ 3,9
+= 0,43589743589743589744
+
+Of the !TCGs found, 8.8% (MTMT) and 15.8% (dblp) had their authors published significantly lower number of papers then authors in randomly formed groups. Contrary, in the case of average group productivity (i.e. number of distinct papers the group produced divided by group size) authors had significantly lower productivity in 34.0% (MTMT) and 62.7% (dblp) of !TCGs than authors in random groups of similar size.
+-->
 
 ![!FIGURE(11) The productivity of !TCGs compared to similarly sized random groups. Left panels show the distributions of different productivity measures for the MTMT dataset, while right panels show the same for the dblp dataset. Tightly connected groups (tight groups in the legends) are authors connected by links with weights of 0.5 or more. Random groups were formed by choosing authors randomly from the pools of authors not involved in !TCGs. The size of the random groups follows the size of the !TCGs. Medians (M) of the measures for the two types of groups are given in figure legends.](paperfigs/group_productivity.!EXT)
 
-![!FIGURE(12) The distribution of quntiles](paperfigs/cartels_quantiles.!EXT)
+![!FIGURE(12) The distribution of percentiles. The percentile for a !TCG is calculated as the proportion of random groups having lower metric than the given group. Groups in the 0-5% percentile range perform badly compared to the random group, while groups in 95-100% do extremly well.](paperfigs/cartels_quantiles.!EXT)
 
 According to the calculations in the Appendix, authors in !TCGs share in average 63.3% (MTMT) and 67.3% (dblp) of their papers among their group mates. In many groups (MTMT: 15.7%, dblp: 22.6%), however, authors share even more than 80% of their papers (Figure 13). 
 
@@ -231,17 +250,29 @@ According to the calculations in the Appendix, authors in !TCGs share in average
 
 # General discussion
 
-
+- results
+	- cartels can provide large benefits
+	- weighted number of papers as metric dampens these benefits
+    	- generate conflict of interest
+    	- against cooperation
+	- cartels might be widespread
+		- be careful, we do not know if they realy form cartels
+		- we only know that there are tightly connected groups
+			- nevertheless, these groups increase the productivity of their members
+		- surprisingly individuals in tightly connected groups are not very productive
+			- young researchers?
+			- not likely, median number of papers in !TCGs is 13 (MTMT) and six (dblp)
 
 - results
     - model
     - simulation
     - real networks
+		- 
 
 - 
 
 - long period of data
-  -  short cartels cannot be detected because earlier/later independent publication activity dilute cartel activity
+	  -  short cartels cannot be detected because earlier/later independent publication activity dilute cartel activity
   - early career researchers are more exposed; they have fewer papers, it is easier to produce strong strength between authors
 
 # References
