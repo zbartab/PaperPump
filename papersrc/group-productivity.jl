@@ -312,4 +312,20 @@ sum(qgdblp .<= 0.05) / length(qgdblp)
 sum(qwMTMT .<= 0.05) / length(qwMTMT)
 sum(qwdblp .<= 0.05) / length(qwdblp)
 
+# proportion of tight groups with significantly higher number of papers than
+# random groups
+sum(qnMTMT .> 0.95) / length(qnMTMT)
+sum(qndblp .> 0.95) / length(qndblp)
+
+# proportion of tight groups with significantly higher productivity than
+# random groups
+sum(qgMTMT .> 0.95) / length(qgMTMT)
+sum(qgdblp .> 0.95) / length(qgdblp)
+
+# proportion of tight groups with significantly higher weighted number of
+# papers than random groups
+sum(qwMTMT .> 0.95) / length(qwMTMT)
+sum(qwdblp .> 0.95) / length(qwdblp)
+
+
 
