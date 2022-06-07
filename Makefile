@@ -1,7 +1,7 @@
 
 # contains recipies to assemble to PaperPump paper
 
-SRC = PaperPumpMS.md
+SRC = PP-MS_metrics.md
 
 FPP = filepp -kc \& -mp !
 
