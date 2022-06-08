@@ -27,9 +27,9 @@ plot(cc, weighted.pubs.A(cc), type="l", bty="l",
 lines(cc, weighted.pubs.B(cc), col=2)
 lines(cc, w.p.A(cc), lty=2)
 lines(cc, w.p.B(cc), lty=2, col=2)
-legend("topright", legend=c("author A", "author A with bonus",
-														"author B", "author B with bonus"), lty=c(1,2,1,2),
-														col=c(1,1,2,2), bty="n")
+legend("topright", legend=c("author A1", "author A1 with bonus",
+														"author B1", "author B1 with bonus"),
+			 lty=c(1,2,1,2), col=c(1,1,2,2), bty="n")
 mtext("a", side=3, adj=0.1)
 
 ww0 <- weighted.pubs.B(cc)/weighted.pubs.A(cc)

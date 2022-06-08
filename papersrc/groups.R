@@ -4,7 +4,8 @@
 library(igraph)
 
 create.network <- function(gr.name, gr.size, n.coauthors, gr.connected=FALSE) {
-	group <- paste(gr.name, LETTERS[1:gr.size], sep="")
+	#group <- paste(gr.name, LETTERS[1:gr.size], sep="")
+	group <- paste(gr.name, 1:gr.size, sep="")
 	coauthors <- sapply(group,
 											function(a) paste(a, letters[1:n.coauthors], sep=""))
 	coauthors <- as.vector(coauthors)
