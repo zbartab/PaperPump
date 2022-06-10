@@ -45,13 +45,11 @@ $(DOCX): $(SRC) $(PDFS)
 	$(FPP) -DEXT=png $< | pandoc -c ~/lib/markdown/pandoc.css --mathml \
 		-N --standalone --self-contained --filter pandoc-citeproc -o $@
 
-$(PDFS): $(SRC) t_sample_graphs_tex t_simulation_analyses_tex \
-	t_cartel_footprint_tex t_real_networks_tex t_group_productivity_fig
+$(PDFS): $(SRC) t_sample_graphs_tex t_simulation_analyses_tex
 	$(FPP) -D"FIGURE(a)"="" -DEXT=pdf $< | pandoc -N --standalone \
 		--pdf-engine=xelatex --self-contained --filter pandoc-citeproc -o $@ 
 
 $(HTML): $(SRC) $(PNGFIGS) t_sample_graphs_tex t_simulation_analyses_tex \
-	t_cartel_footprint_tex
 	$(FPP) -D"FIGURE(a)"="Figure a." -DEXT=png $< | pandoc \
 		-c ~/lib/markdown/pandoc.css --mathml -N --standalone --toc \
 		--self-contained --filter pandoc-citeproc -o $@
@@ -86,34 +84,5 @@ t_simulation_analyses_tex: $(DSCR)/simulation_analyses.tex \
 	$(FPP) -I paperfigs/ $< > work/$(<F)
 	cd work && xetex $(<F)
 	pdftk work/$(<F:.tex=.pdf) burst output $(DFIG)/$(<F:.tex=-%02d.pdf)
-	touch $@
-
-t_cartel_footprint: $(DSCR)/cartel_footprint.jl
-	cd $(DSCR) && julia $(<F)
-	touch $@
-
-t_cartel_footprint_tex: $(DSCR)/cartel_footprint.tex \
-	t_cartel_footprint
-	$(FPP) -I paperfigs/ $< > work/$(<F)
-	cd work && xetex $(<F)
-	pdftk work/$(<F:.tex=.pdf) burst output $(DFIG)/$(<F:.tex=-%02d.pdf)
-	touch $@
-
-t_real_networks: $(DSCR)/real_networks.jl
-	cd $(DSCR) && julia $(<F)
-	touch $@
-
-t_real_networks_tex: $(DSCR)/real_networks.tex t_real_networks
-	$(FPP) -I paperfigs/ $< > work/$(<F)
-	cd work && xetex $(<F)
-	mv work/$(<F:.tex=.pdf) $(DFIG)/
-	touch $@
-
-t_group_productivity: $(DSCR)/cartel_productivity.jl
-	cd $(DSCR) && julia $(<F)
-	touch $@
-
-t_group_productivity_fig: $(DSCR)/group-productivity.jl t_group_productivity
-	cd $(DSCR) && julia $(<F)
 	touch $@
 
