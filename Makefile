@@ -20,6 +20,9 @@ pdf: $(PDFS)
 html: $(HTML)
 docx: $(DOCX)
 
+init:
+	if [ ! -d work ]; then mkdir work
+
 edit:
 	gvim $(SRC)
 
@@ -45,7 +48,8 @@ $(DOCX): $(SRC) $(PDFS)
 	$(FPP) -DEXT=png $< | pandoc -c ~/lib/markdown/pandoc.css --mathml \
 		-N --standalone --self-contained --filter pandoc-citeproc -o $@
 
-$(PDFS): $(SRC) t_sample_graphs_tex t_simulation_analyses_tex
+$(PDFS): $(SRC) t_sample_graphs_tex t_simulation_analyses_tex \
+	$(DFIG)/groups.pdf $(DFIG)/weighted_production.pdf
 	$(FPP) -D"FIGURE(a)"="" -DEXT=pdf $< | pandoc -N --standalone \
 		--pdf-engine=xelatex --self-contained --filter pandoc-citeproc -o $@ 
 
