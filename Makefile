@@ -21,7 +21,7 @@ html: $(HTML)
 docx: $(DOCX)
 
 init:
-	if [ ! -d work ]; then mkdir work
+	if [ ! -d work ]; then mkdir work; fi
 
 edit:
 	gvim $(SRC)
