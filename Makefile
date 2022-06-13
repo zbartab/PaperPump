@@ -20,6 +20,31 @@ pdf: $(PDFS)
 html: $(HTML)
 docx: $(DOCX)
 
+.PHONY: plosone
+
+SRCPO=$(SRC:.md=-plosone.md)
+PDFPO=$(SRCPO:.md=.pdf)
+DPO=plosone
+
+plosone:
+	if [ ! -d $(DPO) ]; then mkdir $(DPO); fi
+	cp $(SRC) $(DPO)/$(SRCPO)
+	pdftk `sed -n -e '/^!\[/s/!EXT/pdf/' -e '/^!\[/s/.*(\([^)]*\))/\1/p' $(DPO)/$(SRCPO)` cat output $(DPO)/tmp.pdf
+	pdftk $(DPO)/tmp.pdf burst output $(DPO)/Fig%02d.pdf
+	for i in $(DPO)/Fig*.pdf; \
+		do j=`echo $$i | sed 's/pdf$$/tiff/'`; \
+		convert -density 300x300 $$i -background white -alpha background \
+		-alpha off -compress zip +adjoin $$j; \
+		done
+	sed -i -e 's+paperfigs+../paperfigs+' \
+		$(DPO)/$(SRCPO)
+	$(FPP) -D"FIGURE(a)"="**Fig a.** " -DEXT=pdf $(DPO)/$(SRCPO) > $(DPO)/tmp.md
+	sed -i -e '/^!\[/s/\]([^)]*)$$//' -e '/^!\[/s/^!\[//' $(DPO)/tmp.md
+	pandoc -N --standalone --pdf-engine=xelatex --self-contained \
+		--filter pandoc-citeproc -o $(DPO)/$(PDFPO) $(DPO)/tmp.md
+	rm $(DPO)/tmp.md
+
+
 init:
 	if [ ! -d work ]; then mkdir work; fi
 
