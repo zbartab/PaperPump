@@ -25,6 +25,8 @@ docx: $(DOCX)
 SRCPO=$(SRC:.md=-plosone.md)
 PDFPO=$(SRCPO:.md=.pdf)
 DPO=plosone
+POCOVER=PLOSONE-cover_letter.md
+POCOVDOCX=$(POCOVER:.md=.docx)
 
 plosone:
 	if [ ! -d $(DPO) ]; then mkdir $(DPO); fi
@@ -42,7 +44,9 @@ plosone:
 	sed -i -e '/^!\[/s/\]([^)]*)$$//' -e '/^!\[/s/^!\[//' $(DPO)/tmp.md
 	pandoc -N --standalone --pdf-engine=xelatex --self-contained \
 		--filter pandoc-citeproc -o $(DPO)/$(PDFPO) $(DPO)/tmp.md
-	rm $(DPO)/tmp.md
+	rm $(DPO)/tmp.md $(DPO)/tmp.pdf
+	pandoc -o $(DPO)/$(POCOVDOCX) $(POCOVER)
+
 
 
 init:
