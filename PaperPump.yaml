@@ -1,0 +1,2938 @@
+---
+references:
+- id: '2022'
+  abstract: >-
+    The focus on a narrow set of metrics leads to a lack of diversity in the
+    types of leader and institution that win funding.
+  accessed:
+    - year: 2022
+      month: 2
+      day: 21
+  citation-key: '2022'
+  container-title: Nature
+  DOI: 10.1038/d41586-022-00056-z
+  issue: '7892'
+  issued:
+    - year: 2022
+      month: 1
+      day: 11
+  language: en
+  note: |-
+    Bandiera_abtest: a
+    Cg_type: Editorial
+    Subject_term: Careers, Research management, Ethics, Institutions
+  number: '7892'
+  page: 166-166
+  publisher: Nature Publishing Group
+  source: www.nature.com
+  title: Research evaluation needs to change with the times
+  type: article-journal
+  URL: https://www.nature.com/articles/d41586-022-00056-z
+  volume: '601'
+
+- id: aguilar2019
+  abstract: >-
+    In academia, manuscripts serve as an important component of career
+    development. The past several years have seen heightened evaluation of the
+    role of the gender gap in career advancement, as well as other bibliometric
+    changes in publications. We therefore analyzed authorship and publication
+    trends in the Annals of Biomedical Engineering over the past three decades
+    (one complete year of manuscripts for each decade; 1986, 1996, 2006, and
+    2016). The variables analyzed were number of authors per manuscript,
+    numerical position of the corresponding author, number of collaborating
+    institutions and countries, number of references, and number of citations
+    per manuscript. The gender of both the first and corresponding authors was
+    identified and analyzed over time and by region. Globally, the percentage of
+    female first and corresponding authors significantly increased from 0% in
+    1986 to 28.6% (p = 0.003) and 20.4% (p = 0.0009), respectively, in 2016.
+    Although there were significant differences regarding female first and
+    corresponding author over time, they did not vary by region of origin
+    (p = 0.5 and 0.2, respectively). Overall, these findings highlight the
+    improvements made and the challenges that still exist related to publishing
+    within the bioengineering field.
+  accessed:
+    - year: 2021
+      month: 12
+      day: 18
+  author:
+    - family: Aguilar
+      given: Izath Nizeet
+    - family: Ganesh
+      given: Venkateswaran
+    - family: Mannfeld
+      given: Rachel
+    - family: Gorden
+      given: Riley
+    - family: Hatch
+      given: Jennifer M.
+    - family: Lunsford
+      given: Shatoria
+    - family: Whipple
+      given: Elizabeth C.
+    - family: Loder
+      given: Randall T.
+    - family: Kacena
+      given: Melissa A.
+  citation-key: aguilar2019
+  container-title: Annals of Biomedical Engineering
+  container-title-short: Ann Biomed Eng
+  DOI: 10.1007/s10439-019-02222-3
+  ISSN: 1573-9686
+  issue: '5'
+  issued:
+    - year: 2019
+      month: 5
+      day: 1
+  language: en
+  page: 1171-1180
+  source: Springer Link
+  title: >-
+    Authorship Trends Over the Past 30-Years in the Annals of Biomedical
+    Engineering
+  type: article-journal
+  URL: https://doi.org/10.1007/s10439-019-02222-3
+  volume: '47'
+
+- id: ali2021
+  abstract: >-
+    Authorship is the currency of an academic career. Scientific publications
+    have significant academic and financial implications. Several standard
+    authorship guidelines exist, and the International Committee of Medical
+    Journal Editors (ICMJE) is the most popular amongst them. There are
+    increasing concerns about the ethics of publications with the rise of
+    inappropriate authorship. The most important reason appears to be a lack of
+    knowledge and awareness of the authorship guidelines and what actions
+    constitute unethical behaviors. There is a need to incorporate standard
+    guidelines in medical curricula and conduct structured training and
+    education programs for researchers across the board. The current perspective
+    describes the significant concepts of appropriate and inappropriate
+    authorship, and the possible measures being formulated to shape the future
+    of authorship.
+  accessed:
+    - year: 2021
+      month: 12
+      day: 18
+  author:
+    - family: Ali
+      given: Mohammad Javed
+  citation-key: ali2021
+  container-title: Indian Journal of Ophthalmology
+  container-title-short: Indian J Ophthalmol
+  DOI: 10.4103/ijo.IJO_2221_20
+  ISSN: 0301-4738
+  issue: '1'
+  issued:
+    - year: 2021
+      month: 1
+  page: 36-41
+  PMCID: PMC7926104
+  PMID: '33323568'
+  source: PubMed Central
+  title: >-
+    No room for ambiguity: The concepts of appropriate and inappropriate
+    authorship in scientific publications
+  title-short: No room for ambiguity
+  type: article-journal
+  URL: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7926104/
+  volume: '69'
+
+- id: aubertbonn2021
+  abstract: >-
+    Research assessments have been under growing scrutiny in the past few years.
+    The way in which researchers are assessed has a tangible impact on decisions
+    and practices in research. Yet, there is an emerging understanding that
+    research assessments as they currently stand might hamper the quality and
+    the integrity of research. In this chapter, we provide a narrative review of
+    the shortcomings of current research assessments and showcase innovative
+    actions that aim to address these. To discuss these shortcomings and
+    actions, we target five diﬀerent dimensions of research assessment. First,
+    we discuss the content of research assessment, thereby introducing the
+    common indicators used to assess researchers and the way these indicators
+    are being used. Second, we address the procedure of research assessments,
+    describing the resources needed for assessing researchers in an ever-growing
+    research system. Third, we describe the crucial role of assessors in
+    improving research assessments. Fourth, we present the broader environments
+    in which researchers work, explaining that omnipresent competition and
+    employment insecurity also need to be toned down substantially to foster
+    high quality and high integrity research. Finally, we describe the challenge
+    of coordinating individual actions to ensure that the problems of research
+    assessments are addressed tangibly and sustainably.
+  accessed:
+    - year: 2021
+      month: 12
+      day: 18
+  author:
+    - family: Aubert Bonn
+      given: Noémie
+    - family: Bouter
+      given: Lex
+  citation-key: aubertbonn2021
+  DOI: 10.31222/osf.io/82rmj
+  genre: preprint
+  issued:
+    - year: 2021
+      month: 7
+      day: 19
+  language: en
+  publisher: MetaArXiv
+  source: DOI.org (Crossref)
+  title: >-
+    Research assessments should recognize responsible research practices —
+    Narrative review of a lively debate and promising developments
+  type: report
+  URL: https://osf.io/82rmj
+
+- id: baas2019
+  abstract: >-
+    There is anecdotal information available that some reviewers attempt to
+    increase their citation counts by using the peer review process, adding
+    references to reviewed publications. There have been studies around citation
+    coercion from the perspective of journal editing and boosting of journal
+    indicators. This study builds further on that work, with a different angle:
+    by measuring excessive citation manipulation at the level of reviewers. In
+    order to assess the extent of this behaviour, access to a large pool of
+    peer-review records is required: connections between authors and reviewers,
+    connections between reviewers and reviewed work and so forth. This study
+    explores this area in two phases. In phase one we detect the overall
+    patterns of citations from reviewed material to reviewers, and assign a
+    value to the proportion of citations originating from reviewed work. The
+    second phase further explores the citation patterns, by taking the outliers
+    from phase one and identifying the citations that have been added during the
+    review process. We find in the results that highly suspicious cases of this
+    behaviour can be successfully detected and that the scale of suspicion of
+    clear misconduct behaviour is relatively limited (0.79%).
+  accessed:
+    - year: 2021
+      month: 12
+      day: 18
+  author:
+    - family: Baas
+      given: Jeroen
+    - family: Fennell
+      given: Catriona
+  citation-key: baas2019
+  event-place: Rochester, NY
+  genre: SSRN Scholarly Paper
+  issued:
+    - year: 2019
+      month: 5
+      day: 22
+  language: en
+  number: ID 3339568
+  publisher: Social Science Research Network
+  publisher-place: Rochester, NY
+  source: papers.ssrn.com
+  title: >-
+    When Peer Reviewers Go Rogue - Estimated Prevalence of Citation Manipulation
+    by Reviewers Based on the Citation Patterns of 69,000 Reviewers
+  type: report
+  URL: https://papers.ssrn.com/abstract=3339568
+
+- id: baccini2018
+  author:
+    - family: Baccini
+      given: Alberto
+  citation-key: baccini2018
+  event: Global Solutions Summit
+  event-place: Berlin
+  issued:
+    - year: 2018
+  language: en
+  publisher-place: Berlin
+  title: >-
+    Performance-based incentives, research evaluation systems and the
+    trickle-down of bad science
+  type: paper-conference
+
+- id: barabasi2016
+  author:
+    - family: Barabási
+      given: Albert-László
+  citation-key: barabasi2016
+  edition: '1'
+  ISBN: 1-107-07626-9
+  issued:
+    - year: 2016
+  publisher: Cambridge University Press
+  title: Network Science
+  type: book
+  URL: http://networksciencebook.com/
+
+- id: bezanson2017a
+  abstract: >-
+    Bridging cultures that have often been distant, Julia combines expertise
+    from the diverse fields of computer science and computational science to
+    create a new approach to numerical computing. Julia is designed to be easy
+    and fast and questions notions generally held to be “laws of nature" by
+    practitioners of numerical computing: \beginlist \item High-level dynamic
+    programs have to be slow. \item One must prototype in one language and then
+    rewrite in another language for speed or deployment. \item There are parts
+    of a system appropriate for the programmer, and other parts that are best
+    left untouched as they have been built by the experts. \endlist We introduce
+    the Julia programming language and its design---a dance between
+    specialization and abstraction. Specialization allows for custom treatment.
+    Multiple dispatch, a technique from computer science, picks the right
+    algorithm for the right circumstance. Abstraction, which is what good
+    computation is really about, recognizes what remains the same after
+    differences are stripped away. Abstractions in mathematics are captured as
+    code through another technique from computer science, generic programming.
+    Julia shows that one can achieve machine performance without sacrificing
+    human convenience.
+  accessed:
+    - year: 2022
+      month: 1
+      day: 19
+  author:
+    - family: Bezanson
+      given: Jeff
+    - family: Edelman
+      given: Alan
+    - family: Karpinski
+      given: Stefan
+    - family: Shah
+      given: Viral B.
+  citation-key: bezanson2017a
+  container-title: SIAM Review
+  container-title-short: SIAM Rev.
+  DOI: 10.1137/141000671
+  ISSN: 0036-1445
+  issue: '1'
+  issued:
+    - year: 2017
+      month: 1
+      day: 1
+  page: 65-98
+  publisher: Society for Industrial and Applied Mathematics
+  source: epubs.siam.org (Atypon)
+  title: 'Julia: A Fresh Approach to Numerical Computing'
+  title-short: Julia
+  type: article-journal
+  URL: https://epubs.siam.org/doi/10.1137/141000671
+  volume: '59'
+
+- id: biagioli2019
+  accessed:
+    - year: 2021
+      month: 12
+      day: 18
+  author:
+    - family: Biagioli
+      given: Mario
+    - family: Kenney
+      given: Martin
+    - family: Martin
+      given: Ben R.
+    - family: Walsh
+      given: John P.
+  citation-key: biagioli2019
+  collection-title: Academic Misconduct, Misrepresentation, and Gaming
+  container-title: Research Policy
+  container-title-short: Research Policy
+  DOI: 10.1016/j.respol.2018.10.025
+  ISSN: 0048-7333
+  issue: '2'
+  issued:
+    - year: 2019
+      month: 3
+      day: 1
+  language: en
+  page: 401-413
+  source: ScienceDirect
+  title: 'Academic misconduct, misrepresentation and gaming: A reassessment'
+  title-short: Academic misconduct, misrepresentation and gaming
+  type: article-journal
+  URL: https://www.sciencedirect.com/science/article/pii/S0048733318302658
+  volume: '48'
+
+- id: broad1981
+  accessed:
+    - year: 2020
+      month: 10
+      day: 15
+  author:
+    - family: Broad
+      given: W. J.
+  citation-key: broad1981
+  container-title: Science
+  DOI: 10.1126/science.7008199
+  ISSN: 0036-8075, 1095-9203
+  issue: '4487'
+  issued:
+    - year: 1981
+      month: 3
+      day: 13
+  language: en
+  page: 1137-1139
+  PMID: '7008199'
+  publisher: American Association for the Advancement of Science
+  section: News &amp; Comment
+  source: science.sciencemag.org
+  title: 'The publishing game: getting more for less'
+  title-short: The publishing game
+  type: article-journal
+  URL: https://science.sciencemag.org/content/211/4487/1137
+  volume: '211'
+
+- id: chakraborty2022
+  abstract: >-
+    Research integrity is under threat. Apart from traditional research
+    malpractices that include fabrication, falsification, and plagiarism, recent
+    reports reflect intentionally biased citations and other complex
+    malpractices to inflate impact factors mutually (excessive self-cites,
+    citation stacking, cartels, cabals, and rings). Such journals are
+    blacklisted annually by Thomson Reuters firm since 2009. This paper
+    highlights and categorizes all possible cases of research misconduct. It
+    creates awareness and an urgent need to introduce new monitoring and
+    evaluation standards based on advanced computational intelligence
+    techniques. Further, existing metrics need to be redefined, traditionally
+    based upon citation and publication count as key quantifiers.
+  author:
+    - family: Chakraborty
+      given: Joyita
+    - family: Pradhan
+      given: Dinesh K.
+    - family: Nandi
+      given: Subrata
+  citation-key: chakraborty2022
+  collection-title: Lecture Notes on Data Engineering and Communications Technologies
+  container-title: Data Management, Analytics and Innovation
+  DOI: 10.1007/978-981-16-2937-2_30
+  editor:
+    - family: Sharma
+      given: Neha
+    - family: Chakrabarti
+      given: Amlan
+    - family: Balas
+      given: Valentina Emilia
+    - family: Bruckstein
+      given: Alfred M.
+  event-place: Singapore
+  ISBN: '9789811629372'
+  issued:
+    - year: 2022
+  language: en
+  page: 485-492
+  publisher: Springer
+  publisher-place: Singapore
+  source: Springer Link
+  title: >-
+    Research Misconduct and Citation Gaming: A Critical Review on
+    Characterization and Recent Trends of Research Manipulation
+  title-short: Research Misconduct and Citation Gaming
+  type: paper-conference
+
+- id: chapman2019a
+  abstract: >-
+    Research is a highly competitive profession where evaluation plays a central
+    role; journals are ranked and individuals are evaluated based on their
+    publication number, the number of times they are cited and their h-index.
+    Yet such evaluations are often done in inappropriate ways that are damaging
+    to individual careers, particularly for young scholars, and to the
+    profession. Furthermore, as with all indices, people can play games to
+    better their scores. This has resulted in the incentive structure of science
+    increasingly mimicking economic principles, but rather than a monetary gain,
+    the incentive is a higher score. To ensure a diversity of cultural
+    perspectives and individual experiences, we gathered a team of academics in
+    the fields of ecology and evolution from around the world and at different
+    career stages. We first examine how authorship, h-index of individuals and
+    journal impact factors are being used and abused. Second, we speculate on
+    the consequences of the continued use of these metrics with the hope of
+    sparking discussions that will help our fields move in a positive direction.
+    We would like to see changes in the incentive systems, rewarding quality
+    research and guaranteeing transparency. Senior faculty should establish the
+    ethical standards, mentoring practices and institutional evaluation criteria
+    to create the needed changes.
+  accessed:
+    - year: 2021
+      month: 12
+      day: 18
+  author:
+    - family: Chapman
+      given: Colin A.
+    - family: Bicca-Marques
+      given: Júlio César
+    - family: Calvignac-Spencer
+      given: Sébastien
+    - family: Fan
+      given: Pengfei
+    - family: Fashing
+      given: Peter J.
+    - family: Gogarten
+      given: Jan
+    - family: Guo
+      given: Songtao
+    - family: Hemingway
+      given: Claire A.
+    - family: Leendertz
+      given: Fabian
+    - family: Li
+      given: Baoguo
+    - family: Matsuda
+      given: Ikki
+    - family: Hou
+      given: Rong
+    - family: Serio-Silva
+      given: Juan Carlos
+    - family: Chr. Stenseth
+      given: Nils
+  citation-key: chapman2019a
+  container-title: 'Proceedings of the Royal Society B: Biological Sciences'
+  DOI: 10.1098/rspb.2019.2047
+  issue: '1916'
+  issued:
+    - year: 2019
+      month: 12
+      day: 4
+  page: '20192047'
+  publisher: Royal Society
+  source: royalsocietypublishing.org (Atypon)
+  title: >-
+    Games academics play and their consequences: how authorship, h-index and
+    journal impact factors are shaping the future of academia
+  title-short: Games academics play and their consequences
+  type: article-journal
+  URL: https://royalsocietypublishing.org/doi/full/10.1098/rspb.2019.2047
+  volume: '286'
+
+- id: clauset2009
+  abstract: >-
+    Power-law distributions occur in many situations of scientific interest and
+    have significant consequences for our understanding of natural and man-made
+    phenomena. Unfortunately, the detection and characterization of power laws
+    is complicated by the large fluctuations that occur in the tail of the
+    distribution – the part of the distribution representing large but rare
+    events – and by the difficulty of identifying the range over which power-law
+    behavior holds. Commonly used methods for analyzing power-law data, such as
+    least-squares fitting, can produce substantially inaccurate estimates of
+    parameters for power-law distributions, and even in cases where such methods
+    return accurate answers they are still unsatisfactory because they give no
+    indication of whether the data obey a power law at all. Here we present a
+    principled statistical framework for discerning and quantifying power-law
+    behavior in empirical data. Our approach combines maximum-likelihood fitting
+    methods with goodness-of-fit tests based on the Kolmogorov-Smirnov statistic
+    and likelihood ratios. We evaluate the effectiveness of the approach with
+    tests on synthetic data and give critical comparisons to previous
+    approaches. We also apply the proposed methods to twenty-four real-world
+    data sets from a range of different disciplines, each of which has been
+    conjectured to follow a power-law distribution. In some cases we find these
+    conjectures to be consistent with the data while in others the power law is
+    ruled out.
+  author:
+    - family: Clauset
+      given: A.
+    - family: Shalizi
+      given: C. R.
+    - family: Newman
+      given: M. E. J.
+  citation-key: clauset2009
+  container-title: SIAM Rev.
+  DOI: 10.1137/070710111
+  issue: '4'
+  issued:
+    - year: 2009
+  note: '_eprint: 0706.1062'
+  page: 661 - 703
+  title: Power-law distributions in empirical data
+  type: article-journal
+  URL: https://arxiv.org/abs/0706.1062
+  volume: '51'
+
+- id: dani2018
+  abstract: >-
+    The point I wish to make is not what we all know: that the methods to assess
+    the quality of research achievement are controversial. I do not wish to call
+    into question the raison d’être of scientometric approach, its methodology
+    or its particular indicators either. Nor am I aiming at coming up with
+    systematic solutions of the contradictions (although I hope to offer some
+    thoughts in that direction later below). Many have called and keep calling
+    attention to the rigid and uniform application of the numerical approach
+    (counting publications), arguing that it is doing injustice to certain areas
+    of science.1 With that as a starting point, this study is intended to serve
+    two purposes. One, in a much sharper tone than generally used in discussions
+    of the topic, I wish to call attention to how extremely harmful the present
+    scientometric practice may be for many scholars and scientists. Two, also
+    partly in support of the former argument, I propose to demonstrate—to the
+    degree of breadth and depth that the sizeconstraints of this paper make
+    possible—how the crucial contradiction in question at the core of the
+    present practice follows from the myths generated by scientometry itself.
+  author:
+    - family: Dani
+      given: Erzsebet
+  citation-key: dani2018
+  issue: '4'
+  issued:
+    - year: 2018
+  language: en
+  page: '6'
+  source: Zotero
+  title: >-
+    How “Publish or Perish” Can Become “Publish and Perish” in the Age of
+    Objective Assessment of Scientific Quality
+  type: article-journal
+  volume: '16'
+
+- id: demesnard2017
+  abstract: >-
+    Universities looking to recruit or to rank researchers have to attribute
+    credit scores to their academic publications. While they could use indexes,
+    there remains the difficulty of coauthored papers. It is unfair to count an
+    n-authored paper as one paper for each coauthor, i.e., as n papers added to
+    the total: this is “feeding the multitude” . Sharing the credit among
+    coauthors by percentages or by simply dividing by n (“1/n rule”) is fairer
+    but somewhat harsh. Accordingly, we propose to take into account the
+    productivity gains of parallelization by introducing a parallelization bonus
+    that multiplies the credit allocated to each coauthor. It might be an idea
+    for coauthors to indicate how they organized their work in producing the
+    paper. However, they might systematically bias their answers. Fortunately,
+    the number of parallel tasks is bounded by the number of coauthors because
+    of specialization and the credit is bounded by a limiting Pareto maximum.
+    Thus, the credit is given by (N+2)/3n for N parallel tasks. As there may be,
+    at most, as many parallel tasks as co-authors, credit allocated to each
+    coauthor is given by (n+2)/3n, that varies between 2/3 of a single-authored
+    paper for two coauthors and 1/3 when the number of coauthors is very large.
+    This is the “maximum parallelization credit” rule that we propose to apply.
+    This new approach is feasible. It can be applied to past and present papers
+    regardless of the agreement of publishing houses. It is fair and it rewards
+    genuine cooperation in academic publishing.
+  accessed:
+    - year: 2022
+      month: 1
+      day: 3
+  author:
+    - family: Mesnard
+      given: Louis
+      non-dropping-particle: de
+  citation-key: demesnard2017
+  container-title: European Journal of Operational Research
+  container-title-short: European Journal of Operational Research
+  DOI: 10.1016/j.ejor.2017.01.009
+  ISSN: 0377-2217
+  issue: '2'
+  issued:
+    - year: 2017
+      month: 7
+      day: 16
+  language: en
+  page: 778-788
+  source: ScienceDirect
+  title: >-
+    Attributing credit to coauthors in academic publishing: The 1/n rule,
+    parallelization, and team bonuses
+  title-short: Attributing credit to coauthors in academic publishing
+  type: article-journal
+  URL: https://www.sciencedirect.com/science/article/pii/S0377221717300140
+  volume: '260'
+
+- id: deutz2020
+  abstract: >-
+    Researchers in Europe are increasingly assessed by their publication
+    metrics. To uncover the effect of quantitative assessment on the publication
+    strategies of clinical researchers in Denmark, we interviewed 9 senior
+    researchers at the Department of Clinical Research at the University of
+    Southern Denmark with the lowest and highest values for a, as defined by
+    Hirsch. Our aim is to investigate the importance of these metrics to their
+    academic careers: h-index, number of publications, number of citations,
+    international collaborations, local collaborations, field specific journal
+    publishing and high journal impact factor publishing. To validate our
+    findings we compared their publication record to their statistically
+    analyzed stated publication strategy. Our results indicate two styles of
+    publication strategy used by these senior researchers. Researchers with Low
+    a engage in local collaborations, disseminate knowledge in local media and
+    publish in field specific journals, while researchers with High a engage in
+    international collaborations, invest significant time in publishing in the
+    highest impact journals in their field, and acquire a greater number of
+    citations. Both publication strategies can lead to a successful academic
+    career, yet we have an indication through the h5-index that the practices of
+    the High a group are more likely to nudge the h-index.
+  accessed:
+    - year: 2021
+      month: 12
+      day: 18
+  author:
+    - family: Deutz
+      given: Daniella B.
+    - family: Vlachos
+      given: Evgenios
+    - family: Drongstrup
+      given: Dorte
+    - family: Dorch
+      given: Bertil F.
+    - family: Wien
+      given: Charlotte
+  citation-key: deutz2020
+  container-title: PLOS ONE
+  container-title-short: PLOS ONE
+  DOI: 10.1371/journal.pone.0228438
+  ISSN: 1932-6203
+  issue: '1'
+  issued:
+    - literal: 2020. jan. 30.
+  language: en
+  page: e0228438
+  publisher: Public Library of Science
+  source: PLoS Journals
+  title: Effective publication strategies in clinical research
+  type: article-journal
+  URL: https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0228438
+  volume: '15'
+
+- id: edwards2017
+  abstract: >-
+    Over the last 50 years, we argue that incentives for academic scientists
+    have become increasingly perverse in terms of competition for research
+    funding, development of quantitative metrics to measure performance, and a
+    changing business model for higher education itself. Furthermore, decreased
+    discretionary funding at the federal and state level is creating a
+    hypercompetitive environment between government agencies (e.g., EPA, NIH,
+    CDC), for scientists in these agencies, and for academics seeking funding
+    from all sources-the combination of perverse incentives and decreased
+    funding increases pressures that can lead to unethical behavior. If a
+    critical mass of scientists become untrustworthy, a tipping point is
+    possible in which the scientific enterprise itself becomes inherently
+    corrupt and public trust is lost, risking a new dark age with devastating
+    consequences to humanity. Academia and federal agencies should better
+    support science as a public good, and incentivize altruistic and ethical
+    outcomes, while de-emphasizing output.
+  author:
+    - family: Edwards
+      given: Marc A.
+    - family: Roy
+      given: Siddhartha
+  citation-key: edwards2017
+  container-title: Environmental Engineering Science
+  container-title-short: Environ Eng Sci
+  DOI: 10.1089/ees.2016.0223
+  ISSN: 1092-8758
+  issue: '1'
+  issued:
+    - year: 2017
+  language: eng
+  page: 51-61
+  PMCID: PMC5206685
+  PMID: '28115824'
+  source: PubMed
+  title: >-
+    Academic Research in the 21st Century: Maintaining Scientific Integrity in a
+    Climate of Perverse Incentives and Hypercompetition
+  title-short: Academic Research in the 21st Century
+  type: article-journal
+  volume: '34'
+
+- id: fanelli2016
+  accessed:
+    - year: 2021
+      month: 12
+      day: 28
+  author:
+    - family: Fanelli
+      given: Daniele
+    - family: Larivière
+      given: Vincent
+  citation-key: fanelli2016
+  container-title: PLOS ONE
+  container-title-short: PLoS ONE
+  DOI: 10.1371/journal.pone.0149504
+  editor:
+    - family: Dorta-González
+      given: Pablo
+  ISSN: 1932-6203
+  issue: '3'
+  issued:
+    - year: 2016
+      month: 3
+      day: 9
+  language: en
+  page: e0149504
+  source: DOI.org (Crossref)
+  title: Researchers’ Individual Publication Rate Has Not Increased in a Century
+  type: article-journal
+  URL: https://dx.plos.org/10.1371/journal.pone.0149504
+  volume: '11'
+
+- id: fawcett2006
+  abstract: >-
+    Receiver operating characteristics (ROC) graphs are useful for organizing
+    classifiers and visualizing their performance. ROC graphs are commonly used
+    in medical decision making, and in recent years have been used increasingly
+    in machine learning and data mining research. Although ROC graphs are
+    apparently simple, there are some common misconceptions and pitfalls when
+    using them in practice. The purpose of this article is to serve as an
+    introduction to ROC graphs and as a guide for using them in research.
+  accessed:
+    - year: 2021
+      month: 1
+      day: 18
+  author:
+    - family: Fawcett
+      given: Tom
+  citation-key: fawcett2006
+  collection-title: ROC Analysis in Pattern Recognition
+  container-title: Pattern Recognition Letters
+  container-title-short: Pattern Recognition Letters
+  DOI: 10.1016/j.patrec.2005.10.010
+  ISSN: 0167-8655
+  issue: '8'
+  issued:
+    - year: 2006
+      month: 6
+      day: 1
+  language: en
+  page: 861-874
+  source: ScienceDirect
+  title: An introduction to ROC analysis
+  type: article-journal
+  URL: http://www.sciencedirect.com/science/article/pii/S016786550500303X
+  volume: '27'
+
+- id: fire2019
+  abstract: >-
+    AbstractBackground. The academic publishing world is changing significantly,
+    with ever-growing numbers of publications each year and shifting publishing
+    pattern
+  accessed:
+    - year: 2021
+      month: 12
+      day: 18
+  author:
+    - family: Fire
+      given: Michael
+    - family: Guestrin
+      given: Carlos
+  citation-key: fire2019
+  container-title: GigaScience
+  container-title-short: Gigascience
+  DOI: 10.1093/gigascience/giz053
+  issue: '6'
+  issued:
+    - year: 2019
+      month: 6
+      day: 1
+  language: en
+  publisher: Oxford Academic
+  source: academic.oup.com
+  title: >-
+    Over-optimization of academic publishing metrics: observing Goodhart’s Law
+    in action
+  title-short: Over-optimization of academic publishing metrics
+  type: article-journal
+  URL: https://academic.oup.com/gigascience/article/8/6/giz053/5506490
+  volume: '8'
+
+- id: fister2016
+  author:
+    - family: Fister
+      given: I.
+    - family: Fister
+      given: I.
+    - family: Perc
+      given: M.
+  citation-key: fister2016
+  container-title: Frontiers in Physics
+  DOI: 10.3389/fphy.2016.00049
+  issued:
+    - year: 2016
+  title: Toward the Discovery of Citation Cartels in Citation Networks
+  type: article-journal
+  volume: '4'
+
+- id: fong2017
+  abstract: >-
+    Some scholars add authors to their research papers or grant proposals even
+    when those individuals contribute nothing to the research effort. Some
+    journal editors coerce authors to add citations that are not pertinent to
+    their work and some authors pad their reference lists with superfluous
+    citations. How prevalent are these types of manipulation, why do scholars
+    stoop to such practices, and who among us is most susceptible to such
+    ethical lapses? This study builds a framework around how intense competition
+    for limited journal space and research funding can encourage manipulation
+    and then uses that framework to develop hypotheses about who manipulates and
+    why they do so. We test those hypotheses using data from over 12,000
+    responses to a series of surveys sent to more than 110,000 scholars from
+    eighteen different disciplines spread across science, engineering, social
+    science, business, and health care. We find widespread misattribution in
+    publications and in research proposals with significant variation by
+    academic rank, discipline, sex, publication history, co-authors, etc. Even
+    though the majority of scholars disapprove of such tactics, many feel
+    pressured to make such additions while others suggest that it is just the
+    way the game is played. The findings suggest that certain changes in the
+    review process might help to stem this ethical decline, but progress could
+    be slow.
+  accessed:
+    - year: 2021
+      month: 12
+      day: 18
+  author:
+    - family: Fong
+      given: Eric A.
+    - family: Wilhite
+      given: Allen W.
+  citation-key: fong2017
+  container-title: PLOS ONE
+  container-title-short: PLOS ONE
+  DOI: 10.1371/journal.pone.0187394
+  ISSN: 1932-6203
+  issue: '12'
+  issued:
+    - year: 2017
+  language: en
+  page: e0187394
+  publisher: Public Library of Science
+  source: PLoS Journals
+  title: Authorship and citation manipulation in academic research
+  type: article-journal
+  URL: https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0187394
+  volume: '12'
+
+- id: fong2020a
+  abstract: >-
+    In a survey on research misconduct, roughly 20% of the respondents admitted
+    that they have submitted federal grant proposals that include scholars as
+    research participants even though those scholars were not expected to
+    contribute to the research effort. This manuscript argues that adding such
+    false investigators is illegal, violating multiple federal statutes
+    including the False Statements Act (18 U.S.C. §1001), the False Claims Act
+    (31 U.S.C. §3729), and False, Fictitious, or Fraudulent Claims (18 U.S.C.
+    §287). Moreover, it is not only the offending academics and the false
+    investigators that face civil and criminal penalties because administrators
+    may also be liable if they sign off on proposals and are in a position to
+    know that false investigators might be included. Policy recommendations that
+    should reduce the use of false investigators include changing institutional
+    cultures, better training and oversight of the responsible conduct of
+    research, and, most importantly, making all grant reviews double blind.
+  accessed:
+    - year: 2021
+      month: 12
+      day: 18
+  author:
+    - family: Fong
+      given: Eric A.
+    - family: Wilhite
+      given: Allen W.
+    - family: Hickman
+      given: Charles
+    - family: Lee
+      given: Yeolan
+  citation-key: fong2020a
+  container-title: The Journal of Law, Medicine & Ethics
+  container-title-short: J Law Med Ethics
+  DOI: 10.1177/1073110520935347
+  ISSN: 1073-1105
+  issue: '2'
+  issued:
+    - year: 2020
+      month: 6
+      day: 1
+  language: en
+  page: 331-339
+  publisher: SAGE Publications Inc
+  source: SAGE Journals
+  title: >-
+    The Legal Consequences of Research Misconduct: False Investigators and Grant
+    Proposals
+  title-short: The Legal Consequences of Research Misconduct
+  type: article-journal
+  URL: https://doi.org/10.1177/1073110520935347
+  volume: '48'
+
+- id: gopalakrishna2021
+  abstract: >-
+    Background
+
+    Prevalence of research misconduct, questionable research practices (QRPs)
+    and their associations with a range of explanatory factors has not been
+    studied sufficiently among academic researchers.
+
+    Methods 
+
+    The National Survey on Research Integrity was aimed at all disciplinary
+    fields and academic ranks in the Netherlands. The survey enquired about
+    engagement in fabrication, falsification and 11 QRPs over the previous three
+    years, and 12 explanatory factor scales. We ensured strict identity
+    protection and used a randomized response method for questions on research
+    misconduct. 
+
+    Results
+
+    6,813 respondents completed the survey. Prevalence of fabrication was 4.3%
+    (95% CI: 2.9, 5.7) and falsification 4.2% (95% CI: 2.8, 5.6). Prevalence of
+    QRPs ranged from 0.6% (95% CI: 0.5, 0.9) to 17.5% (95 % CI: 16.4, 18.7) with
+    51.3% (95% CI: 50.1, 52.5) of respondents engaging frequently in ≥ 1 QRP.
+    Being a PhD candidate or junior researcher increased the odds of frequently
+    engaging in ≥ 1 QRP, as did being male. Scientific norm subscription (odds
+    ratio (OR) 0.79; 95% CI: 0.63, 1.00) and perceived likelihood of detection
+    by reviewers (OR 0.62, 95% CI: 0.44, 0.88) were associated with lower odds
+    of research misconduct. Publication pressure was associated with higher odds
+    of engaging frequently in  ≥ 1 QRP (OR 1.22, 95% CI: 1.14, 1.30).
+
+    Conclusions
+
+    We found higher prevalence of misconduct than earlier surveys. Our results
+    suggest that greater emphasis on scientific norm subscription, strengthening
+    reviewers in their role as gatekeepers of research quality and curbing the
+    “publish or perish” incentive system can promote research integrity.
+  accessed:
+    - year: 2022
+      month: 1
+      day: 5
+  author:
+    - family: Gopalakrishna
+      given: Gowri
+    - family: Riet
+      given: Gerben
+      dropping-particle: ter
+    - family: Vink
+      given: Gerko
+    - family: Stoop
+      given: Ineke
+    - family: Wicherts
+      given: Jelte
+    - family: Bouter
+      given: Lex
+  citation-key: gopalakrishna2021
+  DOI: 10.31222/osf.io/vk9yt
+  issued:
+    - year: 2021
+      month: 7
+      day: 6
+  language: en-us
+  publisher: MetaArXiv
+  source: OSF Preprints
+  title: >-
+    Prevalence of questionable research practices, research misconduct and their
+    potential explanatory factors: a survey among academic researchers in The
+    Netherlands
+  title-short: >-
+    Prevalence of questionable research practices, research misconduct and their
+    potential explanatory factors
+  type: article
+  URL: https://osf.io/preprints/metaarxiv/vk9yt/
+
+- id: gopalakrishna2021a
+  abstract: >-
+    Background
+
+    While substantial attention has been paid to research misbehaviors,
+    responsible research practices (RRPs) and their potential explanatory
+    factors have not been studied extensively.
+
+    Methods 
+
+    The National Survey on Research Integrity (NSRI) is an online survey
+    targeting all disciplines and academic ranks in The Netherlands. Data was
+    collected on 11 RRPs and 12 explanatory factor scales. Results were
+    controlled for explanatory factor scales, academic rank, disciplinary field,
+    gender, doing empirical research and if respondents belonged to a NSRI
+    supporting institution or not.
+
+    Results
+
+    6,813 respondents completed the survey. The RRPs with the highest prevalence
+    were avoiding plagiarism (99%), disclosing conflicts of interest (96.5%) and
+    checking for errors before publication (94.3%). Preregistration of study
+    protocols (42.8%), making accessible underlying data and syntaxes (47.2%),
+    and keeping comprehensive research records (56.3%) had the lowest
+    prevalence. Arts and humanities scholars, PhD candidates and junior
+    researchers were associated with a lower RRP mean (-0.51 and -0.31
+    respectively) as was publication pressure (-0.05; 95% CI -0.08, -0.02).
+    Mentoring (0.15; 95% CI 0.12, 0.17), scientific norm subscription (0.13; 95%
+    CI 0.1, 0.15) and funding pressure (0.13; 95% CI0.10, 0.17) were
+    significantly associated with a higher RRP mean.
+
+    Conclusions
+
+    We found publication pressure to affect RRPs negatively. Mentoring,
+    scientific norm subscription and funding pressure may help foster RRPs. Arts
+    and humanities scholars, PhD candidates and junior researchers need more
+    efforts to raise awareness on RRPs. Further research on these groups is
+    warranted in order to understand research integrity challenges that may be
+    unique to them.
+  accessed:
+    - year: 2022
+      month: 1
+      day: 5
+  author:
+    - family: Gopalakrishna
+      given: Gowri
+    - family: Wicherts
+      given: Jelte
+    - family: Vink
+      given: Gerko
+    - family: Stoop
+      given: Ineke
+    - family: Akker
+      given: Olmo
+      dropping-particle: van den
+    - family: Riet
+      given: Gerben
+      dropping-particle: ter
+    - family: Bouter
+      given: Lex
+  citation-key: gopalakrishna2021a
+  DOI: 10.31222/osf.io/xsn94
+  issued:
+    - year: 2021
+      month: 7
+      day: 6
+  language: en-us
+  publisher: MetaArXiv
+  source: OSF Preprints
+  title: >-
+    Prevalence of responsible research practices and their potential explanatory
+    factors: a survey among academic researchers in The Netherlands
+  title-short: >-
+    Prevalence of responsible research practices and their potential explanatory
+    factors
+  type: article
+  URL: https://osf.io/preprints/metaarxiv/xsn94/
+
+- id: gossling2021
+  abstract: >-
+    Academics are becoming accustomed to growing demands on ‘performance’ as
+    universities place increasing emphasis on quantifiable research outputs.
+    Despite the rapid ascendancy of bibliometrics, limited empirical research
+    has considered the definitions of “research performance” employed by
+    institutions, and subsequent academic responses. Drawing on exploratory data
+    collected from 58 university-based colleagues in 23 countries, supplemented
+    with the personal experiences of authors, this manuscript explores how
+    institutions utilise bibliometrics, and how scholars adapt. Findings
+    demonstrate a significant number of mechanisms utilised by institutions to
+    assess research performance, postulating the emergence of forms of ‘academic
+    entrepreneurship’, characterised by more and less ethical patterns of
+    manipulation. A conceptual model of bibliometric engagement is presented,
+    with implications for tourism and cognate disciplines.
+  accessed:
+    - year: 2021
+      month: 12
+      day: 18
+  author:
+    - family: Gössling
+      given: Stefan
+    - family: Moyle
+      given: Brent D.
+    - family: Weaver
+      given: David
+  citation-key: gossling2021
+  container-title: Annals of Tourism Research
+  container-title-short: Annals of Tourism Research
+  DOI: 10.1016/j.annals.2021.103270
+  ISSN: 0160-7383
+  issued:
+    - year: 2021
+      month: 9
+      day: 1
+  language: en
+  page: '103270'
+  source: ScienceDirect
+  title: 'Academic entrepreneurship: A bibliometric engagement model'
+  title-short: Academic entrepreneurship
+  type: article-journal
+  URL: https://www.sciencedirect.com/science/article/pii/S0160738321001481
+  volume: '90'
+
+- id: grossman2019
+  abstract: >-
+    Decisiones sobre autoría en ecología, evolución, biología de organismos y
+    gestión de recursos naturales; quién, cómo y por qué La publicación en
+    revistas con revisión crítica es fundamental para  lograr progresos
+    científicos como: 1) la mejora del conocimiento, 2)  beneficios sociales
+    como la toma de decisiones basada en datos  científicos, 3) la evaluación de
+    la productividad de los investigadores,  y 4) la obtención y el
+    mantenimiento de un puesto de docente  universitario, y la facilitación de
+    futuras contribuciones científicas. A  medida que la ciencia se vuelve más
+    compleja, también lo hacen los  resultados necesarios para la publicación,
+    que frecuentemente requieren  la colaboración de científicos de distintos
+    campos. No obstante, la  publicación colaborativa siempre incluye la
+    posibilidad de que se  produzcan malentendidos y diferentes opiniones. En
+    este estudio, primero  examinamos los artículos publicados sobre la
+    determinación de la  autoría de publicaciones científicas en materia de
+    ecología, evolución,  biología de los organismos y gestión de recursos
+    naturales, y luego se  estudió en qué consiste la autoría y se analizaron
+    las contribuciones  del autor, el orden de los autores en la línea de firma
+    y las relaciones  de poder, tras lo cual proporcionamos varios ejemplos de
+    situaciones  realistas de conflictos de autoría con fines pedagógicos y para
+    entablar  un debate con compañeros y estudiantes.
+  accessed:
+    - year: 2021
+      month: 12
+      day: 18
+  author:
+    - family: Grossman
+      given: G. D.
+    - family: DeVries
+      given: D. R.
+  citation-key: grossman2019
+  container-title: Animal Biodiversity and Conservation
+  issue: '2'
+  issued:
+    - year: 2019
+      month: 8
+      day: 2
+  language: ca-ES
+  page: 337-346
+  source: raco.cat
+  title: >-
+    Authorship decisions in ecology, evolution, organismal biology and natural
+    resource management: who, why, and how | Animal Biodiversity and
+    Conservation
+  title-short: >-
+    Authorship decisions in ecology, evolution, organismal biology and natural
+    resource management
+  type: article-journal
+  URL: https://raco.cat/index.php/ABC/article/view/360087
+  volume: '42'
+
+- id: halaweh2020
+  abstract: >-
+    The aim of this paper is to propose a new quantitative metric that can be
+    used to measure the total actual researcher contribution (ARC) to a body of
+    knowledge. The proposed ARC metric is a fair measure that is needed to
+    address the abuse of research collaboration and issues arising from honorary
+    authorship, which both lead to the inflation of the total number of
+    published articles by a researcher. This inflation can provide misleading
+    information about a researcher’s expertise and competence based on their
+    perceived contribution. Research ranking agencies, database indexes,
+    universities, and other decision makers can rely on the ARC metric to rank
+    and evaluate university and researcher contributions to a body of knowledge
+    and thus make more informed decisions and allocate research resources more
+    efficiently.
+  author:
+    - family: Halaweh
+      given: Mohanad
+  citation-key: halaweh2020
+  collection-title: Communications in Computer and Information Science
+  container-title: 'Digital Libraries: The Era of Big Data and Data Science'
+  DOI: 10.1007/978-3-030-39905-4_10
+  editor:
+    - family: Ceci
+      given: Michelangelo
+    - family: Ferilli
+      given: Stefano
+    - family: Poggi
+      given: Antonella
+  event-place: Cham
+  ISBN: 978-3-030-39905-4
+  issued:
+    - year: 2020
+  language: en
+  page: 93-102
+  publisher: Springer International Publishing
+  publisher-place: Cham
+  source: Springer Link
+  title: >-
+    Actual Researcher Contribution (ARC) Versus the Perceived Contribution to
+    the Scientific Body of Knowledge
+  type: paper-conference
+
+- id: he2021
+  abstract: >-
+    Modern scientific research has become largely a cooperative activity in the
+    Internet age. We build a simulation model to understand the population-level
+    creativity based on the heuristic ant colony algorithm. Each researcher has
+    two heuristic parameters characterizing the goodness of his own judgments
+    and his trust on literature. In a population with all kinds of researchers,
+    we find that as the problem scale increases, the contributor distribution
+    significantly shifts from the independent regime of relying on one's own
+    judgments to the cooperative regime of more closely following the
+    literature. The distribution also changes with the stage of the research
+    problem and the computing power available. Our work provides some
+    preliminary understanding and guidance for the dynamical process of
+    cooperative scientific research in various disciplines.
+  accessed:
+    - year: 2021
+      month: 12
+      day: 18
+  author:
+    - family: He
+      given: Zhuoran
+    - family: Zhou
+      given: Tingtao
+  citation-key: he2021
+  container-title: arXiv:2105.02571 [physics]
+  issued:
+    - year: 2021
+      month: 5
+      day: 6
+  source: arXiv.org
+  title: >-
+    A model for cooperative scientific research inspired by the ant colony
+    algorithm
+  type: article-journal
+  URL: http://arxiv.org/abs/2105.02571
+
+- id: hosseini2020
+  abstract: >-
+    The article at hand presents the results of a literature review on the
+    ethical issues related to scientific authorship. These issues are understood
+    as questions and/or concerns about obligations, values or virtues in
+    relation to reporting, authorship and publication of research results. For
+    this purpose, the Web of Science core collection was searched for English
+    resources published between 1945 and 2018, and a total of 324 items were
+    analyzed. Based on the review of the documents, ten ethical themes have been
+    identified, some of which entail several ethical issues. Ranked on the basis
+    of their frequency of occurrence these themes are: 1) attribution, 2)
+    violations of the norms of authorship, 3) bias, 4) responsibility and
+    accountability, 5) authorship order, 6) citations and referencing, 7)
+    definition of authorship, 8) publication strategy, 9) originality, and 10)
+    sanctions. In mapping these themes, the current article explores major
+    ethical issue and provides a critical discussion about the application of
+    codes of conduct, various understandings of culture, and contributing
+    factors to unethical behavior.
+  author:
+    - family: Hosseini
+      given: Mohammad
+    - family: Gordijn
+      given: Bert
+  citation-key: hosseini2020
+  container-title: Accountability in Research
+  container-title-short: Account Res
+  DOI: 10.1080/08989621.2020.1750957
+  ISSN: 1545-5815
+  issue: '5'
+  issued:
+    - year: 2020
+      month: 7
+  language: eng
+  page: 284-324
+  PMID: '32243214'
+  source: PubMed
+  title: >-
+    A review of the literature on ethical issues related to scientific
+    authorship
+  type: article-journal
+  volume: '27'
+
+- id: hosseini2020a
+  abstract: >-
+    The practice of assigning authorship for a scientific publication tends to
+    raise two normative questions: 1) “who should be credited as an author?”; 2)
+    “who should not be credited as an author but should still be acknowledged?”.
+    With the publication of the revised version of The European Code of Conduct
+    for Research Integrity (ECCRI), standard answers to these questions have
+    been called into question. This article examines the ways in which the ECCRI
+    approaches these two questions and compares these approaches to standard
+    definitions of “authorship” and “acknowledgment” in guidelines issued by the
+    International Committee of Medical Journal Editors (ICMJE) and the World
+    Association of Medical Editors (WAME). In light of two scenarios and the
+    problems posed by these kinds of “real-world” examples, we recommend
+    specific revisions to the content of the ECCRI in order not only to provide
+    a more detailed account of the tasks deserving of acknowledgment, but to
+    improve the Code’s current definition of authorship.
+  accessed:
+    - year: 2021
+      month: 12
+      day: 18
+  author:
+    - family: Hosseini
+      given: Mohammad
+    - family: Lewis
+      given: Jonathan
+  citation-key: hosseini2020a
+  container-title: Accountability in Research
+  DOI: 10.1080/08989621.2020.1721288
+  ISSN: 0898-9621
+  issue: '2'
+  issued:
+    - year: 2020
+      month: 2
+      day: 17
+  note: '_eprint: https://doi.org/10.1080/08989621.2020.1721288'
+  page: 80-98
+  PMID: '31976754'
+  publisher: Taylor & Francis
+  source: Taylor and Francis+NEJM
+  title: >-
+    The norms of authorship credit: Challenging the definition of authorship in
+    The European Code of Conduct for Research Integrity
+  title-short: The norms of authorship credit
+  type: article-journal
+  URL: https://doi.org/10.1080/08989621.2020.1721288
+  volume: '27'
+
+- id: ioannidis2005a
+  abstract: >-
+    Summary There is increasing concern that most current published research
+    findings are false. The probability that a research claim is true may depend
+    on study power and bias, the number of other studies on the same question,
+    and, importantly, the ratio of true to no relationships among the
+    relationships probed in each scientific field. In this framework, a research
+    finding is less likely to be true when the studies conducted in a field are
+    smaller; when effect sizes are smaller; when there is a greater number and
+    lesser preselection of tested relationships; where there is greater
+    flexibility in designs, definitions, outcomes, and analytical modes; when
+    there is greater financial and other interest and prejudice; and when more
+    teams are involved in a scientific field in chase of statistical
+    significance. Simulations show that for most study designs and settings, it
+    is more likely for a research claim to be false than true. Moreover, for
+    many current scientific fields, claimed research findings may often be
+    simply accurate measures of the prevailing bias. In this essay, I discuss
+    the implications of these problems for the conduct and interpretation of
+    research.
+  accessed:
+    - year: 2022
+      month: 1
+      day: 5
+  author:
+    - family: Ioannidis
+      given: John P. A.
+  citation-key: ioannidis2005a
+  container-title: PLOS Medicine
+  container-title-short: PLOS Medicine
+  DOI: 10.1371/journal.pmed.0020124
+  ISSN: 1549-1676
+  issue: '8'
+  issued:
+    - literal: 2005. aug. 30.
+  language: en
+  page: e124
+  publisher: Public Library of Science
+  source: PLoS Journals
+  title: Why Most Published Research Findings Are False
+  type: article-journal
+  URL: >-
+    https://journals.plos.org/plosmedicine/article?id=10.1371/journal.pmed.0020124
+  volume: '2'
+
+- id: jabbehdari2017
+  abstract: >-
+    Scientific authorship has become a contested terrain in contemporary
+    science. Based on a survey of authors across fields, we measure the
+    likelihood of specialist authors (sometimes called “guest” authors): people
+    who only made specialized contributions, such as data, materials, or
+    funding; and “nonauthor collaborators” (sometimes referred to as “ghost”
+    authors): those who did significant work on the project but do not appear as
+    authors, across different research contexts, including field, size of the
+    project team, commercial orientation, impact of publication, and
+    organization of the collaboration. We find that guest and ghost authors are
+    common, with about one-third of publications having at least one specialist
+    author and over half having at least one nonauthor collaborator. We see
+    significant cross-field variations in both overall rates and types of
+    specialist authors and nonauthor collaborators. We find there are generally
+    fewer specialist authors among highly cited papers and more graduate student
+    nonauthor collaborators in single location projects. The results suggest
+    authorship practices vary across fields, and by project characteristics,
+    complicating the use of authorship lists as a basis for evaluation
+    (especially when comparing across fields or types of projects). We discuss
+    implications of these findings for interpreting author lists in the context
+    of science policy.
+  accessed:
+    - year: 2021
+      month: 12
+      day: 20
+  author:
+    - family: Jabbehdari
+      given: Sahra
+    - family: Walsh
+      given: John P.
+  citation-key: jabbehdari2017
+  container-title: Science, Technology, & Human Values
+  container-title-short: Science, Technology, & Human Values
+  DOI: 10.1177/0162243917697192
+  ISSN: 0162-2439
+  issue: '5'
+  issued:
+    - year: 2017
+      month: 9
+      day: 1
+  language: en
+  page: 872-900
+  publisher: SAGE Publications Inc
+  source: SAGE Journals
+  title: Authorship Norms and Project Structures in Science
+  type: article-journal
+  URL: https://doi.org/10.1177/0162243917697192
+  volume: '42'
+
+- id: jung2018
+  accessed:
+    - year: 2021
+      month: 12
+      day: 18
+  author:
+    - family: Jung
+      given: Young-Chul
+  citation-key: jung2018
+  container-title: Psychiatry Investigation
+  container-title-short: Psychiatry Investig
+  DOI: 10.30773/pi.2018.03.29
+  ISSN: 1738-3684
+  issue: '4'
+  issued:
+    - year: 2018
+      month: 4
+  page: '335'
+  PMCID: PMC5912488
+  PMID: '29669411'
+  source: PubMed Central
+  title: 'Already, But Not Yet: Ending Unethical Practices in Authorship'
+  title-short: Already, But Not Yet
+  type: article-journal
+  URL: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5912488/
+  volume: '15'
+
+- id: kim2018
+  abstract: >-
+    Author name ambiguity in a digital library may affect the ﬁndings of
+    research that mines authorship data of the library. This study evaluates
+    author name disambiguation in DBLP, a widely used but insufﬁciently
+    evaluated digital library for its disambiguation performance. In doing so,
+    this study takes a triangulation approach that author name disambiguation
+    for a digital library can be better evaluated when its performance is
+    assessed on multiple labeled datasets with comparison to baselines. Tested
+    on three types of labeled data containing 5000 to 6 M disambiguated names,
+    DBLP is shown to assign author names quite accurately to distinct authors,
+    resulting in pairwise precision, recall, and F1 measures around 0.90 or
+    above overall. DBLP’s author name disambiguation performs well even on large
+    ambiguous name blocks but deﬁciently on distinguishing authors with the same
+    names. Compared to other disambiguation algorithms, DBLP’s disambiguation
+    performance is quite competitive, possibly due to its hybrid disambiguation
+    approach combining algorithmic disambiguation and manual error correction. A
+    discussion follows on strengths and weaknesses of labeled datasets used in
+    this study for future efforts to evaluate author name disambiguation on a
+    digital library scale.
+  accessed:
+    - year: 2020
+      month: 11
+      day: 11
+  author:
+    - family: Kim
+      given: Jinseok
+  citation-key: kim2018
+  container-title: Scientometrics
+  container-title-short: Scientometrics
+  DOI: 10.1007/s11192-018-2824-5
+  ISSN: 0138-9130, 1588-2861
+  issue: '3'
+  issued:
+    - year: 2018
+      month: 9
+  language: en
+  page: 1867-1886
+  source: DOI.org (Crossref)
+  title: 'Evaluating author name disambiguation for digital libraries: a case of DBLP'
+  title-short: Evaluating author name disambiguation for digital libraries
+  type: article-journal
+  URL: http://link.springer.com/10.1007/s11192-018-2824-5
+  volume: '116'
+
+- id: kong2019
+  abstract: >-
+    In the fast-growing scholarly big data background, social network
+    technologies have recently aroused widespread attention in academia and
+    industry. The concept of academic social networks is created precisely in
+    the context of scholarly big data, which refers to the complicated academic
+    network formed by academic entities and their relationships. There are a
+    wealth of scholarly big data processing methods to analyze the rich
+    structural types and related information about academic social networks.
+    Nowadays, various academic data can be easily obtained, which makes it
+    easier for us to analyze and study academic social networks. This study
+    investigates the background, the current status, and trends of academic
+    social networks. We first elaborate on the concept of academic social
+    networks and related research background. Secondly, we analyze models based
+    on nodes' types and timeliness. Thirdly, we review analytical methods,
+    including relevant metrics, network properties, and available academic
+    analysis tools. Furthermore, we sort out some key mining technologies for
+    academic social networks. Finally, we systematically review representative
+    research tasks in this domain from three levels: actor, relationship, and
+    network. In addition, some academic social networking sites are presented.
+    This survey concludes with the current challenges and open issues.
+  accessed:
+    - year: 2022
+      month: 3
+      day: 20
+  author:
+    - family: Kong
+      given: Xiangjie
+    - family: Shi
+      given: Yajie
+    - family: Yu
+      given: Shuo
+    - family: Liu
+      given: Jiaying
+    - family: Xia
+      given: Feng
+  citation-key: kong2019
+  container-title: Journal of Network and Computer Applications
+  container-title-short: Journal of Network and Computer Applications
+  DOI: 10.1016/j.jnca.2019.01.029
+  ISSN: 1084-8045
+  issued:
+    - year: 2019
+      month: 4
+      day: 15
+  language: en
+  page: 86-103
+  source: ScienceDirect
+  title: 'Academic social networks: Modeling, analysis, mining and applications'
+  title-short: Academic social networks
+  type: article-journal
+  URL: https://www.sciencedirect.com/science/article/pii/S1084804519300438
+  volume: '132'
+
+- id: kumar2011
+  abstract: >-
+    Sensitivity and specificity are two components that measure the inherent
+    validity of a diagnostic test for dichotomous outcomes against a gold
+    standard. Receiver operating characteristic (ROC) curve is the plot that
+    depicts the trade-off between the sensitivity and (1-specificity) across a
+    series of cut-off points when the diagnostic test is continuous or on
+    ordinal scale (minimum 5 categories). This is an effective method for
+    assessing the performance of a diagnostic test. The aim of this article is
+    to provide basic conceptual framework and interpretation of ROC analysis to
+    help medical researchers to use it effectively. ROC curve and its important
+    components like area under the curve, sensitivity at specified specificity
+    and vice versa, and partial area under the curve are discussed. Various
+    other issues such as choice between parametric and non-parametric methods,
+    biases that affect the performance of a diagnostic test, sample size for
+    estimating the sensitivity, specificity, and area under ROC curve, and
+    details of commonly used softwares in ROC analysis are also presented.
+  author:
+    - family: Kumar
+      given: Rajeev
+    - family: Indrayan
+      given: Abhaya
+  citation-key: kumar2011
+  container-title: INDIAN PEDIATRICS
+  issued:
+    - year: 2011
+  language: en
+  page: '11'
+  source: Zotero
+  title: Receiver Operating Characteristic (ROC) Curve for Medical Researchers
+  type: article-journal
+  volume: '48'
+
+- id: kupferschmidt2018
+  accessed:
+    - year: 2021
+      month: 12
+      day: 20
+  author:
+    - family: Kupferschmidt
+      given: Kai
+  citation-key: kupferschmidt2018
+  container-title: Science
+  DOI: 10.1126/science.361.6403.636
+  issue: '6403'
+  issued:
+    - year: 2018
+      month: 8
+      day: 17
+  page: 636-641
+  publisher: American Association for the Advancement of Science
+  source: science.org (Atypon)
+  title: Tide of lies
+  type: article-journal
+  URL: https://www.science.org/doi/abs/10.1126/science.361.6403.636
+  volume: '361'
+
+- id: lancichinetti2009
+  abstract: >-
+    Many networks in nature, society and technology are characterized by a
+    mesoscopic level of organization, with groups of nodes forming tightly
+    connected units, called communities or modules, that are only weakly linked
+    to each other. Uncovering this community structure is one of the most
+    important problems in the ﬁeld of complex networks. Networks often show a
+    hierarchical organization, with communities embedded within other
+    communities; moreover, nodes can be shared between different communities.
+    Here, we present the ﬁrst algorithm that ﬁnds both overlapping communities
+    and the hierarchical structure. The method is based on the local
+    optimization of a ﬁtness function. Community structure is revealed by peaks
+    in the ﬁtness histogram. The resolution can be tuned by a parameter enabling
+    different hierarchical levels of organization to be investigated. Tests on
+    real and artiﬁcial networks give excellent results.
+  accessed:
+    - year: 2020
+      month: 12
+      day: 10
+  author:
+    - family: Lancichinetti
+      given: Andrea
+    - family: Fortunato
+      given: Santo
+    - family: Kertész
+      given: János
+  citation-key: lancichinetti2009
+  container-title: New Journal of Physics
+  container-title-short: New J. Phys.
+  DOI: 10.1088/1367-2630/11/3/033015
+  ISSN: 1367-2630
+  issue: '3'
+  issued:
+    - year: 2009
+      month: 3
+      day: 10
+  language: en
+  page: '033015'
+  source: DOI.org (Crossref)
+  title: >-
+    Detecting the overlapping and hierarchical community structure in complex
+    networks
+  type: article-journal
+  URL: https://iopscience.iop.org/article/10.1088/1367-2630/11/3/033015
+  volume: '11'
+
+- id: lariviere2019
+  abstract: >-
+    The journal impact factor ( ) is, by far, the most discussed bibliometric
+    indicator. Since its introduction over 40 years ago, it has had enormous
+    effects on the scientific ecosystem: transforming the publishing industry,
+    shaping hiring practices and the allocation of resources, and, as a result,
+    reorienting the research activities and dissemination practices of scholars.
+    Given both the ubiquity and impact of the indicator, the JIF has been widely
+    dissected and debated by scholars of every disciplinary orientation. Drawing
+    on the existing literature as well as original research, this chapter
+    provides a brief history of the indicator and highlights well-known
+    limitations—such as the asymmetry between the numerator and the denominator,
+    differences across disciplines, the insufficient citation window, and the
+    skewness of the underlying citation distributions. The inflation of the JIF
+    and the weakening predictive power is discussed, as well as the adverse
+    effects on the behaviors of individual actors and the research enterprise.
+    Alternative journal-based indicators are described and the chapter concludes
+    with a call for responsible application and a commentary on future
+    developments in journal indicators.
+  accessed:
+    - year: 2021
+      month: 12
+      day: 18
+  author:
+    - family: Larivière
+      given: Vincent
+    - family: Sugimoto
+      given: Cassidy R.
+  citation-key: lariviere2019
+  collection-title: Springer Handbooks
+  container-title: Springer Handbook of Science and Technology Indicators
+  DOI: 10.1007/978-3-030-02511-3_1
+  editor:
+    - family: Glänzel
+      given: Wolfgang
+    - family: Moed
+      given: Henk F.
+    - family: Schmoch
+      given: Ulrich
+    - family: Thelwall
+      given: Mike
+  event-place: Cham
+  ISBN: 978-3-030-02511-3
+  issued:
+    - year: 2019
+  language: en
+  page: 3-24
+  publisher: Springer International Publishing
+  publisher-place: Cham
+  source: Springer Link
+  title: >-
+    The Journal Impact Factor: A Brief History, Critique, and Discussion of
+    Adverse Effects
+  title-short: The Journal Impact Factor
+  type: chapter
+  URL: https://doi.org/10.1007/978-3-030-02511-3_1
+
+- id: leising2021
+  abstract: >-
+    We point out ten steps that we think will go a long way in improving
+    personality science. The first five steps focus on fostering consensus
+    regarding (1) research goals, (2) terminology, (3) measurement practices,
+    (4) data handling, and (5) the current state of theory and evidence. The
+    other five steps focus on improving the credibility of empirical research,
+    through (6) formal modelling, (7) mandatory pre-registration for
+    confirmatory claims, (8) replication as a routine practice, (9) planning for
+    informative studies (e.g., in terms of statistical power), and (10) making
+    data, analysis scripts, and materials openly available. The current,
+    quantitybased incentive structures in academia clearly stand in the way of
+    implementing many of these practices, resulting in a research literature
+    with sometimes questionable utility and/or integrity. As a solution, we
+    propose a quality-based reward scheme that explicitly weights published
+    research by its Good Science merits. Scientists need to be increasingly
+    rewarded for doing good work, not just lots of work.
+  author:
+    - family: Leising
+      given: Daniel
+    - family: Thielmann
+      given: Isabel
+    - family: Glöckner
+      given: Andreas
+    - family: Gärtner
+      given: Anne
+    - family: Schönbrodt
+      given: Felix
+  citation-key: leising2021
+  issued:
+    - year: 2021
+  language: en
+  page: '61'
+  source: Zotero
+  title: >-
+    Commissioned by the Personality and Diagnostics Chapter (DPPD) of the German
+    Psychological Society (DGPs)
+  type: article-journal
+
+- id: marusic2011
+  abstract: >-
+    Background The purpose of this systematic review was to evaluate evidence
+    about authorship issues and provide synthesis of research on authorship
+    across all research fields. Methods We searched bibliographical databases to
+    identify articles describing empirical quantitive or qualitative research
+    from all scholarly fields on different aspects of authorship. Search was
+    limited to original articles and reviews. Results The final sample consisted
+    of 123 articles reporting results from 118 studies. Most studies came for
+    biomedical and health research fields and social sciences. Study design was
+    usually a survey (53%) or descriptive study (27%); only 2 studies used
+    randomized design. We identified four 4 general themes common to all
+    research disciplines: authorship perceptions, definitions and practices,
+    defining order of authors on the byline, ethical and unethical authorship
+    practices, and authorship issues related to student/non-research
+    personnel-supervisor collaboration. For 14 survey studies, a meta-analysis
+    showed a pooled weighted average of 29% (95% CI 24% to 35%) researchers
+    reporting their own or others' experience with misuse of authorship.
+    Authorship misuse was reported more often by researcher outside of the USA
+    and UK: 55% (95% CI 45% to 64%) for 4 studies in France, South Africa, India
+    and Bangladesh vs. 23% (95% CI 18% to 28%) in USA/UK or international
+    journal settings. Interpretation High prevalence of authorship problems may
+    have severe impact on the integrity of the research process, just as more
+    serious forms of research misconduct. There is a need for more
+    methodologically rigorous studies to understand the allocation of
+    publication credit across research disciplines.
+  accessed:
+    - year: 2022
+      month: 1
+      day: 3
+  author:
+    - family: Marušić
+      given: Ana
+    - family: Bošnjak
+      given: Lana
+    - family: Jerončić
+      given: Ana
+  citation-key: marusic2011
+  container-title: PLOS ONE
+  container-title-short: PLOS ONE
+  DOI: 10.1371/journal.pone.0023477
+  ISSN: 1932-6203
+  issue: '9'
+  issued:
+    - year: 2011
+      month: 9
+      day: 8
+  language: en
+  page: e23477
+  publisher: Public Library of Science
+  source: PLoS Journals
+  title: >-
+    A Systematic Review of Research on the Meaning, Ethics and Practices of
+    Authorship across Scholarly Disciplines
+  type: article-journal
+  URL: https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0023477
+  volume: '6'
+
+- id: mejlgaard2020a
+  abstract: >-
+    Counselling, coaches and collegiality — how institutions can share resources
+    to promote best practice in science.
+  accessed:
+    - year: 2022
+      month: 1
+      day: 11
+  author:
+    - family: Mejlgaard
+      given: Niels
+    - family: Bouter
+      given: Lex M.
+    - family: Gaskell
+      given: George
+    - family: Kavouras
+      given: Panagiotis
+    - family: Allum
+      given: Nick
+    - family: Bendtsen
+      given: Anna-Kathrine
+    - family: Charitidis
+      given: Costas A.
+    - family: Claesen
+      given: Nik
+    - family: Dierickx
+      given: Kris
+    - family: Domaradzka
+      given: Anna
+    - family: Reyes Elizondo
+      given: Andrea
+    - family: Foeger
+      given: Nicole
+    - family: Hiney
+      given: Maura
+    - family: Kaltenbrunner
+      given: Wolfgang
+    - family: Labib
+      given: Krishma
+    - family: Marušić
+      given: Ana
+    - family: Sørensen
+      given: Mads P.
+    - family: Ravn
+      given: Tine
+    - family: Ščepanović
+      given: Rea
+    - family: Tijdink
+      given: Joeri K.
+    - family: Veltri
+      given: Giuseppe A.
+  citation-key: mejlgaard2020a
+  container-title: Nature
+  DOI: 10.1038/d41586-020-02847-8
+  issue: '7829'
+  issued:
+    - year: 2020
+      month: 10
+  language: en
+  note: |-
+    Bandiera_abtest: a
+    Cg_type: Comment
+    Subject_term: Research management, Institutions, Policy
+  number: '7829'
+  page: 358-360
+  publisher: Nature Publishing Group
+  source: www.nature.com
+  title: 'Research integrity: nine ways to move from talk to walk'
+  title-short: Research integrity
+  type: article-journal
+  URL: https://www.nature.com/articles/d41586-020-02847-8
+  volume: '586'
+
+- id: moher2020
+  abstract: >-
+    For knowledge to benefit research and society, it must be trustworthy.
+    Trustworthy research is robust, rigorous, and transparent at all stages of
+    design, execution, and reporting. Assessment of researchers still rarely
+    includes considerations related to trustworthiness, rigor, and transparency.
+    We have developed the Hong Kong Principles (HKPs) as part of the 6th World
+    Conference on Research Integrity with a specific focus on the need to drive
+    research improvement through ensuring that researchers are explicitly
+    recognized and rewarded for behaviors that strengthen research integrity. We
+    present five principles: responsible research practices; transparent
+    reporting; open science (open research); valuing a diversity of types of
+    research; and recognizing all contributions to research and scholarly
+    activity. For each principle, we provide a rationale for its inclusion and
+    provide examples where these principles are already being adopted.
+  accessed:
+    - year: 2022
+      month: 1
+      day: 11
+  author:
+    - family: Moher
+      given: David
+    - family: Bouter
+      given: Lex
+    - family: Kleinert
+      given: Sabine
+    - family: Glasziou
+      given: Paul
+    - family: Sham
+      given: Mai Har
+    - family: Barbour
+      given: Virginia
+    - family: Coriat
+      given: Anne-Marie
+    - family: Foeger
+      given: Nicole
+    - family: Dirnagl
+      given: Ulrich
+  citation-key: moher2020
+  container-title: PLOS Biology
+  container-title-short: PLOS Biology
+  DOI: 10.1371/journal.pbio.3000737
+  ISSN: 1545-7885
+  issue: '7'
+  issued:
+    - literal: 2020. júl. 16.
+  language: en
+  page: e3000737
+  publisher: Public Library of Science
+  source: PLoS Journals
+  title: >-
+    The Hong Kong Principles for assessing researchers: Fostering research
+    integrity
+  title-short: The Hong Kong Principles for assessing researchers
+  type: article-journal
+  URL: >-
+    https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3000737
+  volume: '18'
+
+- id: newman2001
+  abstract: >-
+    Using computer databases of scientific papers in physics, biomedical
+    research, and computer science, we have constructed networks of
+    collaboration between scientists in each of these disciplines. In these
+    networks two scientists are considered connected if they have coauthored one
+    or more papers together. Here we study a variety of nonlocal statistics for
+    these networks, such as typical distances between scientists through the
+    network, and measures of centrality such as closeness and betweenness. We
+    further argue that simple networks such as these cannot capture variation in
+    the strength of collaborative ties and propose a measure of collaboration
+    strength based on the number of papers coauthored by pairs of scientists,
+    and the number of other scientists with whom they coauthored those papers.
+  author:
+    - family: Newman
+      given: M. E. J.
+  citation-key: newman2001
+  container-title: Physical Review E
+  DOI: 10.1103/PhysRevE.64.016132
+  issue: '89'
+  issued:
+    - year: 2001
+  page: '016132'
+  title: >-
+    Scientific collaboration networks. II. Shortest paths, weighted networks,
+    and centrality
+  type: article-journal
+  volume: '64'
+
+- id: newman2001a
+  abstract: >-
+    The structure of scientific collaboration networks is investigated. Two
+    scientists are considered connected if they have authored a paper together
+    and explicit networks of such connections are constructed by using data
+    drawn from a number of databases, including MEDLINE (biomedical research),
+    the Los Alamos e-Print Archive (physics), and NCSTRL (computer science). I
+    show that these collaboration networks form “small worlds,” in which
+    randomly chosen pairs of scientists are typically separated by only a short
+    path of intermediate acquaintances. I further give results for mean and
+    distribution of numbers of collaborators of authors, demonstrate the
+    presence of clustering in the networks, and highlight a number of apparent
+    differences in the patterns of collaboration between the fields studied.
+  accessed:
+    - year: 2020
+      month: 11
+      day: 11
+  author:
+    - family: Newman
+      given: M. E. J.
+  citation-key: newman2001a
+  container-title: Proceedings of the National Academy of Sciences
+  container-title-short: PNAS
+  DOI: 10.1073/pnas.98.2.404
+  ISSN: 0027-8424, 1091-6490
+  issue: '2'
+  issued:
+    - year: 2001
+      month: 1
+      day: 16
+  language: en
+  page: 404-409
+  publisher: National Academy of Sciences
+  section: Physical Sciences
+  source: www.pnas.org
+  title: The structure of scientific collaboration networks
+  type: article-journal
+  URL: https://www.pnas.org/content/98/2/404
+  volume: '98'
+
+- id: newman2004b
+  abstract: >-
+    By using data from three bibliographic databases in biology, physics, and
+    mathematics, respectively, networks are constructed in which the nodes are
+    scientists, and two scientists are connected if they have coauthored a
+    paper. We use these networks to answer a broad variety of questions about
+    collaboration patterns, such as the numbers of papers authors write, how
+    many people they write them with, what the typical distance between
+    scientists is through the network, and how patterns of collaboration vary
+    between subjects and over time. We also summarize a number of recent results
+    by other authors on coauthorship patterns.
+  accessed:
+    - year: 2020
+      month: 11
+      day: 11
+  author:
+    - family: Newman
+      given: M. E. J.
+  citation-key: newman2004b
+  container-title: Proceedings of the National Academy of Sciences
+  container-title-short: PNAS
+  DOI: 10.1073/pnas.0307545100
+  ISSN: 0027-8424, 1091-6490
+  issue: suppl 1
+  issued:
+    - year: 2004
+      month: 4
+      day: 6
+  language: en
+  page: 5200-5205
+  PMID: '14745042'
+  publisher: National Academy of Sciences
+  section: Colloquium
+  source: www.pnas.org
+  title: Coauthorship networks and patterns of scientific collaboration
+  type: article-journal
+  URL: https://www.pnas.org/content/101/suppl_1/5200
+  volume: '101'
+
+- id: noorden2020
+  abstract: >-
+    An algorithm developed to spot abnormal patterns of citations aims to find
+    scientists who have manipulated reference lists.
+  accessed:
+    - year: 2021
+      month: 2
+      day: 25
+  author:
+    - family: Noorden
+      given: Richard Van
+  citation-key: noorden2020
+  container-title: Nature
+  DOI: 10.1038/d41586-020-02378-2
+  issue: '7822'
+  issued:
+    - year: 2020
+      month: 8
+      day: 14
+  language: en
+  number: '7822'
+  page: 508-508
+  publisher: Nature Publishing Group
+  source: www.nature.com
+  title: Signs of ‘citation hacking’ flagged in scientific papers
+  type: article-journal
+  URL: https://www.nature.com/articles/d41586-020-02378-2
+  volume: '584'
+
+- id: pan2020
+  abstract: >-
+    In 2014, SAGE Publications retracted 60 articles authored by Taiwanese
+    researchers due to suspected peer-review fraud. This scandal led to the
+    resignation of the Minister of Education at the time since he coauthored
+    several retracted works. Issues regarding the lack of transparent
+    decision-making processes regarding authorship were further disclosed.
+    Motivated by the scandal, we believe that this is one of the first empirical
+    studies of questionable authorship practices (QAPs) in East Asian academia;
+    we investigate Taiwanese researchers’ perceptions of QAPs. To meet this
+    purpose, a self-reported survey was developed. Four hundred and three local
+    researchers, including research faculty (e.g., professors), postdoctoral
+    researchers, and Ph.D. students, participated in the survey. Four major
+    findings resulted. First, the underlying causes of Taiwanese doctoral
+    students’ engagement in QAPs were attributable to their desire to achieve
+    particular academic-related successes and their feeling of reciprocal
+    obligation to support other researchers. Second, the underlying motives for
+    Taiwanese research associates’ (i.e., research faculty and postdoctoral
+    fellows) engagement in QAPs were attributable to their attempts to achieve
+    particular career successes and of the desire to consolidate their
+    professional networks. Third, the participants generally agreed that QAPs
+    had a long history among local academics but were rarely reported. Fourth,
+    participants’ backgrounds (i.e., research discipline, academic rank, and
+    type of affiliations) had significant effects on their responses regarding
+    particular authorship issues; however, their gender did not have a
+    significant effect. QAPs are a critical issue in Taiwanese academia;
+    therefore, we discussed the implications of the current findings including
+    subsequent instruction and future research.
+  accessed:
+    - year: 2021
+      month: 12
+      day: 18
+  author:
+    - family: Pan
+      given: Sophia Jui-An
+    - family: Chou
+      given: Chien
+  citation-key: pan2020
+  container-title: Science and Engineering Ethics
+  container-title-short: Sci Eng Ethics
+  DOI: 10.1007/s11948-020-00180-x
+  ISSN: 1471-5546
+  issue: '3'
+  issued:
+    - year: 2020
+      month: 6
+      day: 1
+  language: en
+  page: 1499-1530
+  source: Springer Link
+  title: >-
+    Taiwanese Researchers’ Perceptions of Questionable Authorship Practices: An
+    Exploratory Study
+  title-short: Taiwanese Researchers’ Perceptions of Questionable Authorship Practices
+  type: article-journal
+  URL: https://doi.org/10.1007/s11948-020-00180-x
+  volume: '26'
+
+- id: papatheodorou2008
+  accessed:
+    - year: 2022
+      month: 1
+      day: 3
+  author:
+    - family: Papatheodorou
+      given: Stefania I.
+    - family: Trikalinos
+      given: Thomas A.
+    - family: Ioannidis
+      given: John P. A.
+  citation-key: papatheodorou2008
+  container-title: Journal of Clinical Epidemiology
+  container-title-short: Journal of Clinical Epidemiology
+  DOI: 10.1016/j.jclinepi.2007.07.017
+  ISSN: 0895-4356, 1878-5921
+  issue: '6'
+  issued:
+    - year: 2008
+      month: 6
+      day: 1
+  language: English
+  page: 546-551
+  PMID: '18471658'
+  publisher: Elsevier
+  source: www.jclinepi.com
+  title: >-
+    Inflated numbers of authors over time have not been just due to increasing
+    research complexity
+  type: article-journal
+  URL: https://www.jclinepi.com/article/S0895-4356(07)00290-9/fulltext
+  volume: '61'
+
+- id: portenoy2021
+  abstract: >-
+    There currently exist hundreds of millions of scientific publications, with
+    more being created at an ever-increasing rate. This is leading to
+    information overload: the scale and complexity of this body of knowledge is
+    increasing well beyond the capacity of any individual to make sense of it
+    all, overwhelming traditional, manual methods of curation and synthesis. At
+    the same time, the availability of this literature and surrounding metadata
+    in structured, digital form, along with the proliferation of computing power
+    and techniques to take advantage of large-scale and complex data, represents
+    an opportunity to develop new tools and techniques to help people make
+    connections, synthesize, and pose new hypotheses. This dissertation consists
+    of several contributions of data, methods, and tools aimed at addressing
+    information overload in science. My central contribution to this space is
+    Autoreview, a framework for building and evaluating systems to automatically
+    select relevant publications for literature reviews, starting from small
+    sets of seed papers. These automated methods have the potential to help
+    researchers save time and effort when keeping up with relevant literature,
+    as well as surfacing papers that more manual methods may miss. I show that
+    this approach can work to recommend relevant literature, and can also be
+    used to systematically compare different features used in the
+    recommendations. I also present the design, implementation, and evaluation
+    of several visualization tools. One of these is an animated network
+    visualization showing the influence of a scholar over time. Another is
+    SciSight, an interactive system for recommending new authors and research by
+    finding similarities along different dimensions. Additionally, I discuss the
+    current state of available scholarly data sets; my work curating, linking,
+    and building upon these data sets; and methods I developed to scale graph
+    clustering techniques to very large networks.
+  accessed:
+    - year: 2021
+      month: 12
+      day: 18
+  author:
+    - family: Portenoy
+      given: Jason
+  citation-key: portenoy2021
+  genre: Thesis
+  issued:
+    - year: 2021
+  language: en_US
+  note: 'Accepted: 2021-08-26T18:12:03Z'
+  source: digital.lib.washington.edu
+  title: >-
+    Harnessing Scholarly Literature as Data to Curate, Explore, and Evaluate
+    Scientific Research
+  type: thesis
+  URL: https://digital.lib.washington.edu:443/researchworks/handle/1773/47601
+
+- id: racz2021
+  abstract: >-
+    Hatvanezer kutatót hívtak meg minden idők legnagyobb tudományos
+    integritásról szóló felmérésére, de sok egyetem vonakodott részt venni
+    benne, így végül csak 6800 kutató vallott az általa alkalmazott
+    praktikákról. Kiderült, hogy a publikációs kényszer szüli a trükkös
+    megoldásokat, és mivel az egész rendszert nem lehet újraírni, csak bizonyos
+    jó gyakorlatok bevezetése segíthet.
+  accessed:
+    - year: 2022
+      month: 1
+      day: 5
+  author:
+    - family: Rácz
+      given: Johanna
+  citation-key: racz2021
+  container-title: Qubit
+  issued:
+    - year: 2021
+      month: 7
+      day: 12
+  language: hu
+  section: TUDOMÁNY
+  title: Meglepően sok kutató trükközik vagy csal a tudományos eredményekkel
+  type: webpage
+  URL: >-
+    https://qubit.hu/2021/07/12/meglepoen-sok-kutato-trukkozik-vagy-csal-a-tudomanyos-eredmenyekkel
+
+- id: scanff2021
+  abstract: >-
+    Context Convergent analyses in different disciplines support the use of the
+    Percentage of Papers by the Most Prolific author (PPMP) as a red flag to
+    identify journals that can be suspected of questionable editorial practices.
+    We examined whether this index, complemented by the Gini index, could be
+    useful for identifying cases of potential editorial bias, using a large
+    sample of biomedical journals.
+
+    Methods We extracted metadata for all biomedical journals referenced in the
+    National Library of Medicine, with any attributed Broad Subject Terms, and
+    at least 50 authored (i.e. by at least one author) articles between 2015 and
+    2019, identifying the most prolific author (i.e. the person who signed the
+    most papers in each particular journal). We calculated the PPMP and the
+    2015-2019 Gini index for the distribution of articles across authors. When
+    the relevant information was reported, we also computed the median
+    publication lag (time between submission and acceptance) for articles
+    authored by any of the most prolific authors and that for articles not
+    authored by prolific authors. For outlier journals, defined as a PPMP or
+    Gini index above the 95th percentile of their respective distributions, a
+    random sample of 100 journals was selected and described in relation to
+    status on the editorial board for the most prolific author.
+
+    Results 5 468 journals that published 4 986 335 papers between 2015 and 2019
+    were analysed. The PPMP 95th percentile was 10.6% (median 2.9%). The Gini
+    index 95th percentile was 0.355 (median 0.183). Correlation between the two
+    indices was 0.35 (95CI 0.33 to 0.37). Information on publication lag was
+    available for 2 743 journals. We found that 277 journals (10.2%) had a
+    median time lag to publication for articles by the most prolific author(s)
+    that was shorter than 3 weeks, versus 51 (1.9%) journals with articles not
+    authored by prolific author(s). Among the random sample of outlier journals,
+    98 provided information about their editorial board. Among these 98, the
+    most prolific author was part of the editorial board in 60 cases (61%),
+    among whom 25 (26% of the 98) were editors-in-chief.
+
+    Discussion In most journals publications are distributed across a large
+    number of authors. Our results reveal a subset of journals where a few
+    authors, often members of the editorial board, were responsible for a
+    disproportionate number of publications. The papers by these authors were
+    more likely to be accepted for publication within 3 weeks of their
+    submission. To enhance trust in their practices, journals need to be
+    transparent about their editorial and peer review practices.
+  accessed:
+    - year: 2021
+      month: 12
+      day: 18
+  author:
+    - family: Scanff
+      given: Alexandre
+    - family: Naudet
+      given: Florian
+    - family: Cristea
+      given: Ioana
+    - family: Moher
+      given: David
+    - family: Bishop
+      given: Dorothy V. M.
+    - family: Locher
+      given: Clara
+  citation-key: scanff2021
+  DOI: 10.1101/2021.02.03.429520
+  issued:
+    - year: 2021
+      month: 2
+      day: 3
+  language: en
+  page: 2021.02.03.429520
+  publisher: Cold Spring Harbor Laboratory
+  section: New Results
+  source: bioRxiv
+  title: '‘Nepotistic journals’: a survey of biomedical journals'
+  title-short: ‘Nepotistic journals’
+  type: article
+  URL: https://www.biorxiv.org/content/10.1101/2021.02.03.429520v1
+
+- id: szomszor2020
+  author:
+    - family: Szomszor
+      given: Martin
+    - family: Quaderi
+      given: Nandita
+  citation-key: szomszor2020
+  genre: Global Research Report
+  issued:
+    - year: 2020
+  language: en
+  page: '16'
+  publisher: Institute for Scientific Information
+  source: Zotero
+  title: >-
+    Research Integrity: Understanding our shared responsibility for a
+    sustainable scholarly ecosystem
+  type: report
+  URL: >-
+    https://clarivate.com/wp-content/uploads/2021/02/ISI-Research-Integrity-Report.pdf
+
+- id: teixeiradasilva2021
+  abstract: >-
+    Logically, and by most common standards, academics would be pleased to be
+    cited, considering it a form of recognition of their intellect. In return,
+    especially those with high citation counts, such as Clarivate Analytics’
+    Highly Cited Researchers, can benefit through peer recognition, rewards,
+    funding, securing a better position, or expanding a collaborative network.
+    Despite known and untold benefits, one issue has not been discussed: the
+    right to refuse to be cited or the right to refuse a citation. Academics
+    might not want to be cited by papers published in truly predatory journals,
+    papers with false authors, or sting papers with falsified elements that
+    employ underhanded ethical tactics. Currently, academics generally have the
+    freedom to select where they publish their findings and choose studies they
+    cite, so it is highly probable that requests to remove citations or refuse
+    citations might never become formal publishing policy. Nonetheless, this
+    academic discussion is worth having as valid and invalid literature
+    increasingly gets mixed through citations, and as the grey zone between
+    predatory/non-predatory and scholarly/unscholarly becomes increasingly
+    difficult to distinguish.
+  accessed:
+    - year: 2021
+      month: 12
+      day: 18
+  author:
+    - family: Teixeira da Silva
+      given: Jaime A.
+    - family: Vuong
+      given: Quan-Hoang
+  citation-key: teixeiradasilva2021
+  container-title: Scientometrics
+  container-title-short: Scientometrics
+  DOI: 10.1007/s11192-021-03960-9
+  ISSN: 1588-2861
+  issue: '6'
+  issued:
+    - year: 2021
+      month: 6
+      day: 1
+  language: en
+  page: 5355-5360
+  source: Springer Link
+  title: >-
+    The right to refuse unwanted citations: rethinking the culture of science
+    around the citation
+  title-short: The right to refuse unwanted citations
+  type: article-journal
+  URL: https://doi.org/10.1007/s11192-021-03960-9
+  volume: '126'
+
+- id: tennant2019
+  abstract: >-
+    The changing world of scholarly communication and the emerging new wave of
+    &lsquo;Open Science&rsquo; or &lsquo;Open Research&rsquo; has brought to
+    light a number of controversial and hotly debated topics. Evidence-based
+    rational debate is regularly drowned out by misinformed or exaggerated
+    rhetoric, which does not benefit the evolving system of scholarly
+    communication. This article aims to provide a baseline evidence framework
+    for ten of the most contested topics, in order to help frame and move
+    forward discussions, practices, and policies. We address issues around
+    preprints and scooping, the practice of copyright transfer, the function of
+    peer review, predatory publishers, and the legitimacy of
+    &lsquo;global&rsquo; databases. These arguments and data will be a powerful
+    tool against misinformation across wider academic research, policy and
+    practice, and will inform changes within the rapidly evolving scholarly
+    publishing system.
+  accessed:
+    - year: 2021
+      month: 12
+      day: 18
+  author:
+    - family: Tennant
+      given: Jonathan P.
+    - family: Crane
+      given: Harry
+    - family: Crick
+      given: Tom
+    - family: Davila
+      given: Jacinto
+    - family: Enkhbayar
+      given: Asura
+    - family: Havemann
+      given: Johanna
+    - family: Kramer
+      given: Bianca
+    - family: Martin
+      given: Ryan
+    - family: Masuzzo
+      given: Paola
+    - family: Nobes
+      given: Andy
+    - family: Rice
+      given: Curt
+    - family: Rivera-López
+      given: Bárbara
+    - family: Ross-Hellauer
+      given: Tony
+    - family: Sattler
+      given: Susanne
+    - family: Thacker
+      given: Paul D.
+    - family: Vanholsbeeck
+      given: Marc
+  citation-key: tennant2019
+  container-title: Publications
+  DOI: 10.3390/publications7020034
+  issue: '2'
+  issued:
+    - year: 2019
+      month: 6
+  language: en
+  number: '2'
+  page: '34'
+  publisher: Multidisciplinary Digital Publishing Institute
+  source: www.mdpi.com
+  title: Ten Hot Topics around Scholarly Publishing
+  type: article-journal
+  URL: https://www.mdpi.com/2304-6775/7/2/34
+  volume: '7'
+
+- id: vavrycuk2018
+  abstract: >-
+    The main drawback of ranking of researchers by the number of papers,
+    citations or by the Hirsch index is ignoring the problem of distributing
+    authorship among authors in multi-author publications. So far, the
+    single-author or multi-author publications contribute to the publication
+    record of a researcher equally. This full counting scheme is apparently
+    unfair and causes unjust disproportions, in particular, if ranked
+    researchers have distinctly different collaboration profiles. These
+    disproportions are removed by less common fractional or authorship-weighted
+    counting schemes, which can distribute the authorship credit more properly
+    and suppress a tendency to unjustified inflation of co-authors. The urgent
+    need of widely adopting a fair ranking scheme in practise is exemplified by
+    analysing citation profiles of several highly-cited astronomers and
+    astrophysicists. While the full counting scheme often leads to completely
+    incorrect and misleading ranking, the fractional or authorship-weighted
+    schemes are more accurate and applicable to ranking of researchers as well
+    as research teams. In addition, they suppress differences in ranking among
+    scientific disciplines. These more appropriate schemes should urgently be
+    adopted by scientific publication databases as the Web of Science (Thomson
+    Reuters) or the Scopus (Elsevier).
+  author:
+    - family: Vavryčuk
+      given: V.
+  citation-key: vavrycuk2018
+  container-title: PLoS ONE
+  DOI: 10.1371/journal.pone.0195509
+  issue: '4'
+  issued:
+    - year: 2018
+  page: e0195509
+  title: Fair ranking of researchers and research teams.
+  type: article-journal
+  URL: https://www.ncbi.nlm.nih.gov/pubmed/29621316
+  volume: '13'
+
+- id: villar2019
+  abstract: >-
+    He is called Charles Goodhart and if you are an economist you should know
+    the name well. Time was he was seriously influential in the UK’s Bank of
+    England, espe
+  accessed:
+    - year: 2021
+      month: 12
+      day: 18
+  author:
+    - family: Villar
+      given: Richard (Ricky)
+  citation-key: villar2019
+  container-title: Journal of Hip Preservation Surgery
+  container-title-short: J Hip Preserv Surg
+  DOI: 10.1093/jhps/hnz034
+  issue: '2'
+  issued:
+    - year: 2019
+      month: 7
+      day: 1
+  language: en
+  page: 101-103
+  publisher: Oxford Academic
+  source: academic.oup.com
+  title: Should we hunt a metric?
+  type: article-journal
+  URL: https://academic.oup.com/jhps/article/6/2/101/5540395
+  volume: '6'
+
+- id: vonbergen2017
+  abstract: >-
+    Tenure, promotion, significant salary increases, let alone stature and
+    recognition in one’s field, are often dependent on the quantity and quality
+    of research articles faculty members produce. In addition, research grants,
+    text and professional publications may be dependent upon intellectual
+    contributions and often equated with research published in professional
+    journals. These pressures, along with accreditation requirements, often
+    force faculty members to place greater emphasis on research rather than
+    teaching or service responsibilities. Administrators sometimes also coerce
+    senior faculty members to “help out” junior faculty members achieve tenure
+    by including them in their research endeavors. In response to such pressures
+    more and more research articles have an increasing number of authors on the
+    publication byline. This poses ethical concerns regarding author validity
+    and legitimate individual contribution to research that helps to advance the
+    profession.
+  author:
+    - family: Von Bergen
+      given: C. W.
+    - family: Bressler
+      given: Martin S
+  citation-key: vonbergen2017
+  container-title: Research in Higher Education Journal
+  issued:
+    - year: 2017
+  language: en
+  page: '17'
+  source: Zotero
+  title: 'Academe’s unspoken ethical dilemma: author inflation in higher education'
+  type: article-journal
+  URL: http://www.aabri.com/manuscripts/162505.pdf
+  volume: '32'
+
+- id: wachs2019
+  accessed:
+    - year: 2020
+      month: 10
+      day: 23
+  author:
+    - family: Wachs
+      given: Johannes
+    - family: Kertész
+      given: János
+  citation-key: wachs2019
+  container-title: Scientific Reports
+  container-title-short: Sci Rep
+  DOI: 10.1038/s41598-019-47198-1
+  ISSN: 2045-2322
+  issue: '1'
+  issued:
+    - year: 2019
+      month: 12
+  language: en
+  page: '10818'
+  source: DOI.org (Crossref)
+  title: A network approach to cartel detection in public auction markets
+  type: article-journal
+  URL: http://www.nature.com/articles/s41598-019-47198-1
+  volume: '9'
+
+- id: wachs2019a
+  author:
+    - family: Wachs
+      given: Johannes
+  citation-key: wachs2019a
+  event-place: Budapest
+  genre: PhD
+  issued:
+    - year: 2019
+  language: en
+  number-of-pages: '138'
+  publisher: Central European University
+  publisher-place: Budapest
+  source: Zotero
+  title: Network Approaches to the Study of Corruption
+  type: thesis
+
+- id: werner2015
+  abstract: >-
+    Forcing research to fit the mould of high-impact journals weakens it. Hiring
+    decisions should be based on merit, not impact factor, says Reinhard Werner.
+  accessed:
+    - year: 2022
+      month: 1
+      day: 17
+  author:
+    - family: Werner
+      given: Reinhard
+  citation-key: werner2015
+  container-title: Nature
+  DOI: 10.1038/517245a
+  ISSN: 1476-4687
+  issue: '7534'
+  issued:
+    - year: 2015
+      month: 1
+  language: en
+  note: |-
+    Bandiera_abtest: a
+    Cg_type: Nature Research Journals
+    Primary_atype: Comments & Opinion
+    Subject_term: Lab life;Publishing;Research management
+    Subject_term_id: lab-life;publishing;research-management
+  number: '7534'
+  page: 245-245
+  publisher: Nature Publishing Group
+  source: www.nature.com
+  title: The focus on bibliometrics makes papers less useful
+  type: article-journal
+  URL: https://www.nature.com/articles/517245a
+  volume: '517'
+
+- id: wislar2011
+  abstract: >-
+    Objectives To assess the prevalence of honorary and ghost authors in six
+    leading general medical journals in 2008 and compare this with the
+    prevalence reported by authors of articles published in 1996.
+
+    Design Cross sectional survey using a web based questionnaire.
+
+    Setting International survey of journal authors.
+
+    Participants Sample of corresponding authors of 896 research articles,
+    review articles, and editorial/opinion articles published in six general
+    medical journals with high impact factors in 2008: Annals of Internal
+    Medicine, JAMA, Lancet, Nature Medicine, New England Journal of Medicine,
+    and PLoS Medicine.
+
+    Main outcome measures Self reported compliance with International Committee
+    of Medical Journal Editors (ICMJE) criteria for authorship for all authors
+    on the selected articles.
+
+    Results A total of 630/896 (70.3%) corresponding authors responded to the
+    survey. The prevalence of articles with honorary authorship or ghost
+    authorship, or both, was 21.0% (95% CI 18.0% to 24.3%), a decrease from
+    29.2% reported in 1996 (P=0.004). Based on 545 responses on honorary
+    authorship, 96 articles (17.6% (95% CI 14.6% to 21.0%)) had honorary authors
+    (range by journal 12.2% to 29.3%), a non-significant change from 1996
+    (19.3%; P=0.439). Based on 622 responses on ghost authorship, 49 articles
+    (7.9% (6.0% to 10.3%)) had ghost authors (range by journal 2.1% to 11.0%), a
+    significant decline from 1996 (11.5%; P=0.023). The prevalence of honorary
+    authorship was 25.0% in original research reports, 15.0% in reviews, and
+    11.2% in editorials, whereas the prevalence of ghost authorship was 11.9% in
+    research articles, 6.0% in reviews, and 5.3% in editorials.
+
+    Conclusions Evidence of honorary and ghost authorship in 21% of articles
+    published in major medical journals in 2008 suggests that increased efforts
+    by scientific journals, individual authors, and academic institutions are
+    essential to promote responsibility, accountability, and transparency in
+    authorship, and to maintain integrity in scientific publication.
+  accessed:
+    - year: 2022
+      month: 1
+      day: 3
+  author:
+    - family: Wislar
+      given: Joseph S.
+    - family: Flanagin
+      given: Annette
+    - family: Fontanarosa
+      given: Phil B.
+    - family: DeAngelis
+      given: Catherine D.
+  citation-key: wislar2011
+  container-title: BMJ
+  container-title-short: BMJ
+  DOI: 10.1136/bmj.d6128
+  ISSN: 0959-8138, 1468-5833
+  issued:
+    - year: 2011
+      month: 10
+      day: 25
+  language: en
+  page: d6128
+  PMID: '22028479'
+  publisher: British Medical Journal Publishing Group
+  section: Research
+  source: www.bmj.com
+  title: >-
+    Honorary and ghost authorship in high impact biomedical journals: a cross
+    sectional survey
+  title-short: Honorary and ghost authorship in high impact biomedical journals
+  type: article-journal
+  URL: https://www.bmj.com/content/343/bmj.d6128
+  volume: '343'
+
+- id: wouters2019
+  abstract: >-
+    We need a broader, more-transparent suite of metrics to improve science
+    publishing, say Paul Wouters, colleagues and co-signatories.
+  accessed:
+    - year: 2021
+      month: 12
+      day: 18
+  author:
+    - family: Wouters
+      given: Paul
+    - family: Sugimoto
+      given: Cassidy R.
+    - family: Larivière
+      given: Vincent
+    - family: McVeigh
+      given: Marie E.
+    - family: Pulverer
+      given: Bernd
+    - family: Rijcke
+      given: Sarah
+      non-dropping-particle: de
+    - family: Waltman
+      given: Ludo
+  citation-key: wouters2019
+  container-title: Nature
+  DOI: 10.1038/d41586-019-01643-3
+  issue: '7758'
+  issued:
+    - year: 2019
+      month: 5
+  language: en
+  note: |-
+    Bandiera_abtest: a
+    Cg_type: Comment
+    Subject_term: Publishing, Research management
+  number: '7758'
+  page: 621-623
+  publisher: Nature Publishing Group
+  source: www.nature.com
+  title: 'Rethinking impact factors: better ways to judge a journal'
+  title-short: Rethinking impact factors
+  type: article-journal
+  URL: https://www.nature.com/articles/d41586-019-01643-3
+  volume: '569'
+
+- id: wren2020
+  abstract: >-
+    Although citations are used as a quantifiable, objective metric of academic
+    influence, cases have been documented whereby references were added to a
+    paper solely to inflate the perceived influence of a body of research. This
+    reference list manipulation (RLM) could take place during the peer-review
+    process (e.g., coercive citation from editors or reviewers), or prior to it
+    (e.g., a quid-pro-quo between authors). Surveys have estimated how many
+    people may have been affected by coercive RLM at one time or another, but it
+    is not known how many authors engage in RLM, nor to what degree. Examining a
+    subset of active, highly published authors (n=20,803) in PubMed, we find the
+    frequency of non-self citations (NSC) to one author coming from one paper
+    approximates Zipf’s law. We propose the Gini Index as a simple means of
+    quantifying skew in this distribution and test it against a series of “red
+    flag” metrics that are expected to result from RLM attempts. We estimate
+    between 81 (FDR <0.05) and 231 (FDR<0.10) authors are outliers on the curve,
+    suggestive of chronic, repeated RLM. Based upon the distribution, we
+    estimate approximately 3,284 (16%) of all authors may have engaged in RLM to
+    some degree, possibly opportunistically. Finally, we find authors who use
+    18% or more of their references for self-citation are significantly more
+    likely to have NSC Gini distortions, suggesting their desire to see their
+    work cited carries over into their peer-review activity.
+  accessed:
+    - year: 2021
+      month: 12
+      day: 28
+  author:
+    - family: Wren
+      given: Jonathan D.
+    - family: Georgescu
+      given: Constantin
+  citation-key: wren2020
+  DOI: 10.1101/2020.08.12.248369
+  issued:
+    - year: 2020
+      month: 8
+      day: 13
+  language: en
+  page: 2020.08.12.248369
+  publisher: Cold Spring Harbor Laboratory
+  section: New Results
+  source: bioRxiv
+  title: Detecting potential reference list manipulation within a citation network
+  type: article
+  URL: https://www.biorxiv.org/content/10.1101/2020.08.12.248369v1
+
+- id: zagonari2019
+  abstract: >-
+    In this study, I developed operational versions of Gini&rsquo;s and
+    Hirsch&rsquo;s indexes that can be applied to characterize each
+    researcher&rsquo;s publication history (PH) as heterodox, orthodox, and
+    interdisciplinary. In addition, the new indicators warn against anomalies
+    that potentially arise from tactical or opportunistic citation and
+    publication behaviors by authors and editors, and can be calculated from
+    readily available information. I split the original Hirsch index into nested
+    indexes to isolate networking activity, as well as to distinguish scientific
+    production (number of articles) from scientific productivity (rate of
+    production), and used nested Gini indexes to identify intentional and
+    successful intertopical and interdisciplinary research. I applied the most
+    popular standardizations (i.e., per author and per year), and used simple
+    methodologies (i.e., least-squares linear and cubic fitting, whole-career
+    vs. subperiods, two-dimensional graphs). I provide three representative
+    numerical examples based on an orthodox multidisciplinary PH, a heterodox PH
+    from the social sciences, and an orthodox unidisciplinary PH from the
+    physical sciences. Two additional numerical examples based on PHs from the
+    life and health sciences show that the suggested PH characterization can be
+    applied to different disciplines where different publication and citation
+    practices prevail. Software is provided to help readers explore the use of
+    these indicators.
+  accessed:
+    - year: 2021
+      month: 12
+      day: 18
+  author:
+    - family: Zagonari
+      given: Fabio
+  citation-key: zagonari2019
+  container-title: Publications
+  DOI: 10.3390/publications7020032
+  issue: '2'
+  issued:
+    - year: 2019
+      month: 6
+  language: en
+  number: '2'
+  page: '32'
+  publisher: Multidisciplinary Digital Publishing Institute
+  source: www.mdpi.com
+  title: >-
+    Scientific Production and Productivity for Characterizing an Author’s
+    Publication History: Simple and Nested Gini’s and Hirsch’s Indexes Combined
+  title-short: >-
+    Scientific Production and Productivity for Characterizing an Author’s
+    Publication History
+  type: article-journal
+  URL: https://www.mdpi.com/2304-6775/7/2/32
+  volume: '7'
+
+- id: zagonari2019a
+  abstract: >-
+    This paper develops an empirically validated theoretical model of a
+    researcher’s publication goal to assess which standardisations and policies
+    are more likely to achieve equity and efficiency in different disciplines.
+    The main theoretical insight is that there is a trade-off between equity and
+    efficiency, as well as between networking activity and knowledge-diffusion
+    activity. The main empirical insight is that, in order to achieve equity and
+    efficiency, the original version of the H index should be replaced by a
+    version that is standardised per author and per year and calculated by
+    excluding reciprocal citations and publications other than peer-reviewed
+    articles.
+  accessed:
+    - year: 2021
+      month: 12
+      day: 18
+  author:
+    - family: Zagonari
+      given: Fabio
+  citation-key: zagonari2019a
+  container-title: Publishing Research Quarterly
+  container-title-short: Pub Res Q
+  DOI: 10.1007/s12109-018-09625-5
+  ISSN: 1936-4792
+  issue: '2'
+  issued:
+    - year: 2019
+      month: 6
+      day: 1
+  language: en
+  page: 285-300
+  source: Springer Link
+  title: >-
+    Coping with the Inequity and Inefficiency of the H-Index: A
+    Cross-Disciplinary Analytical Model
+  title-short: Coping with the Inequity and Inefficiency of the H-Index
+  type: article-journal
+  URL: https://doi.org/10.1007/s12109-018-09625-5
+  volume: '35'
+
+- id: zuo2019
+  abstract: >-
+    Explore millions of resources from scholarly journals, books, newspapers,
+    videos and more, on the ProQuest Platform.
+  accessed:
+    - year: 2021
+      month: 12
+      day: 18
+  author:
+    - family: Zuo
+      given: Zhiya
+  citation-key: zuo2019
+  genre: PhD
+  issued:
+    - year: 2019
+  language: en
+  publisher: The University of Iowa
+  title: Analyzing Collaboration with Large-scale Scholarly Data - ProQuest
+  type: thesis
+  URL: >-
+    https://www.proquest.com/openview/1e0817027c58766e6b1e609931342f2b/1?pq-origsite=gscholar&cbl=18750&diss=y
+...
